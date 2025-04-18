@@ -1,0 +1,72 @@
+---
+title: Analysing decisions in data analysis
+authors:
+  - name: H. Sherry Zhang
+    affiliation: University of Texas at Austin
+    corresponding: true
+  - name: Roger D. Peng
+    affiliation: University of Texas at Austin
+bibliography: references.bib
+number-sections: true
+---
+
+# Introduction
+
+# Literature review
+
+# Construct decision databases
+
+## Recording decisions in data analysis
+
+* give example from extracting decision from sentences of a paper
+* adapt from the tidy data principle [@tidydata], each row is a decision  
+* some decisions are related to how the variable is estimated spatially and temporally
+* model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
+* sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)
+* sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom) 
+
+A hypothetical database of decisions may look as follows:
+
+| Paper| ID | Model | variable | method | parameter | type | reason | decision| 
+| -- | - | --- | --- | --- | --- | --- | -------- | --- |
+| ostro | 1 | Poisson regression | temperature | smoothing spline | degree of freedom | parameter |  NA | 3 degree of freedom |
+| ostro | 2 | Poisson regression | temperature | smoothing spline | degree of freedom | temporal | NA | 1-day lag|
+| ostro | 3 | Poisson regression | relative humidity | LOESS | smoothing parameter | parameter | to minimize Akaike's Information Criterion | NA |
+| ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city|
+
+## Austomatic reading of literature with LLM
+
+* We use LLM to automatic read the paper through the `ellmer` package [@ellmer] and manually review the decision outputs. Both Antropic Claude and Google Gemini accept pdf inputs and we choose Claude. The prompt used to finetune the Claude LLM is available in the appendix. 
+
+## Review the LLM output
+
+(the shiny app)
+
+* screenshot of the interface
+* The current application includes three actions: 
+    1) modify a row (`dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`), 
+    2) delete unrelated decisions (`dplyr::filter(!(CONDITION))`), and 
+    3) manually add a decision (`dplyr::bind_rows()`)
+
+* All the actions will generate the corresponding codes. 
+* The download button will download the modified decision database as a csv file
+
+# Calculate paper similarity 
+
+* define what does it mean by papers are similar: same reason? some decisions?
+* lexical similarity through word embedding using the `text` package [@text]
+* summarize paper similarity through item similarity
+
+# Applications
+
+## Air pollution mortality modelling
+
+* look at for one type of decision (time) - what are the choices made by different papers
+* look at whether decisions changes across time
+* Visualize the decision database: apply clustering algorithm and visualize the database through `sigma.js`
+
+## Species distribution modelling
+
+# Conclusion
+
+# Reference

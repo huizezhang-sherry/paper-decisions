@@ -1,0 +1,12 @@
+---
+title: Appendix to "Analysing decisions in data analysis"
+authors:
+  - name: H. Sherry Zhang
+    affiliation: University of Texas at Austin
+    corresponding: true
+  - name: Roger D. Peng
+    affiliation: University of Texas at Austin
+---
+
+
+# LLM prompt used to obtain the decision database
