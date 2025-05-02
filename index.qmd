@@ -7,63 +7,117 @@ authors:
   - name: Roger D. Peng
     affiliation: University of Texas at Austin
 bibliography: references.bib
+link-citations: true
 number-sections: true
 ---
 
 # Introduction
 
-# Literature review
+In this work, we design a tabular format for record data analysis decisions to capture the reason and decisions, along with metadata, made during the data analysis. We create software tools to create and analyze the these data analysis decisions. We leverage the LLM model to automatically process existing literature to create the decision table. This allows us to survey decisions choices available in the literature, trace them across time, and compare and contract methodologies in the literature. Lastly, we deliver two decisions database in two domains: 1) modelling of daily mortality on pollution (PM10 or PM2.5) with Poisson Generalized Additive Model, and 2) ...
+
+Contribution:
+
+-   We provide a new mean to analyze decisions as analyzing data
+
+-   
+
+# Background
+
+Data analysis as an complicated, iterative process to make sense \[ref\] of the scientific data collected.
+
+-   The iterative process of formulating hypothesis @jun2022
+
+-   Analysts make choices on how to analyze the data on how to pre-processing variables, how to impute missing data, how to choose the degree of freedom for smoothing methods, choosing variables to include in the model, choose temporal lags in the model, etc. This leads to the garden of forking paths @gelman2014
+
+-   When these choices are not exercised based on scientific rigorous and sincere intention, it hinders the statistical analysis of evidence/data to trust scientific discovery:
+
+    -   p-hacking and research degree of freedom
+
+    -   variation of results by analytic choices in the same research question formulation [@silberzahn2018many] and many more
+
+    -   fairness of the algorithms that affect day-to-day life
+
+Solutions:
+
+-   Advocate of guidelines and recommendation for practical data analysis
+
+    -   pre-registration
+    -   @wicherts2016degrees provides a checklist of researcher degrees of freedom to combat the "garden of forking paths" problem
+    -   false-positive psychology suggests 6 guidelines for reporting data analysis to prevent false-positive rate
+
+-   Create software tools to help analysts making better decisions:
+
+    -   The python package Tisane [@jun2022] integrates conceptual idea (diagram like DAG, group/ cluster/ hierarchical structure) to help junior researchers to construct GLM/ GLMM model
+    -   `multiverse`
+    -   `DeclareDesign` @blair2019 proposes the MIDA framework for researchers to declare-diagnose-redesign their analysis to produce a distribution, rather than a single value, of the statistic of interest. It has been applied on randomized controlled trial experiment by @bishop2024
+
+-   Study decisions in data analysis:
+
+    -   an interview/ participatory method: @simson, many others
+    -   (automated) visualization of decisions made in data analysis:
+        -   datamation [@pu2023],
+        -   @liu2020paths uses Analytic Decision Graphs (ADG) to represent high-level decision process in data analysis.
+        -   [Urania: Visualizing Data Analysis Pipelines for Natural Language-Based Data Exploration](https://arxiv.org/pdf/2306.07760)
 
 # Construct decision databases
 
 ## Recording decisions in data analysis
 
-* give example from extracting decision from sentences of a paper
-* adapt from the tidy data principle [@tidydata], each row is a decision  
-* some decisions are related to how the variable is estimated spatially and temporally
-* model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
-* sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)
-* sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom) 
+-   give example from extracting decision from sentences of a paper
+-   adapt from the tidy data principle [@tidydata], each row is a decision @wickham2014\
+-   some decisions are related to how the variable is estimated spatially and temporally
+-   model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
+-   sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)
+-   sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom)
 
 A hypothetical database of decisions may look as follows:
 
-| Paper| ID | Model | variable | method | parameter | type | reason | decision| 
-| -- | - | --- | --- | --- | --- | --- | -------- | --- |
-| ostro | 1 | Poisson regression | temperature | smoothing spline | degree of freedom | parameter |  NA | 3 degree of freedom |
-| ostro | 2 | Poisson regression | temperature | smoothing spline | degree of freedom | temporal | NA | 1-day lag|
+| Paper | ID | Model | variable | method | parameter | type | reason | decision |
+|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+| ostro | 1 | Poisson regression | temperature | smoothing spline | degree of freedom | parameter | NA | 3 degree of freedom |
+| ostro | 2 | Poisson regression | temperature | smoothing spline | degree of freedom | temporal | NA | 1-day lag |
 | ostro | 3 | Poisson regression | relative humidity | LOESS | smoothing parameter | parameter | to minimize Akaike's Information Criterion | NA |
-| ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city|
+| ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city |
 
 ## Austomatic reading of literature with LLM
 
-* We use LLM to automatic read the paper through the `ellmer` package [@ellmer] and manually review the decision outputs. Both Antropic Claude and Google Gemini accept pdf inputs and we choose Claude. The prompt used to finetune the Claude LLM is available in the appendix. 
+-   We use LLM to automatic read the paper through the `ellmer` package [@ellmer] and manually review the decision outputs. Both Antropic Claude and Google Gemini accept pdf inputs and we choose Claude. The prompt used to finetune the Claude LLM is available in the appendix.
 
 ## Review the LLM output
 
 (the shiny app)
 
-* screenshot of the interface
-* The current application includes three actions: 
-    1) modify a row (`dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`), 
-    2) delete unrelated decisions (`dplyr::filter(!(CONDITION))`), and 
-    3) manually add a decision (`dplyr::bind_rows()`)
+-   screenshot of the interface
+-   The current application includes three actions:
+    -   modify a row (`dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`),
+    -   delete unrelated decisions (`dplyr::filter(!(CONDITION))`), and
+    -   manually add a decision (`dplyr::bind_rows()`)
+-   All the actions will generate the corresponding codes.
+-   The download button will download the modified decision database as a csv file
 
-* All the actions will generate the corresponding codes. 
-* The download button will download the modified decision database as a csv file
+### Decision quality summary
 
-# Calculate paper similarity 
+# Calculate paper similarity
 
-* define what does it mean by papers are similar: same reason? some decisions?
-* lexical similarity through word embedding using the `text` package [@text]
-* summarize paper similarity through item similarity
+-   pre-processing
+    -   standardize statistical methods its corresponding parameters (LOESS, smoothing spline, etc)
+    -   group variables into broader categories: time, temperature, humidity, PM
+-   identify the most frequent analysis decisions across papers
+-   retain only papers that report more than x such decisions
+-   measure similarity between decisions and their justificaiton using NLP
+    -   word embedding with attention mechanism, instead of bag of word,
+    -   specific NLP models (default to `bert-base-uncased`), aggregation methods from word to text
+-   compute paper similarity score for each paper pair by aggregating decision-level compoarisons
+    -   check/ report on the number of decisions compared in each paper pair
+-   similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices
 
 # Applications
 
 ## Air pollution mortality modelling
 
-* look at for one type of decision (time) - what are the choices made by different papers
-* look at whether decisions changes across time
-* Visualize the decision database: apply clustering algorithm and visualize the database through `sigma.js`
+-   look at for one type of decision (time) - what are the choices made by different papers
+-   look at whether decisions changes across time
+-   Visualize the decision database: apply clustering algorithm and visualize the database through `sigma.js`
 
 ## Species distribution modelling
 

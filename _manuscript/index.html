@@ -67,6 +67,12 @@ div.csl-indent {
 <meta name="citation_language" content="en">
 <meta name="citation_reference" content="citation_title=Ellmer: Chat with large language models;,citation_author=Hadley Wickham;,citation_author=Joe Cheng;,citation_author=Aaron Jacobs;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://CRAN.R-project.org/package=ellmer;">
 <meta name="citation_reference" content="citation_title=The text-package: An r-package for analyzing and visualizing human language using natural language processing and deep learning;,citation_author=Oscar Kjell;,citation_author=Salvatore Giorgi;,citation_author=H. Andrew Schwartz;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://osf.io/preprints/psyarxiv/293kt/;,citation_doi=10.1037/met0000542;,citation_journal_title=Psychological Methods;">
+<meta name="citation_reference" content="citation_title=Tidy Data;,citation_author=Hadley Wickham;,citation_publication_date=2014-09-12;,citation_cover_date=2014-09-12;,citation_year=2014;,citation_fulltext_html_url=https://doi.org/10.18637/jss.v059.i10;,citation_doi=10.18637/jss.v059.i10;,citation_volume=59;,citation_language=en;,citation_journal_title=Journal of Statistical Software;">
+<meta name="citation_reference" content="citation_title=Hypothesis Formalization: Empirical Findings, Software Limitations, and Design Implications;,citation_author=Eunice Jun;,citation_author=Melissa Birchfield;,citation_author=Nicole De Moura;,citation_author=Jeffrey Heer;,citation_author=René Just;,citation_publication_date=2022-02-28;,citation_cover_date=2022-02-28;,citation_year=2022;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3476980;,citation_issue=1;,citation_doi=10.1145/3476980;,citation_volume=29;,citation_language=en;,citation_journal_title=ACM Transactions on Computer-Human Interaction;">
+<meta name="citation_reference" content="citation_title=The statistical crisis in science;,citation_author=Andrew Gelman;,citation_author=Eric Loken;,citation_publication_date=2014-12;,citation_cover_date=2014-12;,citation_year=2014;,citation_fulltext_html_url=https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1;,citation_issue=6;,citation_volume=102;,citation_language=en-US;,citation_journal_title=American Scientist;">
+<meta name="citation_reference" content="citation_title=Declaring and Diagnosing Research Designs;,citation_author=Graeme Blair;,citation_author=Jasper Cooper;,citation_author=Alexander Coppock;,citation_author=Macartan Humphreys;,citation_publication_date=2019-08;,citation_cover_date=2019-08;,citation_year=2019;,citation_fulltext_html_url=https://www.cambridge.org/core/product/identifier/S0003055419000194/type/journal_article;,citation_issue=3;,citation_doi=10.1017/S0003055419000194;,citation_volume=113;,citation_language=en;,citation_journal_title=American Political Science Review;">
+<meta name="citation_reference" content="citation_title=When Alternative Analyses of the Same Data Come to Different Conclusions: A Tutorial Using DeclareDesign With a Worked Real-World Example;,citation_author=Dorothy V. M. Bishop;,citation_author=Charles Hulme;,citation_publication_date=2024-07-01;,citation_cover_date=2024-07-01;,citation_year=2024;,citation_fulltext_html_url=https://doi.org/10.1177/25152459241267904;,citation_issue=3;,citation_doi=10.1177/25152459241267904;,citation_volume=7;,citation_language=en;,citation_journal_title=Advances in Methods and Practices in Psychological Science;">
+<meta name="citation_reference" content="citation_title=CHI ’23: CHI Conference on Human Factors in Computing Systems;,citation_author=Xiaoying Pu;,citation_author=Matthew Kay;,citation_publication_date=2023-04-19;,citation_cover_date=2023-04-19;,citation_year=2023;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3544548.3580837;,citation_doi=10.1145/3544548.3580837;,citation_language=en;,citation_conference=ACM;">
 </head>
 
 <body>
@@ -124,12 +130,15 @@ div.csl-indent {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#literature-review" id="toc-literature-review" class="nav-link" data-scroll-target="#literature-review"><span class="header-section-number">2</span> Literature review</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">2</span> Background</a></li>
   <li><a href="#construct-decision-databases" id="toc-construct-decision-databases" class="nav-link" data-scroll-target="#construct-decision-databases"><span class="header-section-number">3</span> Construct decision databases</a>
   <ul class="collapse">
   <li><a href="#recording-decisions-in-data-analysis" id="toc-recording-decisions-in-data-analysis" class="nav-link" data-scroll-target="#recording-decisions-in-data-analysis"><span class="header-section-number">3.1</span> Recording decisions in data analysis</a></li>
   <li><a href="#austomatic-reading-of-literature-with-llm" id="toc-austomatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#austomatic-reading-of-literature-with-llm"><span class="header-section-number">3.2</span> Austomatic reading of literature with LLM</a></li>
-  <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">3.3</span> Review the LLM output</a></li>
+  <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">3.3</span> Review the LLM output</a>
+  <ul class="collapse">
+  <li><a href="#decision-quality-summary" id="toc-decision-quality-summary" class="nav-link" data-scroll-target="#decision-quality-summary"><span class="header-section-number">3.3.1</span> Decision quality summary</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#calculate-paper-similarity" id="toc-calculate-paper-similarity" class="nav-link" data-scroll-target="#calculate-paper-similarity"><span class="header-section-number">4</span> Calculate paper similarity</a></li>
   <li><a href="#applications" id="toc-applications" class="nav-link" data-scroll-target="#applications"><span class="header-section-number">5</span> Applications</a>
@@ -153,9 +162,51 @@ div.csl-indent {
 
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In this work, we design a tabular format for record data analysis decisions to capture the reason and decisions, along with metadata, made during the data analysis. We create software tools to create and analyze the these data analysis decisions. We leverage the LLM model to automatically process existing literature to create the decision table. This allows us to survey decisions choices available in the literature, trace them across time, and compare and contract methodologies in the literature. Lastly, we deliver two decisions database in two domains: 1) modelling of daily mortality on pollution (PM10 or PM2.5) with Poisson Generalized Additive Model, and 2) …</p>
+<p>Contribution:</p>
+<ul>
+<li><p>We provide a new mean to analyze decisions as analyzing data</p></li>
+<li></li>
+</ul>
 </section>
-<section id="literature-review" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Literature review</h1>
+<section id="background" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Background</h1>
+<p>Data analysis as an complicated, iterative process to make sense [ref] of the scientific data collected.</p>
+<ul>
+<li><p>The iterative process of formulating hypothesis <span class="citation" data-cites="jun2022">Jun et al. (<a href="#ref-jun2022" role="doc-biblioref">2022</a>)</span></p></li>
+<li><p>Analysts make choices on how to analyze the data on how to pre-processing variables, how to impute missing data, how to choose the degree of freedom for smoothing methods, choosing variables to include in the model, choose temporal lags in the model, etc. This leads to the garden of forking paths <span class="citation" data-cites="gelman2014">Gelman and Loken (<a href="#ref-gelman2014" role="doc-biblioref">2014</a>)</span></p></li>
+<li><p>When these choices are not exercised based on scientific rigorous and sincere intention, it hinders the statistical analysis of evidence/data to trust scientific discovery:</p>
+<ul>
+<li><p>p-hacking and research degree of freedom</p></li>
+<li><p>variation of results by analytic choices in the same research question formulation <span class="citation" data-cites="silberzahn2018many">(<a href="#ref-silberzahn2018many" role="doc-biblioref"><strong>silberzahn2018many?</strong></a>)</span> and many more</p></li>
+<li><p>fairness of the algorithms that affect day-to-day life</p></li>
+</ul></li>
+</ul>
+<p>Solutions:</p>
+<ul>
+<li><p>Advocate of guidelines and recommendation for practical data analysis</p>
+<ul>
+<li>pre-registration</li>
+<li><span class="citation" data-cites="wicherts2016degrees">(<a href="#ref-wicherts2016degrees" role="doc-biblioref"><strong>wicherts2016degrees?</strong></a>)</span> provides a checklist of researcher degrees of freedom to combat the “garden of forking paths” problem</li>
+<li>false-positive psychology suggests 6 guidelines for reporting data analysis to prevent false-positive rate</li>
+</ul></li>
+<li><p>Create software tools to help analysts making better decisions:</p>
+<ul>
+<li>The python package Tisane <span class="citation" data-cites="jun2022">(<a href="#ref-jun2022" role="doc-biblioref">Jun et al. 2022</a>)</span> integrates conceptual idea (diagram like DAG, group/ cluster/ hierarchical structure) to help junior researchers to construct GLM/ GLMM model</li>
+<li><code>multiverse</code></li>
+<li><code>DeclareDesign</code> <span class="citation" data-cites="blair2019">Blair et al. (<a href="#ref-blair2019" role="doc-biblioref">2019</a>)</span> proposes the MIDA framework for researchers to declare-diagnose-redesign their analysis to produce a distribution, rather than a single value, of the statistic of interest. It has been applied on randomized controlled trial experiment by <span class="citation" data-cites="bishop2024">Bishop and Hulme (<a href="#ref-bishop2024" role="doc-biblioref">2024</a>)</span></li>
+</ul></li>
+<li><p>Study decisions in data analysis:</p>
+<ul>
+<li>an interview/ participatory method: <span class="citation" data-cites="simson">(<a href="#ref-simson" role="doc-biblioref"><strong>simson?</strong></a>)</span>, many others</li>
+<li>(automated) visualization of decisions made in data analysis:
+<ul>
+<li>datamation <span class="citation" data-cites="pu2023">(<a href="#ref-pu2023" role="doc-biblioref">Pu and Kay 2023</a>)</span>,</li>
+<li><span class="citation" data-cites="liu2020paths">(<a href="#ref-liu2020paths" role="doc-biblioref"><strong>liu2020paths?</strong></a>)</span> uses Analytic Decision Graphs (ADG) to represent high-level decision process in data analysis.</li>
+<li><a href="https://arxiv.org/pdf/2306.07760">Urania: Visualizing Data Analysis Pipelines for Natural Language-Based Data Exploration</a></li>
+</ul></li>
+</ul></li>
+</ul>
 </section>
 <section id="construct-decision-databases" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Construct decision databases</h1>
@@ -163,7 +214,7 @@ div.csl-indent {
 <h2 data-number="3.1" class="anchored" data-anchor-id="recording-decisions-in-data-analysis"><span class="header-section-number">3.1</span> Recording decisions in data analysis</h2>
 <ul>
 <li>give example from extracting decision from sentences of a paper</li>
-<li>adapt from the tidy data principle <span class="citation" data-cites="tidydata">(<a href="#ref-tidydata" role="doc-biblioref"><strong>tidydata?</strong></a>)</span>, each row is a decision<br>
+<li>adapt from the tidy data principle <span class="citation" data-cites="tidydata">(<a href="#ref-tidydata" role="doc-biblioref"><strong>tidydata?</strong></a>)</span>, each row is a decision <span class="citation" data-cites="wickham2014">Wickham (<a href="#ref-wickham2014" role="doc-biblioref">2014</a>)</span><br>
 </li>
 <li>some decisions are related to how the variable is estimated spatially and temporally</li>
 <li>model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)</li>
@@ -173,15 +224,15 @@ div.csl-indent {
 <p>A hypothetical database of decisions may look as follows:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 3%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 27%">
-<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -256,22 +307,39 @@ div.csl-indent {
 <ul>
 <li>screenshot of the interface</li>
 <li>The current application includes three actions:
-<ol type="1">
+<ul>
 <li>modify a row (<code>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</code>),</li>
 <li>delete unrelated decisions (<code>dplyr::filter(!(CONDITION))</code>), and</li>
 <li>manually add a decision (<code>dplyr::bind_rows()</code>)</li>
-</ol></li>
+</ul></li>
 <li>All the actions will generate the corresponding codes.</li>
 <li>The download button will download the modified decision database as a csv file</li>
 </ul>
+<section id="decision-quality-summary" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="decision-quality-summary"><span class="header-section-number">3.3.1</span> Decision quality summary</h3>
+</section>
 </section>
 </section>
 <section id="calculate-paper-similarity" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Calculate paper similarity</h1>
 <ul>
-<li>define what does it mean by papers are similar: same reason? some decisions?</li>
-<li>lexical similarity through word embedding using the <code>text</code> package <span class="citation" data-cites="text">(<a href="#ref-text" role="doc-biblioref">Kjell, Giorgi, and Schwartz 2023</a>)</span></li>
-<li>summarize paper similarity through item similarity</li>
+<li>pre-processing
+<ul>
+<li>standardize statistical methods its corresponding parameters (LOESS, smoothing spline, etc)</li>
+<li>group variables into broader categories: time, temperature, humidity, PM</li>
+</ul></li>
+<li>identify the most frequent analysis decisions across papers</li>
+<li>retain only papers that report more than x such decisions</li>
+<li>measure similarity between decisions and their justificaiton using NLP
+<ul>
+<li>word embedding with attention mechanism, instead of bag of word,</li>
+<li>specific NLP models (default to <code>bert-base-uncased</code>), aggregation methods from word to text</li>
+</ul></li>
+<li>compute paper similarity score for each paper pair by aggregating decision-level compoarisons
+<ul>
+<li>check/ report on the number of decisions compared in each paper pair</li>
+</ul></li>
+<li>similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices</li>
 </ul>
 </section>
 <section id="applications" class="level1" data-number="5">
@@ -297,8 +365,23 @@ div.csl-indent {
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">7 Reference</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-text" class="csl-entry" role="listitem">
-Kjell, Oscar, Salvatore Giorgi, and H. Andrew Schwartz. 2023. <span>“The Text-Package: An r-Package for Analyzing and Visualizing Human Language Using Natural Language Processing and Deep Learning.”</span> <em>Psychological Methods</em>. <a href="https://doi.org/10.1037/met0000542">https://doi.org/10.1037/met0000542</a>.
+<div id="ref-bishop2024" class="csl-entry" role="listitem">
+Bishop, Dorothy V. M., and Charles Hulme. 2024. <span>“When Alternative Analyses of the Same Data Come to Different Conclusions: A Tutorial Using DeclareDesign With a Worked Real-World Example.”</span> <em>Advances in Methods and Practices in Psychological Science</em> 7 (3): 25152459241267904. <a href="https://doi.org/10.1177/25152459241267904">https://doi.org/10.1177/25152459241267904</a>.
+</div>
+<div id="ref-blair2019" class="csl-entry" role="listitem">
+Blair, Graeme, Jasper Cooper, Alexander Coppock, and Macartan Humphreys. 2019. <span>“Declaring and Diagnosing Research Designs.”</span> <em>American Political Science Review</em> 113 (3): 838–59. <a href="https://doi.org/10.1017/S0003055419000194">https://doi.org/10.1017/S0003055419000194</a>.
+</div>
+<div id="ref-gelman2014" class="csl-entry" role="listitem">
+Gelman, Andrew, and Eric Loken. 2014. <span>“The Statistical Crisis in Science.”</span> <em>American Scientist</em> 102 (6): 460–65. <a href="https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1">https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1</a>.
+</div>
+<div id="ref-jun2022" class="csl-entry" role="listitem">
+Jun, Eunice, Melissa Birchfield, Nicole De Moura, Jeffrey Heer, and René Just. 2022. <span>“Hypothesis Formalization: Empirical Findings, Software Limitations, and Design Implications.”</span> <em>ACM Transactions on Computer-Human Interaction</em> 29 (1): 1–28. <a href="https://doi.org/10.1145/3476980">https://doi.org/10.1145/3476980</a>.
+</div>
+<div id="ref-pu2023" class="csl-entry" role="listitem">
+Pu, Xiaoying, and Matthew Kay. 2023. <span>“CHI ’23: CHI Conference on Human Factors in Computing Systems.”</span> In, 1–22. Hamburg Germany: ACM. <a href="https://doi.org/10.1145/3544548.3580837">https://doi.org/10.1145/3544548.3580837</a>.
+</div>
+<div id="ref-wickham2014" class="csl-entry" role="listitem">
+Wickham, Hadley. 2014. <span>“Tidy Data.”</span> <em>Journal of Statistical Software</em> 59 (September): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
 </div>
 <div id="ref-ellmer" class="csl-entry" role="listitem">
 Wickham, Hadley, Joe Cheng, and Aaron Jacobs. 2025. <em>Ellmer: Chat with Large Language Models</em>. <a href="https://CRAN.R-project.org/package=ellmer">https://CRAN.R-project.org/package=ellmer</a>.
