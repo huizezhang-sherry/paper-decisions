@@ -13,43 +13,21 @@ number-sections: true
 
 # Introduction
 
-In this work, we design a tabular format for record data analysis decisions to capture the reason and decisions, along with metadata, made during the data analysis. We create software tools to create and analyze the these data analysis decisions. We leverage the LLM model to automatically process existing literature to create the decision table. This allows us to survey decisions choices available in the literature, trace them across time, and compare and contract methodologies in the literature. Lastly, we deliver two decisions database in two domains: 1) modelling of daily mortality on pollution (PM10 or PM2.5) with Poisson Generalized Additive Model, and 2) ...
-
-Contribution:
-
--   We provide a new mean to analyze decisions as analyzing data
-
--   
+In this work, we design a tabular format to record the choices made by analysts during data analysis. Using large language models, we automatically extract these choices from a set of research papers focused on specific topics, e.g. air pollution modelling. This allows us to analyze these choices as data – tracking how they've changed over time or query the possible methodologies used in similar studies. We also introduce a workflow to cluster paper based on decision similarity, using both the decisions themselves and the justifications authors provide for their choices.
 
 # Background
 
-Data analysis as an complicated, iterative process to make sense \[ref\] of the scientific data collected.
+Data analysis as an complicated, iterative process to make sense \[ref\] of the data collected. The iterative process of formulating hypothesis @jun2022.
 
--   The iterative process of formulating hypothesis @jun2022
+Choices are made at nearly every stage of data analysis, ranging from variable pre-processing variables, variable and lag selection in model formulation, to the specification of smoothing parameter during model construction. These possible choices contribute to what @gelman2014 describe as the "garden of forking paths". These choices can introduce substantial variability in results, which has been demonstrated in many-analyst experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. A prominent example is @silberzahn2018 where researchers reported a wide range of point estimates and 95% confidence intervals for the effect of soccer players’ skin tone on the number of red cards awarded by referees (odds ratio from 0.89 to 2.93). Similar findings have emerged in other domains, including structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025].
 
--   Analysts make choices on how to analyze the data on how to pre-processing variables, how to impute missing data, how to choose the degree of freedom for smoothing methods, choosing variables to include in the model, choose temporal lags in the model, etc. This leads to the garden of forking paths @gelman2014
+Given this nature that a wide range of choices can be justified, there has been the long discussion of p-hacking and other misuse of statistics in practical data analysis in publication. \[more on p-hacking and reseracher's degree of freedom\]. Some proposed guidelines and recommendation to overcome this through pre-registration.
 
--   When these choices are not exercised based on scientific rigorous and sincere intention, it hinders the statistical analysis of evidence/data to trust scientific discovery:
+-   pre-registration
+-   @wicherts2016degrees provides a checklist of researcher degrees of freedom to combat the "garden of forking paths" problem
+-   false-positive psychology suggests 6 guidelines for reporting data analysis to prevent false-positive rate
 
-    -   p-hacking and research degree of freedom
-
-    -   variation of results by analytic choices in the same research question formulation [@silberzahn2018many] and many more
-
-    -   fairness of the algorithms that affect day-to-day life
-
-Solutions:
-
--   Advocate of guidelines and recommendation for practical data analysis
-
-    -   pre-registration
-    -   @wicherts2016degrees provides a checklist of researcher degrees of freedom to combat the "garden of forking paths" problem
-    -   false-positive psychology suggests 6 guidelines for reporting data analysis to prevent false-positive rate
-
--   Create software tools to help analysts making better decisions:
-
-    -   The python package Tisane [@jun2022] integrates conceptual idea (diagram like DAG, group/ cluster/ hierarchical structure) to help junior researchers to construct GLM/ GLMM model
-    -   `multiverse`
-    -   `DeclareDesign` @blair2019 proposes the MIDA framework for researchers to declare-diagnose-redesign their analysis to produce a distribution, rather than a single value, of the statistic of interest. It has been applied on randomized controlled trial experiment by @bishop2024
+Another line of work focuses on developing software tools to support analysts in making more informed decisions. For example, the `Tisane` package [@jun2022] integrates conceptual ideas, such as DAGs, and modelling structure (group/ cluster/ hierarchical structure), to assist junior researchers in specifying GLM and GLMM model. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest. This approach has been applied in randomized controlled trial [@bishop2024] . The `multiverse` package facilitates the specification and execution of multiple parallel choices for sensitivity analysis, allowing researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.
 
 -   Study decisions in data analysis:
 
@@ -121,6 +99,8 @@ A hypothetical database of decisions may look as follows:
 
 ## Species distribution modelling
 
-# Conclusion
+# Discussion
+
+-   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
 
 # Reference

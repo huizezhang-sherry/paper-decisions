@@ -1,0 +1,3046 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving
+and Interchange DTD v1.2 20190208//EN" "JATS-archivearticle1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+  <front>
+    <article-meta>
+      <title-group>
+        <article-title>Analysing decisions in data analysis</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author" corresp="yes">
+          <name>
+            <surname>Zhang</surname>
+            <given-names>H. Sherry</given-names>
+          </name>
+          <string-name>H. Sherry Zhang</string-name>
+          <xref ref-type="aff" rid="aff-1">a</xref>
+          <xref ref-type="corresp" rid="cor-1">*</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <name>
+            <surname>Peng</surname>
+            <given-names>Roger D.</given-names>
+          </name>
+          <string-name>Roger D. Peng</string-name>
+          <xref ref-type="aff" rid="aff-1">a</xref>
+        </contrib>
+      </contrib-group>
+      <aff id="aff-1">
+        <institution-wrap>
+          <institution>University of Texas at Austin</institution>
+        </institution-wrap>
+      </aff>
+      <author-notes>
+        <corresp id="cor-1"/>
+      </author-notes>
+      <history/>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="introduction">
+      <title>1. Introduction</title>
+      <p>In this work, we design a tabular format to record the choices made
+  by analysts during data analysis. Using large language models, we
+  automatically extract these choices from a set of research papers
+  focused on specific topics, e.g. air pollution modelling. This allows
+  us to analyze these choices as data – tracking how they’ve changed
+  over time or query the possible methodologies used in similar studies.
+  We also introduce a workflow to cluster paper based on decision
+  similarity, using both the decisions themselves and the justifications
+  authors provide for their choices.</p>
+    </sec>
+    <sec id="background">
+      <title>2. Background</title>
+      <p>Data analysis as an complicated, iterative process to make sense
+  [ref] of the data collected. The iterative process of formulating
+  hypothesis Jun et al.
+  (<xref alt="2022" rid="ref-jun2022" ref-type="bibr">2022</xref>).</p>
+      <p>Choices are made at nearly every stage of data analysis, ranging
+  from variable pre-processing variables, variable and lag selection in
+  model formulation, to the specification of smoothing parameter during
+  model construction. These possible choices contribute to what Gelman
+  and Loken
+  (<xref alt="2014" rid="ref-gelman2014" ref-type="bibr">2014</xref>)
+  describe as the “garden of forking paths”. These choices can introduce
+  substantial variability in results, which has been demonstrated in
+  many-analyst experiments, where independent teams analyzing the same
+  dataset to answer a pre-defined research question often arrive at
+  markedly different conclusions. A prominent example is Silberzahn et
+  al.
+  (<xref alt="2018" rid="ref-silberzahn2018" ref-type="bibr">2018</xref>)
+  where researchers reported a wide range of point estimates and 95%
+  confidence intervals for the effect of soccer players’ skin tone on
+  the number of red cards awarded by referees (odds ratio from 0.89 to
+  2.93). Similar findings have emerged in other domains, including
+  structural equation modeling
+  (<xref alt="Sarstedt et al. 2024" rid="ref-sarstedt2024" ref-type="bibr">Sarstedt
+  et al. 2024</xref>), applied microeconomics
+  (<xref alt="Huntington-Klein et al. 2021" rid="ref-huntington-klein2021" ref-type="bibr">Huntington-Klein
+  et al. 2021</xref>), neuroimaging
+  (<xref alt="Botvinik-Nezer et al. 2020" rid="ref-botvinik-nezer2020" ref-type="bibr">Botvinik-Nezer
+  et al. 2020</xref>), and ecology and evolutionary biology
+  (<xref alt="Gould et al. 2025" rid="ref-gould2025" ref-type="bibr">Gould
+  et al. 2025</xref>).</p>
+      <p>Given this nature that a wide range of choices can be justified,
+  there has been the long discussion of p-hacking and other misuse of
+  statistics in practical data analysis in publication. [more on
+  p-hacking and reseracher’s degree of freedom]. Some proposed
+  guidelines and recommendation to overcome this through
+  pre-registration.</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>pre-registration</p>
+        </list-item>
+        <list-item>
+          <p>(<xref alt="wicherts2016degrees?" rid="ref-wicherts2016degrees" ref-type="bibr"><bold>wicherts2016degrees?</bold></xref>)
+      provides a checklist of researcher degrees of freedom to combat
+      the “garden of forking paths” problem</p>
+        </list-item>
+        <list-item>
+          <p>false-positive psychology suggests 6 guidelines for reporting
+      data analysis to prevent false-positive rate</p>
+        </list-item>
+      </list>
+      <p>Another line of work focuses on developing software tools to
+  support analysts in making more informed decisions. For example, the
+  <monospace>Tisane</monospace> package
+  (<xref alt="Jun et al. 2022" rid="ref-jun2022" ref-type="bibr">Jun et
+  al. 2022</xref>) integrates conceptual ideas, such as DAGs, and
+  modelling structure (group/ cluster/ hierarchical structure), to
+  assist junior researchers in specifying GLM and GLMM model. The
+  <monospace>DeclareDesign</monospace> package
+  (<xref alt="Blair et al. 2019" rid="ref-blair2019" ref-type="bibr">Blair
+  et al. 2019</xref>) introduces the MIDA framework for researchers to
+  declare, diagnose, and redesign their analyses to produce a
+  distribution of the statistic of interest. This approach has been
+  applied in randomized controlled trial
+  (<xref alt="Bishop and Hulme 2024" rid="ref-bishop2024" ref-type="bibr">Bishop
+  and Hulme 2024</xref>) . The <monospace>multiverse</monospace> package
+  facilitates the specification and execution of multiple parallel
+  choices for sensitivity analysis, allowing researchers to
+  systematically explore how different choices affect results and to
+  report the range of plausible outcomes that arise from alternative
+  analytic paths.</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Study decisions in data analysis:</p>
+          <list list-type="bullet">
+            <list-item>
+              <p>an interview/ participatory method:
+          (<xref alt="simson?" rid="ref-simson" ref-type="bibr"><bold>simson?</bold></xref>),
+          many others</p>
+            </list-item>
+            <list-item>
+              <p>(automated) visualization of decisions made in data
+          analysis:</p>
+              <list list-type="bullet">
+                <list-item>
+                  <p>datamation
+              (<xref alt="Pu and Kay 2023" rid="ref-pu2023" ref-type="bibr">Pu
+              and Kay 2023</xref>),</p>
+                </list-item>
+                <list-item>
+                  <p>(<xref alt="liu2020paths?" rid="ref-liu2020paths" ref-type="bibr"><bold>liu2020paths?</bold></xref>)
+              uses Analytic Decision Graphs (ADG) to represent
+              high-level decision process in data analysis.</p>
+                </list-item>
+                <list-item>
+                  <p>
+                    <ext-link ext-link-type="uri" xlink:href="https://arxiv.org/pdf/2306.07760">Urania:
+              Visualizing Data Analysis Pipelines for Natural
+              Language-Based Data Exploration</ext-link>
+                  </p>
+                </list-item>
+              </list>
+            </list-item>
+          </list>
+        </list-item>
+      </list>
+    </sec>
+    <sec id="construct-decision-databases">
+      <title>3. Construct decision databases</title>
+      <sec id="recording-decisions-in-data-analysis">
+        <title>3.1 Recording decisions in data analysis</title>
+        <list list-type="bullet">
+          <list-item>
+            <p>give example from extracting decision from sentences of a
+        paper</p>
+          </list-item>
+          <list-item>
+            <p>adapt from the tidy data principle
+        (<xref alt="tidydata?" rid="ref-tidydata" ref-type="bibr"><bold>tidydata?</bold></xref>),
+        each row is a decision Wickham
+        (<xref alt="2014" rid="ref-wickham2014" ref-type="bibr">2014</xref>)
+        </p>
+          </list-item>
+          <list-item>
+            <p>some decisions are related to how the variable is estimated
+        spatially and temporally</p>
+          </list-item>
+          <list-item>
+            <p>model level decisions on how the model is estimated spatially
+        (for multi-site analyses) and/or temporally (different
+        treatments for years or seasons)</p>
+          </list-item>
+          <list-item>
+            <p>sometimes the decisions are not explicitly stated in the
+        paper (use AIC to choose the degree of freedom in a smoothing
+        spline)</p>
+          </list-item>
+          <list-item>
+            <p>sometimes the reason is not explicitly stated (e.g., why 3
+        degree of freedom)</p>
+          </list-item>
+        </list>
+        <p>A hypothetical database of decisions may look as follows:</p>
+        <table-wrap>
+          <table>
+            <colgroup>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+              <col width="11%"/>
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Paper</th>
+                <th>ID</th>
+                <th>Model</th>
+                <th>variable</th>
+                <th>method</th>
+                <th>parameter</th>
+                <th>type</th>
+                <th>reason</th>
+                <th>decision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ostro</td>
+                <td>1</td>
+                <td>Poisson regression</td>
+                <td>temperature</td>
+                <td>smoothing spline</td>
+                <td>degree of freedom</td>
+                <td>parameter</td>
+                <td>NA</td>
+                <td>3 degree of freedom</td>
+              </tr>
+              <tr>
+                <td>ostro</td>
+                <td>2</td>
+                <td>Poisson regression</td>
+                <td>temperature</td>
+                <td>smoothing spline</td>
+                <td>degree of freedom</td>
+                <td>temporal</td>
+                <td>NA</td>
+                <td>1-day lag</td>
+              </tr>
+              <tr>
+                <td>ostro</td>
+                <td>3</td>
+                <td>Poisson regression</td>
+                <td>relative humidity</td>
+                <td>LOESS</td>
+                <td>smoothing parameter</td>
+                <td>parameter</td>
+                <td>to minimize Akaike’s Information Criterion</td>
+                <td>NA</td>
+              </tr>
+              <tr>
+                <td>ostro</td>
+                <td>4</td>
+                <td>Poisson regression</td>
+                <td>model</td>
+                <td>NA</td>
+                <td>NA</td>
+                <td>spatial</td>
+                <td>to account for variation among cities</td>
+                <td>separate regression models fit in each city</td>
+              </tr>
+            </tbody>
+          </table>
+        </table-wrap>
+      </sec>
+      <sec id="austomatic-reading-of-literature-with-llm">
+        <title>3.2 Austomatic reading of literature with LLM</title>
+        <list list-type="bullet">
+          <list-item>
+            <p>We use LLM to automatic read the paper through the
+        <monospace>ellmer</monospace> package
+        (<xref alt="Wickham, Cheng, and Jacobs 2025" rid="ref-ellmer" ref-type="bibr">Wickham,
+        Cheng, and Jacobs 2025</xref>) and manually review the decision
+        outputs. Both Antropic Claude and Google Gemini accept pdf
+        inputs and we choose Claude. The prompt used to finetune the
+        Claude LLM is available in the appendix.</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec id="review-the-llm-output">
+        <title>3.3 Review the LLM output</title>
+        <p>(the shiny app)</p>
+        <list list-type="bullet">
+          <list-item>
+            <p>screenshot of the interface</p>
+          </list-item>
+          <list-item>
+            <p>The current application includes three actions:</p>
+            <list list-type="bullet">
+              <list-item>
+                <p>modify a row
+            (<monospace>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</monospace>),</p>
+              </list-item>
+              <list-item>
+                <p>delete unrelated decisions
+            (<monospace>dplyr::filter(!(CONDITION))</monospace>),
+            and</p>
+              </list-item>
+              <list-item>
+                <p>manually add a decision
+            (<monospace>dplyr::bind_rows()</monospace>)</p>
+              </list-item>
+            </list>
+          </list-item>
+          <list-item>
+            <p>All the actions will generate the corresponding codes.</p>
+          </list-item>
+          <list-item>
+            <p>The download button will download the modified decision
+        database as a csv file</p>
+          </list-item>
+        </list>
+        <sec id="decision-quality-summary">
+          <title>3.3.1 Decision quality summary</title>
+        </sec>
+      </sec>
+    </sec>
+    <sec id="calculate-paper-similarity">
+      <title>4. Calculate paper similarity</title>
+      <list list-type="bullet">
+        <list-item>
+          <p>pre-processing</p>
+          <list list-type="bullet">
+            <list-item>
+              <p>standardize statistical methods its corresponding
+          parameters (LOESS, smoothing spline, etc)</p>
+            </list-item>
+            <list-item>
+              <p>group variables into broader categories: time, temperature,
+          humidity, PM</p>
+            </list-item>
+          </list>
+        </list-item>
+        <list-item>
+          <p>identify the most frequent analysis decisions across papers</p>
+        </list-item>
+        <list-item>
+          <p>retain only papers that report more than x such decisions</p>
+        </list-item>
+        <list-item>
+          <p>measure similarity between decisions and their justificaiton
+      using NLP</p>
+          <list list-type="bullet">
+            <list-item>
+              <p>word embedding with attention mechanism, instead of bag of
+          word,</p>
+            </list-item>
+            <list-item>
+              <p>specific NLP models (default to
+          <monospace>bert-base-uncased</monospace>), aggregation methods
+          from word to text</p>
+            </list-item>
+          </list>
+        </list-item>
+        <list-item>
+          <p>compute paper similarity score for each paper pair by
+      aggregating decision-level compoarisons</p>
+          <list list-type="bullet">
+            <list-item>
+              <p>check/ report on the number of decisions compared in each
+          paper pair</p>
+            </list-item>
+          </list>
+        </list-item>
+        <list-item>
+          <p>similarity score can serve as the distance matrix to cluster
+      papers by their similarity on decision choices</p>
+        </list-item>
+      </list>
+    </sec>
+    <sec id="applications">
+      <title>5. Applications</title>
+      <sec id="air-pollution-mortality-modelling">
+        <title>5.1 Air pollution mortality modelling</title>
+        <list list-type="bullet">
+          <list-item>
+            <p>look at for one type of decision (time) - what are the
+        choices made by different papers</p>
+          </list-item>
+          <list-item>
+            <p>look at whether decisions changes across time</p>
+          </list-item>
+          <list-item>
+            <p>Visualize the decision database: apply clustering algorithm
+        and visualize the database through
+        <monospace>sigma.js</monospace></p>
+          </list-item>
+        </list>
+      </sec>
+      <sec id="species-distribution-modelling">
+        <title>5.2 Species distribution modelling</title>
+      </sec>
+    </sec>
+    <sec id="discussion">
+      <title>6. Discussion</title>
+      <list list-type="bullet">
+        <list-item>
+          <p>Only prompting engineering is used to extract decisions from
+      the literature. We expect that fine-tuning the model on
+      statistical or domain-specific literature to yield more robust
+      performance on the same document, though it would require
+      substantially more training effort.</p>
+        </list-item>
+      </list>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <title>7. Reference</title>
+      <ref id="ref-ellmer">
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wickham</surname>
+              <given-names>Hadley</given-names>
+            </name>
+            <name>
+              <surname>Cheng</surname>
+              <given-names>Joe</given-names>
+            </name>
+            <name>
+              <surname>Jacobs</surname>
+              <given-names>Aaron</given-names>
+            </name>
+          </person-group>
+          <source>Ellmer: Chat with large language models</source>
+          <year iso-8601-date="2025">2025</year>
+          <uri>https://CRAN.R-project.org/package=ellmer</uri>
+        </element-citation>
+      </ref>
+      <ref id="ref-wickham2014">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wickham</surname>
+              <given-names>Hadley</given-names>
+            </name>
+          </person-group>
+          <article-title>Tidy Data</article-title>
+          <source>Journal of Statistical Software</source>
+          <year iso-8601-date="2014-09-12">2014</year>
+          <month>09</month>
+          <day>12</day>
+          <volume>59</volume>
+          <uri>https://doi.org/10.18637/jss.v059.i10</uri>
+          <pub-id pub-id-type="doi">10.18637/jss.v059.i10</pub-id>
+          <fpage>1</fpage>
+          <lpage>23</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-jun2022">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Jun</surname>
+              <given-names>Eunice</given-names>
+            </name>
+            <name>
+              <surname>Birchfield</surname>
+              <given-names>Melissa</given-names>
+            </name>
+            <name>
+              <surname>De Moura</surname>
+              <given-names>Nicole</given-names>
+            </name>
+            <name>
+              <surname>Heer</surname>
+              <given-names>Jeffrey</given-names>
+            </name>
+            <name>
+              <surname>Just</surname>
+              <given-names>René</given-names>
+            </name>
+          </person-group>
+          <article-title>Hypothesis Formalization: Empirical Findings, Software Limitations, and Design Implications</article-title>
+          <source>ACM Transactions on Computer-Human Interaction</source>
+          <year iso-8601-date="2022-02-28">2022</year>
+          <month>02</month>
+          <day>28</day>
+          <volume>29</volume>
+          <issue>1</issue>
+          <uri>https://dl.acm.org/doi/10.1145/3476980</uri>
+          <pub-id pub-id-type="doi">10.1145/3476980</pub-id>
+          <fpage>1</fpage>
+          <lpage>28</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-gelman2014">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gelman</surname>
+              <given-names>Andrew</given-names>
+            </name>
+            <name>
+              <surname>Loken</surname>
+              <given-names>Eric</given-names>
+            </name>
+          </person-group>
+          <article-title>The statistical crisis in science</article-title>
+          <source>American Scientist</source>
+          <year iso-8601-date="2014-12">2014</year>
+          <month>12</month>
+          <volume>102</volume>
+          <issue>6</issue>
+          <uri>https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1</uri>
+          <fpage>460</fpage>
+          <lpage>465</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-blair2019">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Blair</surname>
+              <given-names>Graeme</given-names>
+            </name>
+            <name>
+              <surname>Cooper</surname>
+              <given-names>Jasper</given-names>
+            </name>
+            <name>
+              <surname>Coppock</surname>
+              <given-names>Alexander</given-names>
+            </name>
+            <name>
+              <surname>Humphreys</surname>
+              <given-names>Macartan</given-names>
+            </name>
+          </person-group>
+          <article-title>Declaring and Diagnosing Research Designs</article-title>
+          <source>American Political Science Review</source>
+          <year iso-8601-date="2019-08">2019</year>
+          <month>08</month>
+          <volume>113</volume>
+          <issue>3</issue>
+          <uri>https://www.cambridge.org/core/product/identifier/S0003055419000194/type/journal_article</uri>
+          <pub-id pub-id-type="doi">10.1017/S0003055419000194</pub-id>
+          <fpage>838</fpage>
+          <lpage>859</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-bishop2024">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bishop</surname>
+              <given-names>Dorothy V. M.</given-names>
+            </name>
+            <name>
+              <surname>Hulme</surname>
+              <given-names>Charles</given-names>
+            </name>
+          </person-group>
+          <article-title>When Alternative Analyses of the Same Data Come to Different Conclusions: A Tutorial Using DeclareDesign With a Worked Real-World Example</article-title>
+          <source>Advances in Methods and Practices in Psychological Science</source>
+          <year iso-8601-date="2024-07-01">2024</year>
+          <month>07</month>
+          <day>01</day>
+          <volume>7</volume>
+          <issue>3</issue>
+          <uri>https://doi.org/10.1177/25152459241267904</uri>
+          <pub-id pub-id-type="doi">10.1177/25152459241267904</pub-id>
+          <fpage>25152459241267904</fpage>
+          <lpage/>
+        </element-citation>
+      </ref>
+      <ref id="ref-pu2023">
+        <element-citation publication-type="paper-conference">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Pu</surname>
+              <given-names>Xiaoying</given-names>
+            </name>
+            <name>
+              <surname>Kay</surname>
+              <given-names>Matthew</given-names>
+            </name>
+          </person-group>
+          <article-title>CHI ’23: CHI Conference on Human Factors in Computing Systems</article-title>
+          <publisher-name>ACM</publisher-name>
+          <publisher-loc>Hamburg Germany</publisher-loc>
+          <year iso-8601-date="2023-04-19">2023</year>
+          <month>04</month>
+          <day>19</day>
+          <uri>https://dl.acm.org/doi/10.1145/3544548.3580837</uri>
+          <pub-id pub-id-type="doi">10.1145/3544548.3580837</pub-id>
+          <fpage>1</fpage>
+          <lpage>22</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-silberzahn2018">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Silberzahn</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Uhlmann</surname>
+              <given-names>E. L.</given-names>
+            </name>
+            <name>
+              <surname>Martin</surname>
+              <given-names>D. P.</given-names>
+            </name>
+            <name>
+              <surname>Anselmi</surname>
+              <given-names>P.</given-names>
+            </name>
+            <name>
+              <surname>Aust</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Awtrey</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Bahník</surname>
+              <given-names>Š.</given-names>
+            </name>
+            <name>
+              <surname>Bai</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Bannard</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Bonnier</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Carlsson</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Cheung</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Christensen</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Clay</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Craig</surname>
+              <given-names>M. A.</given-names>
+            </name>
+            <name>
+              <surname>Dalla Rosa</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Dam</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Evans</surname>
+              <given-names>M. H.</given-names>
+            </name>
+            <name>
+              <surname>Flores Cervantes</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Fong</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Gamez-Djokic</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Glenz</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Gordon-McKeon</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Heaton</surname>
+              <given-names>T. J.</given-names>
+            </name>
+            <name>
+              <surname>Hederos</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Heene</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Hofelich Mohr</surname>
+              <given-names>A. J.</given-names>
+            </name>
+            <name>
+              <surname>Högden</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Hui</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Johannesson</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Kalodimos</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Kaszubowski</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Kennedy</surname>
+              <given-names>D. M.</given-names>
+            </name>
+            <name>
+              <surname>Lei</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Lindsay</surname>
+              <given-names>T. A.</given-names>
+            </name>
+            <name>
+              <surname>Liverani</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Madan</surname>
+              <given-names>C. R.</given-names>
+            </name>
+            <name>
+              <surname>Molden</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Molleman</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Morey</surname>
+              <given-names>R. D.</given-names>
+            </name>
+            <name>
+              <surname>Mulder</surname>
+              <given-names>L. B.</given-names>
+            </name>
+            <name>
+              <surname>Nijstad</surname>
+              <given-names>B. R.</given-names>
+            </name>
+            <name>
+              <surname>Pope</surname>
+              <given-names>N. G.</given-names>
+            </name>
+            <name>
+              <surname>Pope</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Prenoveau</surname>
+              <given-names>J. M.</given-names>
+            </name>
+            <name>
+              <surname>Rink</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Robusto</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Roderique</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Sandberg</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Schlüter</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Schönbrodt</surname>
+              <given-names>F. D.</given-names>
+            </name>
+            <name>
+              <surname>Sherman</surname>
+              <given-names>M. F.</given-names>
+            </name>
+            <name>
+              <surname>Sommer</surname>
+              <given-names>S. A.</given-names>
+            </name>
+            <name>
+              <surname>Sotak</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Spain</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Spörlein</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Stafford</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Stefanutti</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Tauber</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Ullrich</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Vianello</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Wagenmakers</surname>
+              <given-names>E.-J.</given-names>
+            </name>
+            <name>
+              <surname>Witkowiak</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Yoon</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Nosek</surname>
+              <given-names>B. A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Many Analysts, One Data Set: Making Transparent How Variations in Analytic Choices Affect Results</article-title>
+          <source>Advances in Methods and Practices in Psychological Science</source>
+          <year iso-8601-date="2018-09-01">2018</year>
+          <month>09</month>
+          <day>01</day>
+          <volume>1</volume>
+          <issue>3</issue>
+          <uri>https://doi.org/10.1177/2515245917747646</uri>
+          <pub-id pub-id-type="doi">10.1177/2515245917747646</pub-id>
+          <fpage>337</fpage>
+          <lpage>356</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-sarstedt2024">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Sarstedt</surname>
+              <given-names>Marko</given-names>
+            </name>
+            <name>
+              <surname>Adler</surname>
+              <given-names>Susanne J.</given-names>
+            </name>
+            <name>
+              <surname>Ringle</surname>
+              <given-names>Christian M.</given-names>
+            </name>
+            <name>
+              <surname>Cho</surname>
+              <given-names>Gyeongcheol</given-names>
+            </name>
+            <name>
+              <surname>Diamantopoulos</surname>
+              <given-names>Adamantios</given-names>
+            </name>
+            <name>
+              <surname>Hwang</surname>
+              <given-names>Heungsun</given-names>
+            </name>
+            <name>
+              <surname>Liengaard</surname>
+              <given-names>Benjamin D.</given-names>
+            </name>
+          </person-group>
+          <article-title>Same model, same data, but different outcomes: Evaluating the impact of method choices in structural equation modeling</article-title>
+          <source>Journal of Product Innovation Management</source>
+          <year iso-8601-date="2024">2024</year>
+          <volume>41</volume>
+          <issue>6</issue>
+          <uri>https://onlinelibrary.wiley.com/doi/abs/10.1111/jpim.12738</uri>
+          <pub-id pub-id-type="doi">10.1111/jpim.12738</pub-id>
+          <fpage>1100</fpage>
+          <lpage>1117</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-huntington-klein2021">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Huntington-Klein</surname>
+              <given-names>Nick</given-names>
+            </name>
+            <name>
+              <surname>Arenas</surname>
+              <given-names>Andreu</given-names>
+            </name>
+            <name>
+              <surname>Beam</surname>
+              <given-names>Emily</given-names>
+            </name>
+            <name>
+              <surname>Bertoni</surname>
+              <given-names>Marco</given-names>
+            </name>
+            <name>
+              <surname>Bloem</surname>
+              <given-names>Jeffrey R.</given-names>
+            </name>
+            <name>
+              <surname>Burli</surname>
+              <given-names>Pralhad</given-names>
+            </name>
+            <name>
+              <surname>Chen</surname>
+              <given-names>Naibin</given-names>
+            </name>
+            <name>
+              <surname>Grieco</surname>
+              <given-names>Paul</given-names>
+            </name>
+            <name>
+              <surname>Ekpe</surname>
+              <given-names>Godwin</given-names>
+            </name>
+            <name>
+              <surname>Pugatch</surname>
+              <given-names>Todd</given-names>
+            </name>
+            <name>
+              <surname>Saavedra</surname>
+              <given-names>Martin</given-names>
+            </name>
+            <name>
+              <surname>Stopnitzky</surname>
+              <given-names>Yaniv</given-names>
+            </name>
+          </person-group>
+          <article-title>The influence of hidden researcher decisions in applied microeconomics</article-title>
+          <source>Economic Inquiry</source>
+          <year iso-8601-date="2021">2021</year>
+          <volume>59</volume>
+          <issue>3</issue>
+          <uri>https://onlinelibrary.wiley.com/doi/abs/10.1111/ecin.12992</uri>
+          <pub-id pub-id-type="doi">10.1111/ecin.12992</pub-id>
+          <fpage>944</fpage>
+          <lpage>960</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-botvinik-nezer2020">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Botvinik-Nezer</surname>
+              <given-names>Rotem</given-names>
+            </name>
+            <name>
+              <surname>Holzmeister</surname>
+              <given-names>Felix</given-names>
+            </name>
+            <name>
+              <surname>Camerer</surname>
+              <given-names>Colin F.</given-names>
+            </name>
+            <name>
+              <surname>Dreber</surname>
+              <given-names>Anna</given-names>
+            </name>
+            <name>
+              <surname>Huber</surname>
+              <given-names>Juergen</given-names>
+            </name>
+            <name>
+              <surname>Johannesson</surname>
+              <given-names>Magnus</given-names>
+            </name>
+            <name>
+              <surname>Kirchler</surname>
+              <given-names>Michael</given-names>
+            </name>
+            <name>
+              <surname>Iwanir</surname>
+              <given-names>Roni</given-names>
+            </name>
+            <name>
+              <surname>Mumford</surname>
+              <given-names>Jeanette A.</given-names>
+            </name>
+            <name>
+              <surname>Adcock</surname>
+              <given-names>R. Alison</given-names>
+            </name>
+            <name>
+              <surname>Avesani</surname>
+              <given-names>Paolo</given-names>
+            </name>
+            <name>
+              <surname>Baczkowski</surname>
+              <given-names>Blazej M.</given-names>
+            </name>
+            <name>
+              <surname>Bajracharya</surname>
+              <given-names>Aahana</given-names>
+            </name>
+            <name>
+              <surname>Bakst</surname>
+              <given-names>Leah</given-names>
+            </name>
+            <name>
+              <surname>Ball</surname>
+              <given-names>Sheryl</given-names>
+            </name>
+            <name>
+              <surname>Barilari</surname>
+              <given-names>Marco</given-names>
+            </name>
+            <name>
+              <surname>Bault</surname>
+              <given-names>Nadège</given-names>
+            </name>
+            <name>
+              <surname>Beaton</surname>
+              <given-names>Derek</given-names>
+            </name>
+            <name>
+              <surname>Beitner</surname>
+              <given-names>Julia</given-names>
+            </name>
+            <name>
+              <surname>Benoit</surname>
+              <given-names>Roland G.</given-names>
+            </name>
+            <name>
+              <surname>Berkers</surname>
+              <given-names>Ruud M. W. J.</given-names>
+            </name>
+            <name>
+              <surname>Bhanji</surname>
+              <given-names>Jamil P.</given-names>
+            </name>
+            <name>
+              <surname>Biswal</surname>
+              <given-names>Bharat B.</given-names>
+            </name>
+            <name>
+              <surname>Bobadilla-Suarez</surname>
+              <given-names>Sebastian</given-names>
+            </name>
+            <name>
+              <surname>Bortolini</surname>
+              <given-names>Tiago</given-names>
+            </name>
+            <name>
+              <surname>Bottenhorn</surname>
+              <given-names>Katherine L.</given-names>
+            </name>
+            <name>
+              <surname>Bowring</surname>
+              <given-names>Alexander</given-names>
+            </name>
+            <name>
+              <surname>Braem</surname>
+              <given-names>Senne</given-names>
+            </name>
+            <name>
+              <surname>Brooks</surname>
+              <given-names>Hayley R.</given-names>
+            </name>
+            <name>
+              <surname>Brudner</surname>
+              <given-names>Emily G.</given-names>
+            </name>
+            <name>
+              <surname>Calderon</surname>
+              <given-names>Cristian B.</given-names>
+            </name>
+            <name>
+              <surname>Camilleri</surname>
+              <given-names>Julia A.</given-names>
+            </name>
+            <name>
+              <surname>Castrellon</surname>
+              <given-names>Jaime J.</given-names>
+            </name>
+            <name>
+              <surname>Cecchetti</surname>
+              <given-names>Luca</given-names>
+            </name>
+            <name>
+              <surname>Cieslik</surname>
+              <given-names>Edna C.</given-names>
+            </name>
+            <name>
+              <surname>Cole</surname>
+              <given-names>Zachary J.</given-names>
+            </name>
+            <name>
+              <surname>Collignon</surname>
+              <given-names>Olivier</given-names>
+            </name>
+            <name>
+              <surname>Cox</surname>
+              <given-names>Robert W.</given-names>
+            </name>
+            <name>
+              <surname>Cunningham</surname>
+              <given-names>William A.</given-names>
+            </name>
+            <name>
+              <surname>Czoschke</surname>
+              <given-names>Stefan</given-names>
+            </name>
+            <name>
+              <surname>Dadi</surname>
+              <given-names>Kamalaker</given-names>
+            </name>
+            <name>
+              <surname>Davis</surname>
+              <given-names>Charles P.</given-names>
+            </name>
+            <name>
+              <surname>Luca</surname>
+              <given-names>Alberto De</given-names>
+            </name>
+            <name>
+              <surname>Delgado</surname>
+              <given-names>Mauricio R.</given-names>
+            </name>
+            <name>
+              <surname>Demetriou</surname>
+              <given-names>Lysia</given-names>
+            </name>
+            <name>
+              <surname>Dennison</surname>
+              <given-names>Jeffrey B.</given-names>
+            </name>
+            <name>
+              <surname>Di</surname>
+              <given-names>Xin</given-names>
+            </name>
+            <name>
+              <surname>Dickie</surname>
+              <given-names>Erin W.</given-names>
+            </name>
+            <name>
+              <surname>Dobryakova</surname>
+              <given-names>Ekaterina</given-names>
+            </name>
+            <name>
+              <surname>Donnat</surname>
+              <given-names>Claire L.</given-names>
+            </name>
+            <name>
+              <surname>Dukart</surname>
+              <given-names>Juergen</given-names>
+            </name>
+            <name>
+              <surname>Duncan</surname>
+              <given-names>Niall W.</given-names>
+            </name>
+            <name>
+              <surname>Durnez</surname>
+              <given-names>Joke</given-names>
+            </name>
+            <name>
+              <surname>Eed</surname>
+              <given-names>Amr</given-names>
+            </name>
+            <name>
+              <surname>Eickhoff</surname>
+              <given-names>Simon B.</given-names>
+            </name>
+            <name>
+              <surname>Erhart</surname>
+              <given-names>Andrew</given-names>
+            </name>
+            <name>
+              <surname>Fontanesi</surname>
+              <given-names>Laura</given-names>
+            </name>
+            <name>
+              <surname>Fricke</surname>
+              <given-names>G. Matthew</given-names>
+            </name>
+            <name>
+              <surname>Fu</surname>
+              <given-names>Shiguang</given-names>
+            </name>
+            <name>
+              <surname>Galván</surname>
+              <given-names>Adriana</given-names>
+            </name>
+            <name>
+              <surname>Gau</surname>
+              <given-names>Remi</given-names>
+            </name>
+            <name>
+              <surname>Genon</surname>
+              <given-names>Sarah</given-names>
+            </name>
+            <name>
+              <surname>Glatard</surname>
+              <given-names>Tristan</given-names>
+            </name>
+            <name>
+              <surname>Glerean</surname>
+              <given-names>Enrico</given-names>
+            </name>
+            <name>
+              <surname>Goeman</surname>
+              <given-names>Jelle J.</given-names>
+            </name>
+            <name>
+              <surname>Golowin</surname>
+              <given-names>Sergej A. E.</given-names>
+            </name>
+            <name>
+              <surname>González-García</surname>
+              <given-names>Carlos</given-names>
+            </name>
+            <name>
+              <surname>Gorgolewski</surname>
+              <given-names>Krzysztof J.</given-names>
+            </name>
+            <name>
+              <surname>Grady</surname>
+              <given-names>Cheryl L.</given-names>
+            </name>
+            <name>
+              <surname>Green</surname>
+              <given-names>Mikella A.</given-names>
+            </name>
+            <name>
+              <surname>Guassi Moreira</surname>
+              <given-names>João F.</given-names>
+            </name>
+            <name>
+              <surname>Guest</surname>
+              <given-names>Olivia</given-names>
+            </name>
+            <name>
+              <surname>Hakimi</surname>
+              <given-names>Shabnam</given-names>
+            </name>
+            <name>
+              <surname>Hamilton</surname>
+              <given-names>J. Paul</given-names>
+            </name>
+            <name>
+              <surname>Hancock</surname>
+              <given-names>Roeland</given-names>
+            </name>
+            <name>
+              <surname>Handjaras</surname>
+              <given-names>Giacomo</given-names>
+            </name>
+            <name>
+              <surname>Harry</surname>
+              <given-names>Bronson B.</given-names>
+            </name>
+            <name>
+              <surname>Hawco</surname>
+              <given-names>Colin</given-names>
+            </name>
+            <name>
+              <surname>Herholz</surname>
+              <given-names>Peer</given-names>
+            </name>
+            <name>
+              <surname>Herman</surname>
+              <given-names>Gabrielle</given-names>
+            </name>
+            <name>
+              <surname>Heunis</surname>
+              <given-names>Stephan</given-names>
+            </name>
+            <name>
+              <surname>Hoffstaedter</surname>
+              <given-names>Felix</given-names>
+            </name>
+            <name>
+              <surname>Hogeveen</surname>
+              <given-names>Jeremy</given-names>
+            </name>
+            <name>
+              <surname>Holmes</surname>
+              <given-names>Susan</given-names>
+            </name>
+            <name>
+              <surname>Hu</surname>
+              <given-names>Chuan-Peng</given-names>
+            </name>
+            <name>
+              <surname>Huettel</surname>
+              <given-names>Scott A.</given-names>
+            </name>
+            <name>
+              <surname>Hughes</surname>
+              <given-names>Matthew E.</given-names>
+            </name>
+            <name>
+              <surname>Iacovella</surname>
+              <given-names>Vittorio</given-names>
+            </name>
+            <name>
+              <surname>Iordan</surname>
+              <given-names>Alexandru D.</given-names>
+            </name>
+            <name>
+              <surname>Isager</surname>
+              <given-names>Peder M.</given-names>
+            </name>
+            <name>
+              <surname>Isik</surname>
+              <given-names>Ayse I.</given-names>
+            </name>
+            <name>
+              <surname>Jahn</surname>
+              <given-names>Andrew</given-names>
+            </name>
+            <name>
+              <surname>Johnson</surname>
+              <given-names>Matthew R.</given-names>
+            </name>
+            <name>
+              <surname>Johnstone</surname>
+              <given-names>Tom</given-names>
+            </name>
+            <name>
+              <surname>Joseph</surname>
+              <given-names>Michael J. E.</given-names>
+            </name>
+            <name>
+              <surname>Juliano</surname>
+              <given-names>Anthony C.</given-names>
+            </name>
+            <name>
+              <surname>Kable</surname>
+              <given-names>Joseph W.</given-names>
+            </name>
+            <name>
+              <surname>Kassinopoulos</surname>
+              <given-names>Michalis</given-names>
+            </name>
+            <name>
+              <surname>Koba</surname>
+              <given-names>Cemal</given-names>
+            </name>
+            <name>
+              <surname>Kong</surname>
+              <given-names>Xiang-Zhen</given-names>
+            </name>
+            <name>
+              <surname>Koscik</surname>
+              <given-names>Timothy R.</given-names>
+            </name>
+            <name>
+              <surname>Kucukboyaci</surname>
+              <given-names>Nuri Erkut</given-names>
+            </name>
+            <name>
+              <surname>Kuhl</surname>
+              <given-names>Brice A.</given-names>
+            </name>
+            <name>
+              <surname>Kupek</surname>
+              <given-names>Sebastian</given-names>
+            </name>
+            <name>
+              <surname>Laird</surname>
+              <given-names>Angela R.</given-names>
+            </name>
+            <name>
+              <surname>Lamm</surname>
+              <given-names>Claus</given-names>
+            </name>
+            <name>
+              <surname>Langner</surname>
+              <given-names>Robert</given-names>
+            </name>
+            <name>
+              <surname>Lauharatanahirun</surname>
+              <given-names>Nina</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>Hongmi</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>Sangil</given-names>
+            </name>
+            <name>
+              <surname>Leemans</surname>
+              <given-names>Alexander</given-names>
+            </name>
+            <name>
+              <surname>Leo</surname>
+              <given-names>Andrea</given-names>
+            </name>
+            <name>
+              <surname>Lesage</surname>
+              <given-names>Elise</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>Flora</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>Monica Y. C.</given-names>
+            </name>
+            <name>
+              <surname>Lim</surname>
+              <given-names>Phui Cheng</given-names>
+            </name>
+            <name>
+              <surname>Lintz</surname>
+              <given-names>Evan N.</given-names>
+            </name>
+            <name>
+              <surname>Liphardt</surname>
+              <given-names>Schuyler W.</given-names>
+            </name>
+            <name>
+              <surname>Losecaat Vermeer</surname>
+              <given-names>Annabel B.</given-names>
+            </name>
+            <name>
+              <surname>Love</surname>
+              <given-names>Bradley C.</given-names>
+            </name>
+            <name>
+              <surname>Mack</surname>
+              <given-names>Michael L.</given-names>
+            </name>
+            <name>
+              <surname>Malpica</surname>
+              <given-names>Norberto</given-names>
+            </name>
+            <name>
+              <surname>Marins</surname>
+              <given-names>Theo</given-names>
+            </name>
+            <name>
+              <surname>Maumet</surname>
+              <given-names>Camille</given-names>
+            </name>
+            <name>
+              <surname>McDonald</surname>
+              <given-names>Kelsey</given-names>
+            </name>
+            <name>
+              <surname>McGuire</surname>
+              <given-names>Joseph T.</given-names>
+            </name>
+            <name>
+              <surname>Melero</surname>
+              <given-names>Helena</given-names>
+            </name>
+            <name>
+              <surname>Méndez Leal</surname>
+              <given-names>Adriana S.</given-names>
+            </name>
+            <name>
+              <surname>Meyer</surname>
+              <given-names>Benjamin</given-names>
+            </name>
+            <name>
+              <surname>Meyer</surname>
+              <given-names>Kristin N.</given-names>
+            </name>
+            <name>
+              <surname>Mihai</surname>
+              <given-names>Glad</given-names>
+            </name>
+            <name>
+              <surname>Mitsis</surname>
+              <given-names>Georgios D.</given-names>
+            </name>
+            <name>
+              <surname>Moll</surname>
+              <given-names>Jorge</given-names>
+            </name>
+            <name>
+              <surname>Nielson</surname>
+              <given-names>Dylan M.</given-names>
+            </name>
+            <name>
+              <surname>Nilsonne</surname>
+              <given-names>Gustav</given-names>
+            </name>
+            <name>
+              <surname>Notter</surname>
+              <given-names>Michael P.</given-names>
+            </name>
+            <name>
+              <surname>Olivetti</surname>
+              <given-names>Emanuele</given-names>
+            </name>
+            <name>
+              <surname>Onicas</surname>
+              <given-names>Adrian I.</given-names>
+            </name>
+            <name>
+              <surname>Papale</surname>
+              <given-names>Paolo</given-names>
+            </name>
+            <name>
+              <surname>Patil</surname>
+              <given-names>Kaustubh R.</given-names>
+            </name>
+            <name>
+              <surname>Peelle</surname>
+              <given-names>Jonathan E.</given-names>
+            </name>
+            <name>
+              <surname>Pérez</surname>
+              <given-names>Alexandre</given-names>
+            </name>
+            <name>
+              <surname>Pischedda</surname>
+              <given-names>Doris</given-names>
+            </name>
+            <name>
+              <surname>Poline</surname>
+              <given-names>Jean-Baptiste</given-names>
+            </name>
+            <name>
+              <surname>Prystauka</surname>
+              <given-names>Yanina</given-names>
+            </name>
+            <name>
+              <surname>Ray</surname>
+              <given-names>Shruti</given-names>
+            </name>
+            <name>
+              <surname>Reuter-Lorenz</surname>
+              <given-names>Patricia A.</given-names>
+            </name>
+            <name>
+              <surname>Reynolds</surname>
+              <given-names>Richard C.</given-names>
+            </name>
+            <name>
+              <surname>Ricciardi</surname>
+              <given-names>Emiliano</given-names>
+            </name>
+            <name>
+              <surname>Rieck</surname>
+              <given-names>Jenny R.</given-names>
+            </name>
+            <name>
+              <surname>Rodriguez-Thompson</surname>
+              <given-names>Anais M.</given-names>
+            </name>
+            <name>
+              <surname>Romyn</surname>
+              <given-names>Anthony</given-names>
+            </name>
+            <name>
+              <surname>Salo</surname>
+              <given-names>Taylor</given-names>
+            </name>
+            <name>
+              <surname>Samanez-Larkin</surname>
+              <given-names>Gregory R.</given-names>
+            </name>
+            <name>
+              <surname>Sanz-Morales</surname>
+              <given-names>Emilio</given-names>
+            </name>
+            <name>
+              <surname>Schlichting</surname>
+              <given-names>Margaret L.</given-names>
+            </name>
+            <name>
+              <surname>Schultz</surname>
+              <given-names>Douglas H.</given-names>
+            </name>
+            <name>
+              <surname>Shen</surname>
+              <given-names>Qiang</given-names>
+            </name>
+            <name>
+              <surname>Sheridan</surname>
+              <given-names>Margaret A.</given-names>
+            </name>
+            <name>
+              <surname>Silvers</surname>
+              <given-names>Jennifer A.</given-names>
+            </name>
+            <name>
+              <surname>Skagerlund</surname>
+              <given-names>Kenny</given-names>
+            </name>
+            <name>
+              <surname>Smith</surname>
+              <given-names>Alec</given-names>
+            </name>
+            <name>
+              <surname>Smith</surname>
+              <given-names>David V.</given-names>
+            </name>
+            <name>
+              <surname>Sokol-Hessner</surname>
+              <given-names>Peter</given-names>
+            </name>
+            <name>
+              <surname>Steinkamp</surname>
+              <given-names>Simon R.</given-names>
+            </name>
+            <name>
+              <surname>Tashjian</surname>
+              <given-names>Sarah M.</given-names>
+            </name>
+            <name>
+              <surname>Thirion</surname>
+              <given-names>Bertrand</given-names>
+            </name>
+            <name>
+              <surname>Thorp</surname>
+              <given-names>John N.</given-names>
+            </name>
+            <name>
+              <surname>Tinghög</surname>
+              <given-names>Gustav</given-names>
+            </name>
+            <name>
+              <surname>Tisdall</surname>
+              <given-names>Loreen</given-names>
+            </name>
+            <name>
+              <surname>Tompson</surname>
+              <given-names>Steven H.</given-names>
+            </name>
+            <name>
+              <surname>Toro-Serey</surname>
+              <given-names>Claudio</given-names>
+            </name>
+            <name>
+              <surname>Torre Tresols</surname>
+              <given-names>Juan Jesus</given-names>
+            </name>
+            <name>
+              <surname>Tozzi</surname>
+              <given-names>Leonardo</given-names>
+            </name>
+            <name>
+              <surname>Truong</surname>
+              <given-names>Vuong</given-names>
+            </name>
+            <name>
+              <surname>Turella</surname>
+              <given-names>Luca</given-names>
+            </name>
+            <name>
+              <surname>van ‘t Veer</surname>
+              <given-names>Anna E.</given-names>
+            </name>
+            <name>
+              <surname>Verguts</surname>
+              <given-names>Tom</given-names>
+            </name>
+            <name>
+              <surname>Vettel</surname>
+              <given-names>Jean M.</given-names>
+            </name>
+            <name>
+              <surname>Vijayarajah</surname>
+              <given-names>Sagana</given-names>
+            </name>
+            <name>
+              <surname>Vo</surname>
+              <given-names>Khoi</given-names>
+            </name>
+            <name>
+              <surname>Wall</surname>
+              <given-names>Matthew B.</given-names>
+            </name>
+            <name>
+              <surname>Weeda</surname>
+              <given-names>Wouter D.</given-names>
+            </name>
+            <name>
+              <surname>Weis</surname>
+              <given-names>Susanne</given-names>
+            </name>
+            <name>
+              <surname>White</surname>
+              <given-names>David J.</given-names>
+            </name>
+            <name>
+              <surname>Wisniewski</surname>
+              <given-names>David</given-names>
+            </name>
+            <name>
+              <surname>Xifra-Porxas</surname>
+              <given-names>Alba</given-names>
+            </name>
+            <name>
+              <surname>Yearling</surname>
+              <given-names>Emily A.</given-names>
+            </name>
+            <name>
+              <surname>Yoon</surname>
+              <given-names>Sangsuk</given-names>
+            </name>
+            <name>
+              <surname>Yuan</surname>
+              <given-names>Rui</given-names>
+            </name>
+            <name>
+              <surname>Yuen</surname>
+              <given-names>Kenneth S. L.</given-names>
+            </name>
+            <name>
+              <surname>Zhang</surname>
+              <given-names>Lei</given-names>
+            </name>
+            <name>
+              <surname>Zhang</surname>
+              <given-names>Xu</given-names>
+            </name>
+            <name>
+              <surname>Zosky</surname>
+              <given-names>Joshua E.</given-names>
+            </name>
+            <name>
+              <surname>Nichols</surname>
+              <given-names>Thomas E.</given-names>
+            </name>
+            <name>
+              <surname>Poldrack</surname>
+              <given-names>Russell A.</given-names>
+            </name>
+            <name>
+              <surname>Schonberg</surname>
+              <given-names>Tom</given-names>
+            </name>
+          </person-group>
+          <article-title>Variability in the analysis of a single neuroimaging dataset by many teams</article-title>
+          <source>Nature</source>
+          <year iso-8601-date="2020-06">2020</year>
+          <month>06</month>
+          <volume>582</volume>
+          <issue>7810</issue>
+          <uri>https://www.nature.com/articles/s41586-020-2314-9</uri>
+          <pub-id pub-id-type="doi">10.1038/s41586-020-2314-9</pub-id>
+          <fpage>84</fpage>
+          <lpage>88</lpage>
+        </element-citation>
+      </ref>
+      <ref id="ref-gould2025">
+        <element-citation publication-type="article-journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gould</surname>
+              <given-names>Elliot</given-names>
+            </name>
+            <name>
+              <surname>Fraser</surname>
+              <given-names>Hannah S.</given-names>
+            </name>
+            <name>
+              <surname>Parker</surname>
+              <given-names>Timothy H.</given-names>
+            </name>
+            <name>
+              <surname>Nakagawa</surname>
+              <given-names>Shinichi</given-names>
+            </name>
+            <name>
+              <surname>Griffith</surname>
+              <given-names>Simon C.</given-names>
+            </name>
+            <name>
+              <surname>Vesk</surname>
+              <given-names>Peter A.</given-names>
+            </name>
+            <name>
+              <surname>Fidler</surname>
+              <given-names>Fiona</given-names>
+            </name>
+            <name>
+              <surname>Hamilton</surname>
+              <given-names>Daniel G.</given-names>
+            </name>
+            <name>
+              <surname>Abbey-Lee</surname>
+              <given-names>Robin N.</given-names>
+            </name>
+            <name>
+              <surname>Abbott</surname>
+              <given-names>Jessica K.</given-names>
+            </name>
+            <name>
+              <surname>Aguirre</surname>
+              <given-names>Luis A.</given-names>
+            </name>
+            <name>
+              <surname>Alcaraz</surname>
+              <given-names>Carles</given-names>
+            </name>
+            <name>
+              <surname>Aloni</surname>
+              <given-names>Irith</given-names>
+            </name>
+            <name>
+              <surname>Altschul</surname>
+              <given-names>Drew</given-names>
+            </name>
+            <name>
+              <surname>Arekar</surname>
+              <given-names>Kunal</given-names>
+            </name>
+            <name>
+              <surname>Atkins</surname>
+              <given-names>Jeff W.</given-names>
+            </name>
+            <name>
+              <surname>Atkinson</surname>
+              <given-names>Joe</given-names>
+            </name>
+            <name>
+              <surname>Baker</surname>
+              <given-names>Christopher M.</given-names>
+            </name>
+            <name>
+              <surname>Barrett</surname>
+              <given-names>Meghan</given-names>
+            </name>
+            <name>
+              <surname>Bell</surname>
+              <given-names>Kristian</given-names>
+            </name>
+            <name>
+              <surname>Bello</surname>
+              <given-names>Suleiman Kehinde</given-names>
+            </name>
+            <name>
+              <surname>Beltrán</surname>
+              <given-names>Iván</given-names>
+            </name>
+            <name>
+              <surname>Berauer</surname>
+              <given-names>Bernd J.</given-names>
+            </name>
+            <name>
+              <surname>Bertram</surname>
+              <given-names>Michael Grant</given-names>
+            </name>
+            <name>
+              <surname>Billman</surname>
+              <given-names>Peter D.</given-names>
+            </name>
+            <name>
+              <surname>Blake</surname>
+              <given-names>Charlie K.</given-names>
+            </name>
+            <name>
+              <surname>Blake</surname>
+              <given-names>Shannon</given-names>
+            </name>
+            <name>
+              <surname>Bliard</surname>
+              <given-names>Louis</given-names>
+            </name>
+            <name>
+              <surname>Bonisoli-Alquati</surname>
+              <given-names>Andrea</given-names>
+            </name>
+            <name>
+              <surname>Bonnet</surname>
+              <given-names>Timothée</given-names>
+            </name>
+            <name>
+              <surname>Bordes</surname>
+              <given-names>Camille Nina Marion</given-names>
+            </name>
+            <name>
+              <surname>Bose</surname>
+              <given-names>Aneesh P. H.</given-names>
+            </name>
+            <name>
+              <surname>Botterill-James</surname>
+              <given-names>Thomas</given-names>
+            </name>
+            <name>
+              <surname>Boyd</surname>
+              <given-names>Melissa Anna</given-names>
+            </name>
+            <name>
+              <surname>Boyle</surname>
+              <given-names>Sarah A.</given-names>
+            </name>
+            <name>
+              <surname>Bradfer-Lawrence</surname>
+              <given-names>Tom</given-names>
+            </name>
+            <name>
+              <surname>Bradham</surname>
+              <given-names>Jennifer</given-names>
+            </name>
+            <name>
+              <surname>Brand</surname>
+              <given-names>Jack A.</given-names>
+            </name>
+            <name>
+              <surname>Brengdahl</surname>
+              <given-names>Martin I.</given-names>
+            </name>
+            <name>
+              <surname>Bulla</surname>
+              <given-names>Martin</given-names>
+            </name>
+            <name>
+              <surname>Bussière</surname>
+              <given-names>Luc</given-names>
+            </name>
+            <name>
+              <surname>Camerlenghi</surname>
+              <given-names>Ettore</given-names>
+            </name>
+            <name>
+              <surname>Campbell</surname>
+              <given-names>Sara E.</given-names>
+            </name>
+            <name>
+              <surname>Campos</surname>
+              <given-names>Leonardo L. F.</given-names>
+            </name>
+            <name>
+              <surname>Caravaggi</surname>
+              <given-names>Anthony</given-names>
+            </name>
+            <name>
+              <surname>Cardoso</surname>
+              <given-names>Pedro</given-names>
+            </name>
+            <name>
+              <surname>Carroll</surname>
+              <given-names>Charles J. W.</given-names>
+            </name>
+            <name>
+              <surname>Catanach</surname>
+              <given-names>Therese A.</given-names>
+            </name>
+            <name>
+              <surname>Chen</surname>
+              <given-names>Xuan</given-names>
+            </name>
+            <name>
+              <surname>Chik</surname>
+              <given-names>Heung Ying Janet</given-names>
+            </name>
+            <name>
+              <surname>Choy</surname>
+              <given-names>Emily Sarah</given-names>
+            </name>
+            <name>
+              <surname>Christie</surname>
+              <given-names>Alec Philip</given-names>
+            </name>
+            <name>
+              <surname>Chuang</surname>
+              <given-names>Angela</given-names>
+            </name>
+            <name>
+              <surname>Chunco</surname>
+              <given-names>Amanda J.</given-names>
+            </name>
+            <name>
+              <surname>Clark</surname>
+              <given-names>Bethany L.</given-names>
+            </name>
+            <name>
+              <surname>Contina</surname>
+              <given-names>Andrea</given-names>
+            </name>
+            <name>
+              <surname>Covernton</surname>
+              <given-names>Garth A.</given-names>
+            </name>
+            <name>
+              <surname>Cox</surname>
+              <given-names>Murray P.</given-names>
+            </name>
+            <name>
+              <surname>Cressman</surname>
+              <given-names>Kimberly A.</given-names>
+            </name>
+            <name>
+              <surname>Crotti</surname>
+              <given-names>Marco</given-names>
+            </name>
+            <name>
+              <surname>Crouch</surname>
+              <given-names>Connor Davidson</given-names>
+            </name>
+            <name>
+              <surname>D’Amelio</surname>
+              <given-names>Pietro B.</given-names>
+            </name>
+            <name>
+              <surname>Sousa</surname>
+              <given-names>Alexandra Allison de</given-names>
+            </name>
+            <name>
+              <surname>Döbert</surname>
+              <given-names>Timm Fabian</given-names>
+            </name>
+            <name>
+              <surname>Dobler</surname>
+              <given-names>Ralph</given-names>
+            </name>
+            <name>
+              <surname>Dobson</surname>
+              <given-names>Adam J.</given-names>
+            </name>
+            <name>
+              <surname>Doherty</surname>
+              <given-names>Tim S.</given-names>
+            </name>
+            <name>
+              <surname>Drobniak</surname>
+              <given-names>Szymon Marian</given-names>
+            </name>
+            <name>
+              <surname>Duffy</surname>
+              <given-names>Alexandra Grace</given-names>
+            </name>
+            <name>
+              <surname>Duncan</surname>
+              <given-names>Alison B.</given-names>
+            </name>
+            <name>
+              <surname>Dunn</surname>
+              <given-names>Robert P.</given-names>
+            </name>
+            <name>
+              <surname>Dunning</surname>
+              <given-names>Jamie</given-names>
+            </name>
+            <name>
+              <surname>Dutta</surname>
+              <given-names>Trishna</given-names>
+            </name>
+            <name>
+              <surname>Eberhart-Hertel</surname>
+              <given-names>Luke</given-names>
+            </name>
+            <name>
+              <surname>Elmore</surname>
+              <given-names>Jared Alan</given-names>
+            </name>
+            <name>
+              <surname>Elsherif</surname>
+              <given-names>Mahmoud Medhat</given-names>
+            </name>
+            <name>
+              <surname>English</surname>
+              <given-names>Holly M.</given-names>
+            </name>
+            <name>
+              <surname>Ensminger</surname>
+              <given-names>David C.</given-names>
+            </name>
+            <name>
+              <surname>Ernst</surname>
+              <given-names>Ulrich Rainer</given-names>
+            </name>
+            <name>
+              <surname>Ferguson</surname>
+              <given-names>Stephen M.</given-names>
+            </name>
+            <name>
+              <surname>Fernandez-Juricic</surname>
+              <given-names>Esteban</given-names>
+            </name>
+            <name>
+              <surname>Ferreira-Arruda</surname>
+              <given-names>Thalita</given-names>
+            </name>
+            <name>
+              <surname>Fieberg</surname>
+              <given-names>John</given-names>
+            </name>
+            <name>
+              <surname>Finch</surname>
+              <given-names>Elizabeth A.</given-names>
+            </name>
+            <name>
+              <surname>Fiorenza</surname>
+              <given-names>Evan A.</given-names>
+            </name>
+            <name>
+              <surname>Fisher</surname>
+              <given-names>David N.</given-names>
+            </name>
+            <name>
+              <surname>Fontaine</surname>
+              <given-names>Amélie</given-names>
+            </name>
+            <name>
+              <surname>Forstmeier</surname>
+              <given-names>Wolfgang</given-names>
+            </name>
+            <name>
+              <surname>Fourcade</surname>
+              <given-names>Yoan</given-names>
+            </name>
+            <name>
+              <surname>Frank</surname>
+              <given-names>Graham S.</given-names>
+            </name>
+            <name>
+              <surname>Freund</surname>
+              <given-names>Cathryn A.</given-names>
+            </name>
+            <name>
+              <surname>Fuentes-Lillo</surname>
+              <given-names>Eduardo</given-names>
+            </name>
+            <name>
+              <surname>Gandy</surname>
+              <given-names>Sara L.</given-names>
+            </name>
+            <name>
+              <surname>Gannon</surname>
+              <given-names>Dustin G.</given-names>
+            </name>
+            <name>
+              <surname>García-Cervigón</surname>
+              <given-names>Ana I.</given-names>
+            </name>
+            <name>
+              <surname>Garretson</surname>
+              <given-names>Alexis C.</given-names>
+            </name>
+            <name>
+              <surname>Ge</surname>
+              <given-names>Xuezhen</given-names>
+            </name>
+            <name>
+              <surname>Geary</surname>
+              <given-names>William L.</given-names>
+            </name>
+            <name>
+              <surname>Géron</surname>
+              <given-names>Charly</given-names>
+            </name>
+            <name>
+              <surname>Gilles</surname>
+              <given-names>Marc</given-names>
+            </name>
+            <name>
+              <surname>Girndt</surname>
+              <given-names>Antje</given-names>
+            </name>
+            <name>
+              <surname>Gliksman</surname>
+              <given-names>Daniel</given-names>
+            </name>
+            <name>
+              <surname>Goldspiel</surname>
+              <given-names>Harrison B.</given-names>
+            </name>
+            <name>
+              <surname>Gomes</surname>
+              <given-names>Dylan G. E.</given-names>
+            </name>
+            <name>
+              <surname>Good</surname>
+              <given-names>Megan Kate</given-names>
+            </name>
+            <name>
+              <surname>Goslee</surname>
+              <given-names>Sarah C.</given-names>
+            </name>
+            <name>
+              <surname>Gosnell</surname>
+              <given-names>J. Stephen</given-names>
+            </name>
+            <name>
+              <surname>Grames</surname>
+              <given-names>Eliza M.</given-names>
+            </name>
+            <name>
+              <surname>Gratton</surname>
+              <given-names>Paolo</given-names>
+            </name>
+            <name>
+              <surname>Grebe</surname>
+              <given-names>Nicholas M.</given-names>
+            </name>
+            <name>
+              <surname>Greenler</surname>
+              <given-names>Skye M.</given-names>
+            </name>
+            <name>
+              <surname>Griffioen</surname>
+              <given-names>Maaike</given-names>
+            </name>
+            <name>
+              <surname>Griffith</surname>
+              <given-names>Daniel M.</given-names>
+            </name>
+            <name>
+              <surname>Griffith</surname>
+              <given-names>Frances J.</given-names>
+            </name>
+            <name>
+              <surname>Grossman</surname>
+              <given-names>Jake J.</given-names>
+            </name>
+            <name>
+              <surname>Güncan</surname>
+              <given-names>Ali</given-names>
+            </name>
+            <name>
+              <surname>Haesen</surname>
+              <given-names>Stef</given-names>
+            </name>
+            <name>
+              <surname>Hagan</surname>
+              <given-names>James G.</given-names>
+            </name>
+            <name>
+              <surname>Hager</surname>
+              <given-names>Heather A.</given-names>
+            </name>
+            <name>
+              <surname>Harris</surname>
+              <given-names>Jonathan Philo</given-names>
+            </name>
+            <name>
+              <surname>Harrison</surname>
+              <given-names>Natasha Dean</given-names>
+            </name>
+            <name>
+              <surname>Hasnain</surname>
+              <given-names>Sarah Syedia</given-names>
+            </name>
+            <name>
+              <surname>Havird</surname>
+              <given-names>Justin Chase</given-names>
+            </name>
+            <name>
+              <surname>Heaton</surname>
+              <given-names>Andrew J.</given-names>
+            </name>
+            <name>
+              <surname>Herrera-Chaustre</surname>
+              <given-names>María Laura</given-names>
+            </name>
+            <name>
+              <surname>Howard</surname>
+              <given-names>Tanner J.</given-names>
+            </name>
+            <name>
+              <surname>Hsu</surname>
+              <given-names>Bin-Yan</given-names>
+            </name>
+            <name>
+              <surname>Iannarilli</surname>
+              <given-names>Fabiola</given-names>
+            </name>
+            <name>
+              <surname>Iranzo</surname>
+              <given-names>Esperanza C.</given-names>
+            </name>
+            <name>
+              <surname>Iverson</surname>
+              <given-names>Erik N. K.</given-names>
+            </name>
+            <name>
+              <surname>Jimoh</surname>
+              <given-names>Saheed Olaide</given-names>
+            </name>
+            <name>
+              <surname>Johnson</surname>
+              <given-names>Douglas H.</given-names>
+            </name>
+            <name>
+              <surname>Johnsson</surname>
+              <given-names>Martin</given-names>
+            </name>
+            <name>
+              <surname>Jorna</surname>
+              <given-names>Jesse</given-names>
+            </name>
+            <name>
+              <surname>Jucker</surname>
+              <given-names>Tommaso</given-names>
+            </name>
+            <name>
+              <surname>Jung</surname>
+              <given-names>Martin</given-names>
+            </name>
+            <name>
+              <surname>Kačergytė</surname>
+              <given-names>Ineta</given-names>
+            </name>
+            <name>
+              <surname>Kaltz</surname>
+              <given-names>Oliver</given-names>
+            </name>
+            <name>
+              <surname>Ke</surname>
+              <given-names>Alison</given-names>
+            </name>
+            <name>
+              <surname>Kelly</surname>
+              <given-names>Clint D.</given-names>
+            </name>
+            <name>
+              <surname>Keogan</surname>
+              <given-names>Katharine</given-names>
+            </name>
+            <name>
+              <surname>Keppeler</surname>
+              <given-names>Friedrich Wolfgang</given-names>
+            </name>
+            <name>
+              <surname>Killion</surname>
+              <given-names>Alexander K.</given-names>
+            </name>
+            <name>
+              <surname>Kim</surname>
+              <given-names>Dongmin</given-names>
+            </name>
+            <name>
+              <surname>Kochan</surname>
+              <given-names>David P.</given-names>
+            </name>
+            <name>
+              <surname>Korsten</surname>
+              <given-names>Peter</given-names>
+            </name>
+            <name>
+              <surname>Kothari</surname>
+              <given-names>Shan</given-names>
+            </name>
+            <name>
+              <surname>Kuppler</surname>
+              <given-names>Jonas</given-names>
+            </name>
+            <name>
+              <surname>Kusch</surname>
+              <given-names>Jillian M.</given-names>
+            </name>
+            <name>
+              <surname>Lagisz</surname>
+              <given-names>Malgorzata</given-names>
+            </name>
+            <name>
+              <surname>Lalla</surname>
+              <given-names>Kristen Marianne</given-names>
+            </name>
+            <name>
+              <surname>Larkin</surname>
+              <given-names>Daniel J.</given-names>
+            </name>
+            <name>
+              <surname>Larson</surname>
+              <given-names>Courtney L.</given-names>
+            </name>
+            <name>
+              <surname>Lauck</surname>
+              <given-names>Katherine S.</given-names>
+            </name>
+            <name>
+              <surname>Lauterbur</surname>
+              <given-names>M. Elise</given-names>
+            </name>
+            <name>
+              <surname>Law</surname>
+              <given-names>Alan</given-names>
+            </name>
+            <name>
+              <surname>Léandri-Breton</surname>
+              <given-names>Don-Jean</given-names>
+            </name>
+            <name>
+              <surname>Lembrechts</surname>
+              <given-names>Jonas J.</given-names>
+            </name>
+            <name>
+              <surname>L’Herpiniere</surname>
+              <given-names>Kiara</given-names>
+            </name>
+            <name>
+              <surname>Lievens</surname>
+              <given-names>Eva J. P.</given-names>
+            </name>
+            <name>
+              <surname>Lima</surname>
+              <given-names>Daniela Oliveira de</given-names>
+            </name>
+            <name>
+              <surname>Lindsay</surname>
+              <given-names>Shane</given-names>
+            </name>
+            <name>
+              <surname>Luquet</surname>
+              <given-names>Martin</given-names>
+            </name>
+            <name>
+              <surname>MacLeod</surname>
+              <given-names>Ross</given-names>
+            </name>
+            <name>
+              <surname>Macphie</surname>
+              <given-names>Kirsty H.</given-names>
+            </name>
+            <name>
+              <surname>Magellan</surname>
+              <given-names>Kit</given-names>
+            </name>
+            <name>
+              <surname>Mair</surname>
+              <given-names>Magdalena M.</given-names>
+            </name>
+            <name>
+              <surname>Malm</surname>
+              <given-names>Lisa E.</given-names>
+            </name>
+            <name>
+              <surname>Mammola</surname>
+              <given-names>Stefano</given-names>
+            </name>
+            <name>
+              <surname>Mandeville</surname>
+              <given-names>Caitlin P.</given-names>
+            </name>
+            <name>
+              <surname>Manhart</surname>
+              <given-names>Michael</given-names>
+            </name>
+            <name>
+              <surname>Manrique-Garzon</surname>
+              <given-names>Laura Milena</given-names>
+            </name>
+            <name>
+              <surname>Mäntylä</surname>
+              <given-names>Elina</given-names>
+            </name>
+            <name>
+              <surname>Marchand</surname>
+              <given-names>Philippe</given-names>
+            </name>
+            <name>
+              <surname>Marshall</surname>
+              <given-names>Benjamin Michael</given-names>
+            </name>
+            <name>
+              <surname>Martin</surname>
+              <given-names>Charles A.</given-names>
+            </name>
+            <name>
+              <surname>Martin</surname>
+              <given-names>Dominic Andreas</given-names>
+            </name>
+            <name>
+              <surname>Martin</surname>
+              <given-names>Jake Mitchell</given-names>
+            </name>
+            <name>
+              <surname>Martinig</surname>
+              <given-names>April Robin</given-names>
+            </name>
+            <name>
+              <surname>McCallum</surname>
+              <given-names>Erin S.</given-names>
+            </name>
+            <name>
+              <surname>McCauley</surname>
+              <given-names>Mark</given-names>
+            </name>
+            <name>
+              <surname>McNew</surname>
+              <given-names>Sabrina M.</given-names>
+            </name>
+            <name>
+              <surname>Meiners</surname>
+              <given-names>Scott J.</given-names>
+            </name>
+            <name>
+              <surname>Merkling</surname>
+              <given-names>Thomas</given-names>
+            </name>
+            <name>
+              <surname>Michelangeli</surname>
+              <given-names>Marcus</given-names>
+            </name>
+            <name>
+              <surname>Moiron</surname>
+              <given-names>Maria</given-names>
+            </name>
+            <name>
+              <surname>Moreira</surname>
+              <given-names>Bruno</given-names>
+            </name>
+            <name>
+              <surname>Mortensen</surname>
+              <given-names>Jennifer</given-names>
+            </name>
+            <name>
+              <surname>Mos</surname>
+              <given-names>Benjamin</given-names>
+            </name>
+            <name>
+              <surname>Muraina</surname>
+              <given-names>Taofeek Olatunbosun</given-names>
+            </name>
+            <name>
+              <surname>Murphy</surname>
+              <given-names>Penelope Wrenn</given-names>
+            </name>
+            <name>
+              <surname>Nelli</surname>
+              <given-names>Luca</given-names>
+            </name>
+            <name>
+              <surname>Niemelä</surname>
+              <given-names>Petri</given-names>
+            </name>
+            <name>
+              <surname>Nightingale</surname>
+              <given-names>Josh</given-names>
+            </name>
+            <name>
+              <surname>Nilsonne</surname>
+              <given-names>Gustav</given-names>
+            </name>
+            <name>
+              <surname>Nolazco</surname>
+              <given-names>Sergio</given-names>
+            </name>
+            <name>
+              <surname>Nooten</surname>
+              <given-names>Sabine S.</given-names>
+            </name>
+            <name>
+              <surname>Novotny</surname>
+              <given-names>Jessie Lanterman</given-names>
+            </name>
+            <name>
+              <surname>Olin</surname>
+              <given-names>Agnes Birgitta</given-names>
+            </name>
+            <name>
+              <surname>Organ</surname>
+              <given-names>Chris L.</given-names>
+            </name>
+            <name>
+              <surname>Ostevik</surname>
+              <given-names>Kate L.</given-names>
+            </name>
+            <name>
+              <surname>Palacio</surname>
+              <given-names>Facundo Xavier</given-names>
+            </name>
+            <name>
+              <surname>Paquet</surname>
+              <given-names>Matthieu</given-names>
+            </name>
+            <name>
+              <surname>Parker</surname>
+              <given-names>Darren James</given-names>
+            </name>
+            <name>
+              <surname>Pascall</surname>
+              <given-names>David J.</given-names>
+            </name>
+            <name>
+              <surname>Pasquarella</surname>
+              <given-names>Valerie J.</given-names>
+            </name>
+            <name>
+              <surname>Paterson</surname>
+              <given-names>John Harold</given-names>
+            </name>
+            <name>
+              <surname>Payo-Payo</surname>
+              <given-names>Ana</given-names>
+            </name>
+            <name>
+              <surname>Pedersen</surname>
+              <given-names>Karen Marie</given-names>
+            </name>
+            <name>
+              <surname>Perez</surname>
+              <given-names>Grégoire</given-names>
+            </name>
+            <name>
+              <surname>Perry</surname>
+              <given-names>Kayla I.</given-names>
+            </name>
+            <name>
+              <surname>Pottier</surname>
+              <given-names>Patrice</given-names>
+            </name>
+            <name>
+              <surname>Proulx</surname>
+              <given-names>Michael J.</given-names>
+            </name>
+            <name>
+              <surname>Proulx</surname>
+              <given-names>Raphaël</given-names>
+            </name>
+            <name>
+              <surname>Pruett</surname>
+              <given-names>Jessica L.</given-names>
+            </name>
+            <name>
+              <surname>Ramananjato</surname>
+              <given-names>Veronarindra</given-names>
+            </name>
+            <name>
+              <surname>Randimbiarison</surname>
+              <given-names>Finaritra Tolotra</given-names>
+            </name>
+            <name>
+              <surname>Razafindratsima</surname>
+              <given-names>Onja H.</given-names>
+            </name>
+            <name>
+              <surname>Rennison</surname>
+              <given-names>Diana J.</given-names>
+            </name>
+            <name>
+              <surname>Riva</surname>
+              <given-names>Federico</given-names>
+            </name>
+            <name>
+              <surname>Riyahi</surname>
+              <given-names>Sepand</given-names>
+            </name>
+            <name>
+              <surname>Roast</surname>
+              <given-names>Michael James</given-names>
+            </name>
+            <name>
+              <surname>Rocha</surname>
+              <given-names>Felipe Pereira</given-names>
+            </name>
+            <name>
+              <surname>Roche</surname>
+              <given-names>Dominique G.</given-names>
+            </name>
+            <name>
+              <surname>Román-Palacios</surname>
+              <given-names>Cristian</given-names>
+            </name>
+            <name>
+              <surname>Rosenberg</surname>
+              <given-names>Michael S.</given-names>
+            </name>
+            <name>
+              <surname>Ross</surname>
+              <given-names>Jessica</given-names>
+            </name>
+            <name>
+              <surname>Rowland</surname>
+              <given-names>Freya E.</given-names>
+            </name>
+            <name>
+              <surname>Rugemalila</surname>
+              <given-names>Deusdedith</given-names>
+            </name>
+            <name>
+              <surname>Russell</surname>
+              <given-names>Avery L.</given-names>
+            </name>
+            <name>
+              <surname>Ruuskanen</surname>
+              <given-names>Suvi</given-names>
+            </name>
+            <name>
+              <surname>Saccone</surname>
+              <given-names>Patrick</given-names>
+            </name>
+            <name>
+              <surname>Sadeh</surname>
+              <given-names>Asaf</given-names>
+            </name>
+            <name>
+              <surname>Salazar</surname>
+              <given-names>Stephen M.</given-names>
+            </name>
+            <name>
+              <surname>Sales</surname>
+              <given-names>Kris</given-names>
+            </name>
+            <name>
+              <surname>Salmón</surname>
+              <given-names>Pablo</given-names>
+            </name>
+            <name>
+              <surname>Sánchez-Tójar</surname>
+              <given-names>Alfredo</given-names>
+            </name>
+            <name>
+              <surname>Santos</surname>
+              <given-names>Leticia Pereira</given-names>
+            </name>
+            <name>
+              <surname>Santostefano</surname>
+              <given-names>Francesca</given-names>
+            </name>
+            <name>
+              <surname>Schilling</surname>
+              <given-names>Hayden T.</given-names>
+            </name>
+            <name>
+              <surname>Schmidt</surname>
+              <given-names>Marcus</given-names>
+            </name>
+            <name>
+              <surname>Schmoll</surname>
+              <given-names>Tim</given-names>
+            </name>
+            <name>
+              <surname>Schneider</surname>
+              <given-names>Adam C.</given-names>
+            </name>
+            <name>
+              <surname>Schrock</surname>
+              <given-names>Allie E.</given-names>
+            </name>
+            <name>
+              <surname>Schroeder</surname>
+              <given-names>Julia</given-names>
+            </name>
+            <name>
+              <surname>Schtickzelle</surname>
+              <given-names>Nicolas</given-names>
+            </name>
+            <name>
+              <surname>Schultz</surname>
+              <given-names>Nick L.</given-names>
+            </name>
+            <name>
+              <surname>Scott</surname>
+              <given-names>Drew A.</given-names>
+            </name>
+            <name>
+              <surname>Scroggie</surname>
+              <given-names>Michael Peter</given-names>
+            </name>
+            <name>
+              <surname>Shapiro</surname>
+              <given-names>Julie Teresa</given-names>
+            </name>
+            <name>
+              <surname>Sharma</surname>
+              <given-names>Nitika</given-names>
+            </name>
+            <name>
+              <surname>Shearer</surname>
+              <given-names>Caroline L.</given-names>
+            </name>
+            <name>
+              <surname>Simón</surname>
+              <given-names>Diego</given-names>
+            </name>
+            <name>
+              <surname>Sitvarin</surname>
+              <given-names>Michael I.</given-names>
+            </name>
+            <name>
+              <surname>Skupien</surname>
+              <given-names>Fabrício Luiz</given-names>
+            </name>
+            <name>
+              <surname>Slinn</surname>
+              <given-names>Heather Lea</given-names>
+            </name>
+            <name>
+              <surname>Smith</surname>
+              <given-names>Grania Polly</given-names>
+            </name>
+            <name>
+              <surname>Smith</surname>
+              <given-names>Jeremy A.</given-names>
+            </name>
+            <name>
+              <surname>Sollmann</surname>
+              <given-names>Rahel</given-names>
+            </name>
+            <name>
+              <surname>Whitney</surname>
+              <given-names>Kaitlin Stack</given-names>
+            </name>
+            <name>
+              <surname>Still</surname>
+              <given-names>Shannon Michael</given-names>
+            </name>
+            <name>
+              <surname>Stuber</surname>
+              <given-names>Erica F.</given-names>
+            </name>
+            <name>
+              <surname>Sutton</surname>
+              <given-names>Guy F.</given-names>
+            </name>
+            <name>
+              <surname>Swallow</surname>
+              <given-names>Ben</given-names>
+            </name>
+            <name>
+              <surname>Taff</surname>
+              <given-names>Conor Claverie</given-names>
+            </name>
+            <name>
+              <surname>Takola</surname>
+              <given-names>Elina</given-names>
+            </name>
+            <name>
+              <surname>Tanentzap</surname>
+              <given-names>Andrew J.</given-names>
+            </name>
+            <name>
+              <surname>Tarjuelo</surname>
+              <given-names>Rocío</given-names>
+            </name>
+            <name>
+              <surname>Telford</surname>
+              <given-names>Richard J.</given-names>
+            </name>
+            <name>
+              <surname>Thawley</surname>
+              <given-names>Christopher J.</given-names>
+            </name>
+            <name>
+              <surname>Thierry</surname>
+              <given-names>Hugo</given-names>
+            </name>
+            <name>
+              <surname>Thomson</surname>
+              <given-names>Jacqueline</given-names>
+            </name>
+            <name>
+              <surname>Tidau</surname>
+              <given-names>Svenja</given-names>
+            </name>
+            <name>
+              <surname>Tompkins</surname>
+              <given-names>Emily M.</given-names>
+            </name>
+            <name>
+              <surname>Tortorelli</surname>
+              <given-names>Claire Marie</given-names>
+            </name>
+            <name>
+              <surname>Trlica</surname>
+              <given-names>Andrew</given-names>
+            </name>
+            <name>
+              <surname>Turnell</surname>
+              <given-names>Biz R.</given-names>
+            </name>
+            <name>
+              <surname>Urban</surname>
+              <given-names>Lara</given-names>
+            </name>
+            <name>
+              <surname>Van de Vondel</surname>
+              <given-names>Stijn</given-names>
+            </name>
+            <name>
+              <surname>Wal</surname>
+              <given-names>Jessica Eva Megan van der</given-names>
+            </name>
+            <name>
+              <surname>Van Eeckhoven</surname>
+              <given-names>Jens</given-names>
+            </name>
+            <name>
+              <surname>Oordt</surname>
+              <given-names>Francis van</given-names>
+            </name>
+            <name>
+              <surname>Vanderwel</surname>
+              <given-names>K. Michelle</given-names>
+            </name>
+            <name>
+              <surname>Vanderwel</surname>
+              <given-names>Mark C.</given-names>
+            </name>
+            <name>
+              <surname>Vanderwolf</surname>
+              <given-names>Karen J.</given-names>
+            </name>
+            <name>
+              <surname>Vélez</surname>
+              <given-names>Juliana</given-names>
+            </name>
+            <name>
+              <surname>Vergara-Florez</surname>
+              <given-names>Diana Carolina</given-names>
+            </name>
+            <name>
+              <surname>Verrelli</surname>
+              <given-names>Brian C.</given-names>
+            </name>
+            <name>
+              <surname>Vieira</surname>
+              <given-names>Marcus Vinícius</given-names>
+            </name>
+            <name>
+              <surname>Villamil</surname>
+              <given-names>Nora</given-names>
+            </name>
+            <name>
+              <surname>Vitali</surname>
+              <given-names>Valerio</given-names>
+            </name>
+            <name>
+              <surname>Vollering</surname>
+              <given-names>Julien</given-names>
+            </name>
+            <name>
+              <surname>Walker</surname>
+              <given-names>Jeffrey</given-names>
+            </name>
+            <name>
+              <surname>Walker</surname>
+              <given-names>Xanthe J.</given-names>
+            </name>
+            <name>
+              <surname>Walter</surname>
+              <given-names>Jonathan A.</given-names>
+            </name>
+            <name>
+              <surname>Waryszak</surname>
+              <given-names>Pawel</given-names>
+            </name>
+            <name>
+              <surname>Weaver</surname>
+              <given-names>Ryan J.</given-names>
+            </name>
+            <name>
+              <surname>Wedegärtner</surname>
+              <given-names>Ronja E. M.</given-names>
+            </name>
+            <name>
+              <surname>Weller</surname>
+              <given-names>Daniel L.</given-names>
+            </name>
+            <name>
+              <surname>Whelan</surname>
+              <given-names>Shannon</given-names>
+            </name>
+          </person-group>
+          <article-title>Same data, different analysts: Variation in effect sizes due to analytical decisions in ecology and evolutionary biology</article-title>
+          <source>BMC Biology</source>
+          <year iso-8601-date="2025-02-06">2025</year>
+          <month>02</month>
+          <day>06</day>
+          <volume>23</volume>
+          <issue>1</issue>
+          <uri>https://doi.org/10.1186/s12915-024-02101-x</uri>
+          <pub-id pub-id-type="doi">10.1186/s12915-024-02101-x</pub-id>
+          <fpage>35</fpage>
+          <lpage/>
+        </element-citation>
+      </ref>
+    </ref-list>
+  </back>
+  <sub-article article-type="notebook" id="nb-3-nb-1">
+    <front-stub>
+      <title-group>
+        <article-title>Appendix to “Analysing decisions in data
+analysis”</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author" corresp="yes">
+          <name>
+            <surname>Zhang</surname>
+            <given-names>H. Sherry</given-names>
+          </name>
+          <string-name>H. Sherry Zhang</string-name>
+          <xref ref-type="aff" rid="aff-1-nb-1">a</xref>
+          <xref ref-type="corresp" rid="cor-1-nb-1">*</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <name>
+            <surname>Peng</surname>
+            <given-names>Roger D.</given-names>
+          </name>
+          <string-name>Roger D. Peng</string-name>
+          <xref ref-type="aff" rid="aff-1-nb-1">a</xref>
+        </contrib>
+      </contrib-group>
+      <aff id="aff-1-nb-1">
+        <institution-wrap>
+          <institution>University of Texas at Austin</institution>
+        </institution-wrap>
+      </aff>
+      <author-notes>
+        <corresp id="cor-1-nb-1"/>
+      </author-notes>
+    </front-stub>
+    <body>
+      <sec id="llm-prompt-used-to-obtain-the-decision-database-nb-1">
+        <title>LLM prompt used to obtain the decision database</title>
+      </sec>
+    </body>
+    <back>
+</back>
+  </sub-article>
+</article>

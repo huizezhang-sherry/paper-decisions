@@ -1,4 +1,5 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
@@ -7,21 +8,22 @@
   letterpaper,
   DIV=11,
   numbers=noendperiod]{scrartcl}
-
+\usepackage{xcolor}
 \usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -39,9 +41,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -67,8 +66,7 @@
 \makeatother
 
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -93,6 +91,8 @@
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
+
+
 % definitions for citeproc citations
 \NewDocumentCommand\citeproctext{}{}
 \NewDocumentCommand\citeproc{mm}{%
@@ -126,6 +126,18 @@
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
 
 \KOMAoption{captions}{tableheading}
 \makeatletter
@@ -169,11 +181,9 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Analysing decisions in data analysis},
   colorlinks=true,
@@ -187,25 +197,127 @@
 \title{Analysing decisions in data analysis}
 \author{H. Sherry Zhang \and Roger D. Peng}
 \date{}
-
 \begin{document}
 \maketitle
 
 
 \section{Introduction}\label{introduction}
 
-\section{Literature review}\label{literature-review}
+In this work, we design a tabular format to record the choices made by
+analysts during data analysis. Using large language models, we
+automatically extract these choices from a set of research papers
+focused on specific topics, e.g.~air pollution modelling. This allows us
+to analyze these choices as data -- tracking how they've changed over
+time or query the possible methodologies used in similar studies. We
+also introduce a workflow to cluster paper based on decision similarity,
+using both the decisions themselves and the justifications authors
+provide for their choices.
+
+\section{Background}\label{background}
+
+Data analysis as an complicated, iterative process to make sense
+{[}ref{]} of the data collected. The iterative process of formulating
+hypothesis Jun et al. (\citeproc{ref-jun2022}{2022}).
+
+Choices are made at nearly every stage of data analysis, ranging from
+variable pre-processing variables, variable and lag selection in model
+formulation, to the specification of smoothing parameter during model
+construction. These possible choices contribute to what Gelman and Loken
+(\citeproc{ref-gelman2014}{2014}) describe as the ``garden of forking
+paths''. These choices can introduce substantial variability in results,
+which has been demonstrated in many-analyst experiments, where
+independent teams analyzing the same dataset to answer a pre-defined
+research question often arrive at markedly different conclusions. A
+prominent example is Silberzahn et al.
+(\citeproc{ref-silberzahn2018}{2018}) where researchers reported a wide
+range of point estimates and 95\% confidence intervals for the effect of
+soccer players' skin tone on the number of red cards awarded by referees
+(odds ratio from 0.89 to 2.93). Similar findings have emerged in other
+domains, including structural equation modeling
+(\citeproc{ref-sarstedt2024}{Sarstedt et al. 2024}), applied
+microeconomics (\citeproc{ref-huntington-klein2021}{Huntington-Klein et
+al. 2021}), neuroimaging
+(\citeproc{ref-botvinik-nezer2020}{Botvinik-Nezer et al. 2020}), and
+ecology and evolutionary biology (\citeproc{ref-gould2025}{Gould et al.
+2025}).
+
+Given this nature that a wide range of choices can be justified, there
+has been the long discussion of p-hacking and other misuse of statistics
+in practical data analysis in publication. {[}more on p-hacking and
+reseracher's degree of freedom{]}. Some proposed guidelines and
+recommendation to overcome this through pre-registration.
+
+\begin{itemize}
+\tightlist
+\item
+  pre-registration
+\item
+  (\citeproc{ref-wicherts2016degrees}{\textbf{wicherts2016degrees?}})
+  provides a checklist of researcher degrees of freedom to combat the
+  ``garden of forking paths'' problem
+\item
+  false-positive psychology suggests 6 guidelines for reporting data
+  analysis to prevent false-positive rate
+\end{itemize}
+
+Another line of work focuses on developing software tools to support
+analysts in making more informed decisions. For example, the
+\texttt{Tisane} package (\citeproc{ref-jun2022}{Jun et al. 2022})
+integrates conceptual ideas, such as DAGs, and modelling structure
+(group/ cluster/ hierarchical structure), to assist junior researchers
+in specifying GLM and GLMM model. The \texttt{DeclareDesign} package
+(\citeproc{ref-blair2019}{Blair et al. 2019}) introduces the MIDA
+framework for researchers to declare, diagnose, and redesign their
+analyses to produce a distribution of the statistic of interest. This
+approach has been applied in randomized controlled trial
+(\citeproc{ref-bishop2024}{Bishop and Hulme 2024}) . The
+\texttt{multiverse} package facilitates the specification and execution
+of multiple parallel choices for sensitivity analysis, allowing
+researchers to systematically explore how different choices affect
+results and to report the range of plausible outcomes that arise from
+alternative analytic paths.
+
+\begin{itemize}
+\item
+  Study decisions in data analysis:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    an interview/ participatory method:
+    (\citeproc{ref-simson}{\textbf{simson?}}), many others
+  \item
+    (automated) visualization of decisions made in data analysis:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      datamation (\citeproc{ref-pu2023}{Pu and Kay 2023}),
+    \item
+      (\citeproc{ref-liu2020paths}{\textbf{liu2020paths?}}) uses
+      Analytic Decision Graphs (ADG) to represent high-level decision
+      process in data analysis.
+    \item
+      \href{https://arxiv.org/pdf/2306.07760}{Urania: Visualizing Data
+      Analysis Pipelines for Natural Language-Based Data Exploration}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
 
 \section{Construct decision
 databases}\label{construct-decision-databases}
+
+\subsection{Recording decisions in data
+analysis}\label{recording-decisions-in-data-analysis}
 
 \begin{itemize}
 \tightlist
 \item
   give example from extracting decision from sentences of a paper
 \item
-  adapt from the tidy data principle (\textbf{tidydata?}), each row is a
-  decision\\
+  adapt from the tidy data principle
+  (\citeproc{ref-tidydata}{\textbf{tidydata?}}), each row is a decision
+  Wickham (\citeproc{ref-wickham2014}{2014})\\
 \item
   some decisions are related to how the variable is estimated spatially
   and temporally
@@ -224,15 +336,15 @@ databases}\label{construct-decision-databases}
 A hypothetical database of decisions may look as follows:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0417}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0417}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0417}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0417}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1250}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Paper
@@ -269,8 +381,6 @@ for variation among cities & separate regression models fit in each
 city \\
 \end{longtable}
 
-\section{Analysis pipeline}\label{analysis-pipeline}
-
 \subsection{Austomatic reading of literature with
 LLM}\label{austomatic-reading-of-literature-with-llm}
 
@@ -278,10 +388,10 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
 \tightlist
 \item
   We use LLM to automatic read the paper through the \texttt{ellmer}
-  package (Wickham, Cheng, and Jacobs 2025) and manually review the
-  decision outputs. Both Antropic Claude and Google Gemini accept pdf
-  inputs and we choose Claude. The prompt used to finetune the Claude
-  LLM is available in the appendix.
+  package (\citeproc{ref-ellmer}{Wickham, Cheng, and Jacobs 2025}) and
+  manually review the decision outputs. Both Antropic Claude and Google
+  Gemini accept pdf inputs and we choose Claude. The prompt used to
+  finetune the Claude LLM is available in the appendix.
 \end{itemize}
 
 \subsection{Review the LLM output}\label{review-the-llm-output}
@@ -295,8 +405,7 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
 \item
   The current application includes three actions:
 
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi})}
+  \begin{itemize}
   \tightlist
   \item
     modify a row
@@ -306,7 +415,7 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
     and
   \item
     manually add a decision (\texttt{dplyr::bind\_rows()})
-  \end{enumerate}
+  \end{itemize}
 \item
   All the actions will generate the corresponding codes.
 \item
@@ -314,50 +423,160 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
   csv file
 \end{itemize}
 
-\subsection{Calculate paper
-similarity}\label{calculate-paper-similarity}
+\subsubsection{Decision quality summary}\label{decision-quality-summary}
+
+\section{Calculate paper similarity}\label{calculate-paper-similarity}
 
 \begin{itemize}
 \tightlist
 \item
-  define what does it mean by papers are similar: same reason? some
-  decisions?
+  pre-processing
+
+  \begin{itemize}
+  \tightlist
+  \item
+    standardize statistical methods its corresponding parameters (LOESS,
+    smoothing spline, etc)
+  \item
+    group variables into broader categories: time, temperature,
+    humidity, PM
+  \end{itemize}
 \item
-  lexical similarity through word embedding using the \texttt{text}
-  package (Kjell, Giorgi, and Schwartz 2023)
+  identify the most frequent analysis decisions across papers
 \item
-  summarize paper similarity through item similarity
+  retain only papers that report more than x such decisions
+\item
+  measure similarity between decisions and their justificaiton using NLP
+
+  \begin{itemize}
+  \tightlist
+  \item
+    word embedding with attention mechanism, instead of bag of word,
+  \item
+    specific NLP models (default to \texttt{bert-base-uncased}),
+    aggregation methods from word to text
+  \end{itemize}
+\item
+  compute paper similarity score for each paper pair by aggregating
+  decision-level compoarisons
+
+  \begin{itemize}
+  \tightlist
+  \item
+    check/ report on the number of decisions compared in each paper pair
+  \end{itemize}
+\item
+  similarity score can serve as the distance matrix to cluster papers by
+  their similarity on decision choices
 \end{itemize}
 
-\subsection{Visualize the decision
-database}\label{visualize-the-decision-database}
-
-\begin{itemize}
-\tightlist
-\item
-  apply clustering algorithm and visualize the database through
-  \texttt{sigma.js}
-\end{itemize}
-
-\section{Examples}\label{examples}
+\section{Applications}\label{applications}
 
 \subsection{Air pollution mortality
 modelling}\label{air-pollution-mortality-modelling}
 
-\subsection{Another Poisson GAM}\label{another-poisson-gam}
+\begin{itemize}
+\tightlist
+\item
+  look at for one type of decision (time) - what are the choices made by
+  different papers
+\item
+  look at whether decisions changes across time
+\item
+  Visualize the decision database: apply clustering algorithm and
+  visualize the database through \texttt{sigma.js}
+\end{itemize}
 
-\section{Conclusion}\label{conclusion}
+\subsection{Species distribution
+modelling}\label{species-distribution-modelling}
+
+\section{Discussion}\label{discussion}
+
+\begin{itemize}
+\tightlist
+\item
+  Only prompting engineering is used to extract decisions from the
+  literature. We expect that fine-tuning the model on statistical or
+  domain-specific literature to yield more robust performance on the
+  same document, though it would require substantially more training
+  effort.
+\end{itemize}
 
 \section*{Reference}\label{reference}
 \addcontentsline{toc}{section}{Reference}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-text}
-Kjell, Oscar, Salvatore Giorgi, and H. Andrew Schwartz. 2023. {``The
-Text-Package: An r-Package for Analyzing and Visualizing Human Language
-Using Natural Language Processing and Deep Learning.''}
-\emph{Psychological Methods}. \url{https://doi.org/10.1037/met0000542}.
+\bibitem[\citeproctext]{ref-bishop2024}
+Bishop, Dorothy V. M., and Charles Hulme. 2024. {``When Alternative
+Analyses of the Same Data Come to Different Conclusions: A Tutorial
+Using DeclareDesign With a Worked Real-World Example.''} \emph{Advances
+in Methods and Practices in Psychological Science} 7 (3):
+25152459241267904. \url{https://doi.org/10.1177/25152459241267904}.
+
+\bibitem[\citeproctext]{ref-blair2019}
+Blair, Graeme, Jasper Cooper, Alexander Coppock, and Macartan Humphreys.
+2019. {``Declaring and Diagnosing Research Designs.''} \emph{American
+Political Science Review} 113 (3): 838--59.
+\url{https://doi.org/10.1017/S0003055419000194}.
+
+\bibitem[\citeproctext]{ref-botvinik-nezer2020}
+Botvinik-Nezer, Rotem, Felix Holzmeister, Colin F. Camerer, Anna Dreber,
+Juergen Huber, Magnus Johannesson, Michael Kirchler, et al. 2020.
+{``Variability in the Analysis of a Single Neuroimaging Dataset by Many
+Teams.''} \emph{Nature} 582 (7810): 84--88.
+\url{https://doi.org/10.1038/s41586-020-2314-9}.
+
+\bibitem[\citeproctext]{ref-gelman2014}
+Gelman, Andrew, and Eric Loken. 2014. {``The Statistical Crisis in
+Science.''} \emph{American Scientist} 102 (6): 460--65.
+\url{https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1}.
+
+\bibitem[\citeproctext]{ref-gould2025}
+Gould, Elliot, Hannah S. Fraser, Timothy H. Parker, Shinichi Nakagawa,
+Simon C. Griffith, Peter A. Vesk, Fiona Fidler, et al. 2025. {``Same
+Data, Different Analysts: Variation in Effect Sizes Due to Analytical
+Decisions in Ecology and Evolutionary Biology.''} \emph{BMC Biology} 23
+(1): 35. \url{https://doi.org/10.1186/s12915-024-02101-x}.
+
+\bibitem[\citeproctext]{ref-huntington-klein2021}
+Huntington-Klein, Nick, Andreu Arenas, Emily Beam, Marco Bertoni,
+Jeffrey R. Bloem, Pralhad Burli, Naibin Chen, et al. 2021. {``The
+Influence of Hidden Researcher Decisions in Applied Microeconomics.''}
+\emph{Economic Inquiry} 59 (3): 944--60.
+\url{https://doi.org/10.1111/ecin.12992}.
+
+\bibitem[\citeproctext]{ref-jun2022}
+Jun, Eunice, Melissa Birchfield, Nicole De Moura, Jeffrey Heer, and René
+Just. 2022. {``Hypothesis Formalization: Empirical Findings, Software
+Limitations, and Design Implications.''} \emph{ACM Transactions on
+Computer-Human Interaction} 29 (1): 1--28.
+\url{https://doi.org/10.1145/3476980}.
+
+\bibitem[\citeproctext]{ref-pu2023}
+Pu, Xiaoying, and Matthew Kay. 2023. {``CHI '23: CHI Conference on Human
+Factors in Computing Systems.''} In, 1--22. Hamburg Germany: ACM.
+\url{https://doi.org/10.1145/3544548.3580837}.
+
+\bibitem[\citeproctext]{ref-sarstedt2024}
+Sarstedt, Marko, Susanne J. Adler, Christian M. Ringle, Gyeongcheol Cho,
+Adamantios Diamantopoulos, Heungsun Hwang, and Benjamin D. Liengaard.
+2024. {``Same Model, Same Data, but Different Outcomes: Evaluating the
+Impact of Method Choices in Structural Equation Modeling.''}
+\emph{Journal of Product Innovation Management} 41 (6): 1100--1117.
+\url{https://doi.org/10.1111/jpim.12738}.
+
+\bibitem[\citeproctext]{ref-silberzahn2018}
+Silberzahn, R., E. L. Uhlmann, D. P. Martin, P. Anselmi, F. Aust, E.
+Awtrey, Š. Bahník, et al. 2018. {``Many Analysts, One Data Set: Making
+Transparent How Variations in Analytic Choices Affect Results.''}
+\emph{Advances in Methods and Practices in Psychological Science} 1 (3):
+337--56. \url{https://doi.org/10.1177/2515245917747646}.
+
+\bibitem[\citeproctext]{ref-wickham2014}
+Wickham, Hadley. 2014. {``Tidy Data.''} \emph{Journal of Statistical
+Software} 59 (September): 1--23.
+\url{https://doi.org/10.18637/jss.v059.i10}.
 
 \bibitem[\citeproctext]{ref-ellmer}
 Wickham, Hadley, Joe Cheng, and Aaron Jacobs. 2025. \emph{Ellmer: Chat
