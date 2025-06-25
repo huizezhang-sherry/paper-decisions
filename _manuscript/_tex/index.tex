@@ -92,6 +92,12 @@
 \def\fps@figure{htbp}
 \makeatother
 
+\ifLuaTeX
+  \usepackage{luacolor}
+  \usepackage[soul]{lua-ul}
+\else
+  \usepackage{soul}
+\fi
 
 % definitions for citeproc citations
 \NewDocumentCommand\citeproctext{}{}
@@ -199,6 +205,9 @@
 \date{}
 \begin{document}
 \maketitle
+\begin{abstract}
+this is the abstract
+\end{abstract}
 
 
 \section{Introduction}\label{introduction}
@@ -241,25 +250,6 @@ al. 2021}), neuroimaging
 ecology and evolutionary biology (\citeproc{ref-gould2025}{Gould et al.
 2025}).
 
-Given this nature that a wide range of choices can be justified, there
-has been the long discussion of p-hacking and other misuse of statistics
-in practical data analysis in publication. {[}more on p-hacking and
-reseracher's degree of freedom{]}. Some proposed guidelines and
-recommendation to overcome this through pre-registration.
-
-\begin{itemize}
-\tightlist
-\item
-  pre-registration
-\item
-  (\citeproc{ref-wicherts2016degrees}{\textbf{wicherts2016degrees?}})
-  provides a checklist of researcher degrees of freedom to combat the
-  ``garden of forking paths'' problem
-\item
-  false-positive psychology suggests 6 guidelines for reporting data
-  analysis to prevent false-positive rate
-\end{itemize}
-
 Another line of work focuses on developing software tools to support
 analysts in making more informed decisions. For example, the
 \texttt{Tisane} package (\citeproc{ref-jun2022}{Jun et al. 2022})
@@ -270,42 +260,38 @@ in specifying GLM and GLMM model. The \texttt{DeclareDesign} package
 framework for researchers to declare, diagnose, and redesign their
 analyses to produce a distribution of the statistic of interest. This
 approach has been applied in randomized controlled trial
-(\citeproc{ref-bishop2024}{Bishop and Hulme 2024}) . The
-\texttt{multiverse} package facilitates the specification and execution
-of multiple parallel choices for sensitivity analysis, allowing
-researchers to systematically explore how different choices affect
-results and to report the range of plausible outcomes that arise from
-alternative analytic paths.
+(\citeproc{ref-bishop2024}{Bishop and Hulme 2024}) .
+
+The \texttt{multiverse} package
 
 \begin{itemize}
+\tightlist
 \item
-  Study decisions in data analysis:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    an interview/ participatory method:
-    (\citeproc{ref-simson}{\textbf{simson?}}), many others
-  \item
-    (automated) visualization of decisions made in data analysis:
-
-    \begin{itemize}
-    \tightlist
-    \item
-      datamation (\citeproc{ref-pu2023}{Pu and Kay 2023}),
-    \item
-      (\citeproc{ref-liu2020paths}{\textbf{liu2020paths?}}) uses
-      Analytic Decision Graphs (ADG) to represent high-level decision
-      process in data analysis.
-    \item
-      \href{https://arxiv.org/pdf/2306.07760}{Urania: Visualizing Data
-      Analysis Pipelines for Natural Language-Based Data Exploration}
-    \end{itemize}
-  \end{itemize}
+  facilitates the specification and execution of multiple parallel
+  choices for sensitivity analysis, allowing researchers to
+  systematically explore how different choices affect results and to
+  report the range of plausible outcomes that arise from alternative
+  analytic paths.
 \end{itemize}
 
-\section{Construct decision
-databases}\label{construct-decision-databases}
+Study decisions in data analysis:
+
+\begin{itemize}
+\tightlist
+\item
+  interview analysts and researchers to provide recommendation for data
+  analysis practices (\citeproc{ref-kale2019}{Kale, Kay, and Hullman
+  2019}; \citeproc{ref-alspaugh2019}{Alspaugh et al. 2019};
+  \citeproc{ref-liu2020}{Yang Liu, Althoff, and Heer 2020}).
+\item
+  Yang Liu, Althoff, and Heer (\citeproc{ref-liu2020}{2020}) provides
+  visualization to communicate the decision processes through the
+  Analytic Decision Graphs (ADG)
+\item
+  Simson et al. (\citeproc{ref-simson2025}{2025}) conducts a
+  participatory AI study to demonstrate the ``garden of forking paths''
+  of decisions in data analysis and how it affects ML fairness
+\end{itemize}
 
 \subsection{Recording decisions in data
 analysis}\label{recording-decisions-in-data-analysis}
@@ -315,9 +301,8 @@ analysis}\label{recording-decisions-in-data-analysis}
 \item
   give example from extracting decision from sentences of a paper
 \item
-  adapt from the tidy data principle
-  (\citeproc{ref-tidydata}{\textbf{tidydata?}}), each row is a decision
-  Wickham (\citeproc{ref-wickham2014}{2014})\\
+  adapt from the tidy data principle - each row is a decision Wickham
+  (\citeproc{ref-wickham2014}{2014})\\
 \item
   some decisions are related to how the variable is estimated spatially
   and temporally
@@ -387,11 +372,34 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
 \begin{itemize}
 \tightlist
 \item
-  We use LLM to automatic read the paper through the \texttt{ellmer}
-  package (\citeproc{ref-ellmer}{Wickham, Cheng, and Jacobs 2025}) and
-  manually review the decision outputs. Both Antropic Claude and Google
-  Gemini accept pdf inputs and we choose Claude. The prompt used to
-  finetune the Claude LLM is available in the appendix.
+  We use LLM to automatic process the literature to output analysis
+  decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are
+  able to take input of pdf documents and the results reported in this
+  paper is based on Gemini's output. See the section sensitivity
+  analysis for the comparison of the two models.
+\item
+  Claude is decoder only, Gemini is an encoder--decoder model
+
+  \begin{itemize}
+  \tightlist
+  \item
+    these models may paraphrase or hallucinate unless explicitly told
+    not to since it is generative in nature based on the predicted
+    probability of the next word from the text and the instruction
+  \end{itemize}
+\item
+  prompt: instruct the LLM to produce a markdown file with decisions
+  included in a JSON block with the fields described in Section xxx
+\item
+  use the \texttt{ellmer} package (\citeproc{ref-ellmer}{Wickham, Cheng,
+  and Jacobs 2025}) to connect to Gemini API to process the pdf
+  documents in R.
+\item
+  experiment with seed and temperature
+\item
+  Our task differs from conventional text extraction using large
+  language models (LLM) in that \st{it requires higher-order reasoning
+  to identify the decisions made by the authors}.
 \end{itemize}
 
 \subsection{Review the LLM output}\label{review-the-llm-output}
@@ -423,7 +431,7 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
   csv file
 \end{itemize}
 
-\subsubsection{Decision quality summary}\label{decision-quality-summary}
+\subsection{Decision quality summary}\label{decision-quality-summary}
 
 \section{Calculate paper similarity}\label{calculate-paper-similarity}
 
@@ -470,6 +478,22 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
   their similarity on decision choices
 \end{itemize}
 
+\subsection{Sensitivity analysis}\label{sensitivity-analysis}
+
+\begin{itemize}
+\tightlist
+\item
+  standard \texttt{BERT} (\citeproc{ref-devlin2019}{Devlin et al.
+  2019}), \texttt{Roberta} (\citeproc{ref-liu}{Yinhan Liu et al.,
+  n.d.}): trained on a much larger dataset (160GB v.s. BERT's 15GB),
+  \texttt{transformer-xl} (\citeproc{ref-dai}{Dai et al., n.d.}),
+  \texttt{xlnet} by Google Brain(\citeproc{ref-yang}{Yang et al.,
+  n.d.}), and two domain-trained BERT models: \texttt{sciBert}
+  (\citeproc{ref-beltagy2019}{Beltagy, Lo, and Cohan 2019}) and
+  \texttt{bioBert}(\citeproc{ref-lee2020}{Lee et al. 2020}), trained on
+  PubMed and PMC data.
+\end{itemize}
+
 \section{Applications}\label{applications}
 
 \subsection{Air pollution mortality
@@ -507,6 +531,20 @@ modelling}\label{species-distribution-modelling}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-alspaugh2019}
+Alspaugh, Sara, Nava Zokaei, Andrea Liu, Cindy Jin, and Marti A. Hearst.
+2019. {``Futzing and Moseying: Interviews with Professional Data
+Analysts on Exploration Practices.''} \emph{IEEE Transactions on
+Visualization and Computer Graphics} 25 (1): 22--31.
+\url{https://doi.org/10.1109/TVCG.2018.2865040}.
+
+\bibitem[\citeproctext]{ref-beltagy2019}
+Beltagy, Iz, Kyle Lo, and Arman Cohan. 2019. {``Proceedings of the 2019
+Conference on Empirical Methods in Natural Language Processing and the
+9th International Joint Conference on Natural Language Processing
+(EMNLP-IJCNLP).''} In, 3613--18. Hong Kong, China: Association for
+Computational Linguistics. \url{https://doi.org/10.18653/v1/D19-1371}.
+
 \bibitem[\citeproctext]{ref-bishop2024}
 Bishop, Dorothy V. M., and Charles Hulme. 2024. {``When Alternative
 Analyses of the Same Data Come to Different Conclusions: A Tutorial
@@ -526,6 +564,18 @@ Juergen Huber, Magnus Johannesson, Michael Kirchler, et al. 2020.
 {``Variability in the Analysis of a Single Neuroimaging Dataset by Many
 Teams.''} \emph{Nature} 582 (7810): 84--88.
 \url{https://doi.org/10.1038/s41586-020-2314-9}.
+
+\bibitem[\citeproctext]{ref-dai}
+Dai, Zihang, Zhilin Yang, Yiming Yang, Jaime Carbonell, Quoc V. Le, and
+Ruslan Salakhutdinov. n.d. {``Transformer-XL: Attentive Language Models
+Beyond a Fixed-Length Context.''}
+\url{https://doi.org/10.48550/arXiv.1901.02860}.
+
+\bibitem[\citeproctext]{ref-devlin2019}
+Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019.
+{``NAACL-HLT 2019.''} In, edited by Jill Burstein, Christy Doran, and
+Thamar Solorio, 41714186. Minneapolis, Minnesota: Association for
+Computational Linguistics. \url{https://doi.org/10.18653/v1/N19-1423}.
 
 \bibitem[\citeproctext]{ref-gelman2014}
 Gelman, Andrew, and Eric Loken. 2014. {``The Statistical Crisis in
@@ -553,10 +603,31 @@ Limitations, and Design Implications.''} \emph{ACM Transactions on
 Computer-Human Interaction} 29 (1): 1--28.
 \url{https://doi.org/10.1145/3476980}.
 
-\bibitem[\citeproctext]{ref-pu2023}
-Pu, Xiaoying, and Matthew Kay. 2023. {``CHI '23: CHI Conference on Human
-Factors in Computing Systems.''} In, 1--22. Hamburg Germany: ACM.
-\url{https://doi.org/10.1145/3544548.3580837}.
+\bibitem[\citeproctext]{ref-kale2019}
+Kale, Alex, Matthew Kay, and Jessica Hullman. 2019. {``Decision-Making
+Under Uncertainty in Research Synthesis: Designing for the Garden of
+Forking Paths.''} In, 114. CHI '19. New York, NY, USA: Association for
+Computing Machinery. \url{https://doi.org/10.1145/3290605.3300432}.
+
+\bibitem[\citeproctext]{ref-lee2020}
+Lee, Jinhyuk, Wonjin Yoon, Sungdong Kim, Donghyeon Kim, Sunkyu Kim, Chan
+Ho So, and Jaewoo Kang. 2020. {``BioBERT: A Pre-Trained Biomedical
+Language Representation Model for Biomedical Text Mining.''} Edited by
+Jonathan Wren. \emph{Bioinformatics} 36 (4): 1234--40.
+\url{https://doi.org/10.1093/bioinformatics/btz682}.
+
+\bibitem[\citeproctext]{ref-liu2020}
+Liu, Yang, Tim Althoff, and Jeffrey Heer. 2020. {``Paths Explored, Paths
+Omitted, Paths Obscured: Decision Points \& Selective Reporting in
+End-to-End Data Analysis.''} In, 114. CHI '20. New York, NY, USA:
+Association for Computing Machinery.
+\url{https://doi.org/10.1145/3313831.3376533}.
+
+\bibitem[\citeproctext]{ref-liu}
+Liu, Yinhan, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi
+Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov.
+n.d. {``RoBERTa: A Robustly Optimized BERT Pretraining Approach.''}
+\url{https://doi.org/10.48550/arXiv.1907.11692}.
 
 \bibitem[\citeproctext]{ref-sarstedt2024}
 Sarstedt, Marko, Susanne J. Adler, Christian M. Ringle, Gyeongcheol Cho,
@@ -573,6 +644,13 @@ Transparent How Variations in Analytic Choices Affect Results.''}
 \emph{Advances in Methods and Practices in Psychological Science} 1 (3):
 337--56. \url{https://doi.org/10.1177/2515245917747646}.
 
+\bibitem[\citeproctext]{ref-simson2025}
+Simson, Jan, Fiona Draxler, Samuel Mehr, and Christoph Kern. 2025.
+{``Preventing Harmful Data Practices by Using Participatory Input to
+Navigate the Machine Learning Multiverse.''} In, 130. CHI '25. New York,
+NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3706598.3713482}.
+
 \bibitem[\citeproctext]{ref-wickham2014}
 Wickham, Hadley. 2014. {``Tidy Data.''} \emph{Journal of Statistical
 Software} 59 (September): 1--23.
@@ -582,6 +660,12 @@ Software} 59 (September): 1--23.
 Wickham, Hadley, Joe Cheng, and Aaron Jacobs. 2025. \emph{Ellmer: Chat
 with Large Language Models}.
 \url{https://CRAN.R-project.org/package=ellmer}.
+
+\bibitem[\citeproctext]{ref-yang}
+Yang, Zhilin, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan
+Salakhutdinov, and Quoc V. Le. n.d. {``XLNet: Generalized Autoregressive
+Pretraining for Language Understanding.''}
+\url{https://doi.org/10.48550/arXiv.1906.08237}.
 
 \end{CSLReferences}
 
