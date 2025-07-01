@@ -92,12 +92,6 @@
 \def\fps@figure{htbp}
 \makeatother
 
-\ifLuaTeX
-  \usepackage{luacolor}
-  \usepackage[soul]{lua-ul}
-\else
-  \usepackage{soul}
-\fi
 
 % definitions for citeproc citations
 \NewDocumentCommand\citeproctext{}{}
@@ -211,6 +205,13 @@ this is the abstract
 
 
 \section{Introduction}\label{introduction}
+
+Something about ``analysis review'' - Roger thinks it's a better to have
+a new word for this.
+
+provide a baseline understand - place to start
+
+demonstrate - analytically homogeneous - the table won't look like that
 
 In this work, we design a tabular format to record the choices made by
 analysts during data analysis. Using large language models, we
@@ -366,8 +367,8 @@ for variation among cities & separate regression models fit in each
 city \\
 \end{longtable}
 
-\subsection{Austomatic reading of literature with
-LLM}\label{austomatic-reading-of-literature-with-llm}
+\subsection{Automatic reading of literature with
+LLM}\label{automatic-reading-of-literature-with-llm}
 
 \begin{itemize}
 \tightlist
@@ -397,39 +398,63 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
 \item
   experiment with seed and temperature
 \item
-  Our task differs from conventional text extraction using large
-  language models (LLM) in that \st{it requires higher-order reasoning
-  to identify the decisions made by the authors}.
+  Our task involve a reasoning component in that it requires casual
+  reasoning to identify the decisions made by the authors, and its
+  justification/ rationale, rather than purely summarizing the text
+  through pattern-matching.
 \end{itemize}
 
 \subsection{Review the LLM output}\label{review-the-llm-output}
 
-(the shiny app)
+\phantomsection\label{cell-fig-shiny}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=23.04in,height=\textheight,keepaspectratio]{figures/shiny.png}
+
+}
+
+\caption{\label{fig-shiny}The Shiny application interface for editting
+Large Language Model (LLM)-generated decisions (overwrite, delete, and
+add). (1) the default interface after loading the input CSV file. (2)
+The table view will update interactively upon the user-defined filter
+condition -- expressed using \texttt{dplyr::filter()} syntax (e.g.,
+\texttt{paper\ ==\ anderson2008size"}), (3) The user edits the
+\texttt{model} column to ``Poisson regression'' and applies the change
+by clicking the Apply changes button. The table view updates to reflect
+the changes (4) After clicking the Confirm button, the corresponding
+\texttt{tidyverse} code is generated, and the table view returns to its
+original unfiltered view. The edited data can be downloaded by clicking
+the Download CSV button.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://huizezhang-sherry.github.io/paper-decisions/index.qmd.html}{Article
+Notebook}}
 
 \begin{itemize}
 \tightlist
 \item
-  screenshot of the interface
-\item
-  The current application includes three actions:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    modify a row
-    (\texttt{dplyr::mutate(xxx\ =\ ifelse(CONDITION,\ "yyy"\ ,\ xxx))}),
-  \item
-    delete unrelated decisions (\texttt{dplyr::filter(!(CONDITION))}),
-    and
-  \item
-    manually add a decision (\texttt{dplyr::bind\_rows()})
-  \end{itemize}
-\item
-  All the actions will generate the corresponding codes.
-\item
-  The download button will download the modified decision database as a
-  csv file
+  something about result validation of LLM output
 \end{itemize}
+
+The shiny app is designed to provide users a visual interface to review
+and edit the decisions extracted by the LLM from the literature. The app
+allows three actions from the users: 1) \emph{overwrite} -- modify the
+content of a particular cell, equivalently
+\texttt{dplyr::mutate(xxx\ =\ ifelse(CONDITION,\ "yyy"\ ,\ xxx))}, 2)
+\emph{delete} -- remove a particular cell,
+\texttt{dplyr::filter(!(CONDITION))}, and 3) \emph{add} -- manually
+enter a decision, \texttt{dplyr::bind\_rows()}. Figure~\ref{fig-shiny}
+illustrates the \emph{overwrite} action in the Shiny application, where
+users interactively filter the data and preview the rows affected by
+their edits---in this case, changing the model entry from ``generalized
+additive Poisson time series regression'' to the less verbose ``Poisson
+regression''. Upon confirmation, the corresponding \texttt{tidyverse}
+code is generated, and users can download the edited table and
+incorporate the code into their R script.
 
 \subsection{Decision quality summary}\label{decision-quality-summary}
 
@@ -480,18 +505,23 @@ LLM}\label{austomatic-reading-of-literature-with-llm}
 
 \subsection{Sensitivity analysis}\label{sensitivity-analysis}
 
+sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM
+parameters
+
 \begin{itemize}
-\tightlist
 \item
   standard \texttt{BERT} (\citeproc{ref-devlin2019}{Devlin et al.
   2019}), \texttt{Roberta} (\citeproc{ref-liu}{Yinhan Liu et al.,
   n.d.}): trained on a much larger dataset (160GB v.s. BERT's 15GB),
   \texttt{transformer-xl} (\citeproc{ref-dai}{Dai et al., n.d.}),
-  \texttt{xlnet} by Google Brain(\citeproc{ref-yang}{Yang et al.,
+  \texttt{xlnet} by Google Brain (\citeproc{ref-yang}{Yang et al.,
   n.d.}), and two domain-trained BERT models: \texttt{sciBert}
   (\citeproc{ref-beltagy2019}{Beltagy, Lo, and Cohan 2019}) and
   \texttt{bioBert}(\citeproc{ref-lee2020}{Lee et al. 2020}), trained on
   PubMed and PMC data.
+\item
+  A section on reproducibility of LLM outputs: prompt experiment (see if
+  there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 \end{itemize}
 
 \section{Applications}\label{applications}
@@ -524,6 +554,13 @@ modelling}\label{species-distribution-modelling}
   domain-specific literature to yield more robust performance on the
   same document, though it would require substantially more training
   effort.
+\item
+  people from the NYU-LMU workshop are interested to have code script
+  attached as well because people can do one thing in the script but
+  report another in the paper - it would be interesting to compare the
+  paper and the script with some syntax extraction.
+\item
+  Validation of the output:
 \end{itemize}
 
 \section*{Reference}\label{reference}

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="generator" content="quarto-1.7.30">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+    <title>Analysing decisions in data analysis</title>
+    <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      div.columns{display: flex; gap: min(4vw, 1.5em);}
+      div.column{flex: auto; overflow-x: auto;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+        vertical-align: middle;
+      }
+      /* CSS for syntax highlighting */
+      html { -webkit-text-size-adjust: 100%; }
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+        }
+      pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+      /* CSS for citations */
+      div.csl-bib-body { }
+      div.csl-entry {
+        clear: both;
+        margin-bottom: 0em;
+      }
+      .hanging-indent div.csl-entry {
+        margin-left:2em;
+        text-indent:-2em;
+      }
+      div.csl-left-margin {
+        min-width:2em;
+        float:left;
+      }
+      div.csl-right-inline {
+        margin-left:2em;
+        padding-left:1em;
+      }
+      div.csl-indent {
+        margin-left: 2em;
+      }    </style>
+
+    <style>
+      body.hypothesis-enabled #quarto-embed-header {
+        padding-right: 36px;
+      }
+
+      #quarto-embed-header {
+        height: 3em;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px;
+      }
+
+      #quarto-embed-header h6 {
+        font-size: 1.1em;
+        padding-top: 0.6em;
+        margin-left: 1em;
+        margin-right: 1em;
+        font-weight: 400;
+      }
+
+      #quarto-embed-header a.quarto-back-link,
+      #quarto-embed-header a.quarto-download-embed {
+        font-size: 0.8em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+      .quarto-back-container {
+        padding-left: 0.5em;
+        display: flex;
+      }
+
+      .headroom {
+          will-change: transform;
+          transition: transform 200ms linear;
+      }
+
+      .headroom--pinned {
+          transform: translateY(0%);
+      }
+
+      .headroom--unpinned {
+          transform: translateY(-100%);
+      }      
+    </style>
+
+    <script>
+    window.document.addEventListener("DOMContentLoaded", function () {
+
+      var header = window.document.querySelector("#quarto-embed-header");
+      const titleBannerEl = window.document.querySelector("body > #title-block-header");
+      if (titleBannerEl) {
+        titleBannerEl.style.paddingTop = header.clientHeight + "px";
+      }
+      const contentEl = window.document.getElementById('quarto-content');
+      for (const child of contentEl.children) {
+        child.style.paddingTop = header.clientHeight + "px";
+        child.style.marginTop = "1em";
+      }
+
+      // Use the article root if the `back` call doesn't work. This isn't perfect
+      // but should typically work
+      window.quartoBackToArticle = () => {
+        var currentUrl = window.location.href;
+        window.history.back();
+        setTimeout(() => {
+            // if location was not changed in 100 ms, then there is no history back
+            if(currentUrl === window.location.href){              
+                // redirect to site root
+                window.location.href = "index.html";
+            }
+        }, 100);
+      }
+
+      const headroom = new window.Headroom(header, {
+        tolerance: 5,
+        onPin: function () {
+        },
+        onUnpin: function () {
+        },
+      });
+      headroom.init();
+    });
+    </script>
+
+    
+<script src="site_libs/manuscript-notebook/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-8a894fcc3cb5e37eb5bf30def131be2f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+     <script async="" src="https://hypothes.is/embed.js"></script>
+<script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script>  
+      <meta name="citation_title" content="Analysing decisions in data analysis">
+<meta name="citation_abstract" content="this is the abstract">
+<meta name="citation_author" content="H. Sherry Zhang">
+<meta name="citation_author" content="Roger D. Peng">
+<meta name="citation_language" content="en">
+<meta name="citation_reference" content="citation_title=Ellmer: Chat with large language models;,citation_author=Hadley Wickham;,citation_author=Joe Cheng;,citation_author=Aaron Jacobs;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://CRAN.R-project.org/package=ellmer;">
+<meta name="citation_reference" content="citation_title=The text-package: An r-package for analyzing and visualizing human language using natural language processing and deep learning;,citation_author=Oscar Kjell;,citation_author=Salvatore Giorgi;,citation_author=H. Andrew Schwartz;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://osf.io/preprints/psyarxiv/293kt/;,citation_doi=10.1037/met0000542;,citation_journal_title=Psychological Methods;">
+<meta name="citation_reference" content="citation_title=Tidy Data;,citation_author=Hadley Wickham;,citation_publication_date=2014-09-12;,citation_cover_date=2014-09-12;,citation_year=2014;,citation_fulltext_html_url=https://doi.org/10.18637/jss.v059.i10;,citation_doi=10.18637/jss.v059.i10;,citation_volume=59;,citation_language=en;,citation_journal_title=Journal of Statistical Software;">
+<meta name="citation_reference" content="citation_title=Hypothesis Formalization: Empirical Findings, Software Limitations, and Design Implications;,citation_author=Eunice Jun;,citation_author=Melissa Birchfield;,citation_author=Nicole De Moura;,citation_author=Jeffrey Heer;,citation_author=René Just;,citation_publication_date=2022-02-28;,citation_cover_date=2022-02-28;,citation_year=2022;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3476980;,citation_issue=1;,citation_doi=10.1145/3476980;,citation_volume=29;,citation_language=en;,citation_journal_title=ACM Transactions on Computer-Human Interaction;">
+<meta name="citation_reference" content="citation_title=The statistical crisis in science;,citation_author=Andrew Gelman;,citation_author=Eric Loken;,citation_publication_date=2014-12;,citation_cover_date=2014-12;,citation_year=2014;,citation_fulltext_html_url=https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1;,citation_issue=6;,citation_volume=102;,citation_language=en-US;,citation_journal_title=American Scientist;">
+<meta name="citation_reference" content="citation_title=Declaring and Diagnosing Research Designs;,citation_author=Graeme Blair;,citation_author=Jasper Cooper;,citation_author=Alexander Coppock;,citation_author=Macartan Humphreys;,citation_publication_date=2019-08;,citation_cover_date=2019-08;,citation_year=2019;,citation_fulltext_html_url=https://www.cambridge.org/core/product/identifier/S0003055419000194/type/journal_article;,citation_issue=3;,citation_doi=10.1017/S0003055419000194;,citation_volume=113;,citation_language=en;,citation_journal_title=American Political Science Review;">
+<meta name="citation_reference" content="citation_title=When Alternative Analyses of the Same Data Come to Different Conclusions: A Tutorial Using DeclareDesign With a Worked Real-World Example;,citation_author=Dorothy V. M. Bishop;,citation_author=Charles Hulme;,citation_publication_date=2024-07-01;,citation_cover_date=2024-07-01;,citation_year=2024;,citation_fulltext_html_url=https://doi.org/10.1177/25152459241267904;,citation_issue=3;,citation_doi=10.1177/25152459241267904;,citation_volume=7;,citation_language=en;,citation_journal_title=Advances in Methods and Practices in Psychological Science;">
+<meta name="citation_reference" content="citation_title=CHI ’23: CHI Conference on Human Factors in Computing Systems;,citation_author=Xiaoying Pu;,citation_author=Matthew Kay;,citation_publication_date=2023-04-19;,citation_cover_date=2023-04-19;,citation_year=2023;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3544548.3580837;,citation_doi=10.1145/3544548.3580837;,citation_language=en;,citation_conference=ACM;">
+<meta name="citation_reference" content="citation_title=Many Analysts, One Data Set: Making Transparent How Variations in Analytic Choices Affect Results;,citation_author=R. Silberzahn;,citation_author=E. L. Uhlmann;,citation_author=D. P. Martin;,citation_author=P. Anselmi;,citation_author=F. Aust;,citation_author=E. Awtrey;,citation_author=Š. Bahník;,citation_author=F. Bai;,citation_author=C. Bannard;,citation_author=E. Bonnier;,citation_author=R. Carlsson;,citation_author=F. Cheung;,citation_author=G. Christensen;,citation_author=R. Clay;,citation_author=M. A. Craig;,citation_author=A. Dalla Rosa;,citation_author=L. Dam;,citation_author=M. H. Evans;,citation_author=I. Flores Cervantes;,citation_author=N. Fong;,citation_author=M. Gamez-Djokic;,citation_author=A. Glenz;,citation_author=S. Gordon-McKeon;,citation_author=T. J. Heaton;,citation_author=K. Hederos;,citation_author=M. Heene;,citation_author=A. J. Hofelich Mohr;,citation_author=F. Högden;,citation_author=K. Hui;,citation_author=M. Johannesson;,citation_author=J. Kalodimos;,citation_author=E. Kaszubowski;,citation_author=D. M. Kennedy;,citation_author=R. Lei;,citation_author=T. A. Lindsay;,citation_author=S. Liverani;,citation_author=C. R. Madan;,citation_author=D. Molden;,citation_author=E. Molleman;,citation_author=R. D. Morey;,citation_author=L. B. Mulder;,citation_author=B. R. Nijstad;,citation_author=N. G. Pope;,citation_author=B. Pope;,citation_author=J. M. Prenoveau;,citation_author=F. Rink;,citation_author=E. Robusto;,citation_author=H. Roderique;,citation_author=A. Sandberg;,citation_author=E. Schlüter;,citation_author=F. D. Schönbrodt;,citation_author=M. F. Sherman;,citation_author=S. A. Sommer;,citation_author=K. Sotak;,citation_author=S. Spain;,citation_author=C. Spörlein;,citation_author=T. Stafford;,citation_author=L. Stefanutti;,citation_author=S. Tauber;,citation_author=J. Ullrich;,citation_author=M. Vianello;,citation_author=E.-J. Wagenmakers;,citation_author=M. Witkowiak;,citation_author=S. Yoon;,citation_author=B. A. Nosek;,citation_publication_date=2018-09-01;,citation_cover_date=2018-09-01;,citation_year=2018;,citation_fulltext_html_url=https://doi.org/10.1177/2515245917747646;,citation_issue=3;,citation_doi=10.1177/2515245917747646;,citation_volume=1;,citation_language=en;,citation_journal_title=Advances in Methods and Practices in Psychological Science;">
+<meta name="citation_reference" content="citation_title=Same model, same data, but different outcomes: Evaluating the impact of method choices in structural equation modeling;,citation_author=Marko Sarstedt;,citation_author=Susanne J. Adler;,citation_author=Christian M. Ringle;,citation_author=Gyeongcheol Cho;,citation_author=Adamantios Diamantopoulos;,citation_author=Heungsun Hwang;,citation_author=Benjamin D. Liengaard;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_fulltext_html_url=https://onlinelibrary.wiley.com/doi/abs/10.1111/jpim.12738;,citation_issue=6;,citation_doi=10.1111/jpim.12738;,citation_volume=41;,citation_language=en;,citation_journal_title=Journal of Product Innovation Management;">
+<meta name="citation_reference" content="citation_title=The influence of hidden researcher decisions in applied microeconomics;,citation_author=Nick Huntington-Klein;,citation_author=Andreu Arenas;,citation_author=Emily Beam;,citation_author=Marco Bertoni;,citation_author=Jeffrey R. Bloem;,citation_author=Pralhad Burli;,citation_author=Naibin Chen;,citation_author=Paul Grieco;,citation_author=Godwin Ekpe;,citation_author=Todd Pugatch;,citation_author=Martin Saavedra;,citation_author=Yaniv Stopnitzky;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://onlinelibrary.wiley.com/doi/abs/10.1111/ecin.12992;,citation_issue=3;,citation_doi=10.1111/ecin.12992;,citation_volume=59;,citation_language=en;,citation_journal_title=Economic Inquiry;">
+<meta name="citation_reference" content="citation_title=Variability in the analysis of a single neuroimaging dataset by many teams;,citation_author=Rotem Botvinik-Nezer;,citation_author=Felix Holzmeister;,citation_author=Colin F. Camerer;,citation_author=Anna Dreber;,citation_author=Juergen Huber;,citation_author=Magnus Johannesson;,citation_author=Michael Kirchler;,citation_author=Roni Iwanir;,citation_author=Jeanette A. Mumford;,citation_author=R. Alison Adcock;,citation_author=Paolo Avesani;,citation_author=Blazej M. Baczkowski;,citation_author=Aahana Bajracharya;,citation_author=Leah Bakst;,citation_author=Sheryl Ball;,citation_author=Marco Barilari;,citation_author=Nadège Bault;,citation_author=Derek Beaton;,citation_author=Julia Beitner;,citation_author=Roland G. Benoit;,citation_author=Ruud M. W. J. Berkers;,citation_author=Jamil P. Bhanji;,citation_author=Bharat B. Biswal;,citation_author=Sebastian Bobadilla-Suarez;,citation_author=Tiago Bortolini;,citation_author=Katherine L. Bottenhorn;,citation_author=Alexander Bowring;,citation_author=Senne Braem;,citation_author=Hayley R. Brooks;,citation_author=Emily G. Brudner;,citation_author=Cristian B. Calderon;,citation_author=Julia A. Camilleri;,citation_author=Jaime J. Castrellon;,citation_author=Luca Cecchetti;,citation_author=Edna C. Cieslik;,citation_author=Zachary J. Cole;,citation_author=Olivier Collignon;,citation_author=Robert W. Cox;,citation_author=William A. Cunningham;,citation_author=Stefan Czoschke;,citation_author=Kamalaker Dadi;,citation_author=Charles P. Davis;,citation_author=Alberto De Luca;,citation_author=Mauricio R. Delgado;,citation_author=Lysia Demetriou;,citation_author=Jeffrey B. Dennison;,citation_author=Xin Di;,citation_author=Erin W. Dickie;,citation_author=Ekaterina Dobryakova;,citation_author=Claire L. Donnat;,citation_author=Juergen Dukart;,citation_author=Niall W. Duncan;,citation_author=Joke Durnez;,citation_author=Amr Eed;,citation_author=Simon B. Eickhoff;,citation_author=Andrew Erhart;,citation_author=Laura Fontanesi;,citation_author=G. Matthew Fricke;,citation_author=Shiguang Fu;,citation_author=Adriana Galván;,citation_author=Remi Gau;,citation_author=Sarah Genon;,citation_author=Tristan Glatard;,citation_author=Enrico Glerean;,citation_author=Jelle J. Goeman;,citation_author=Sergej A. E. Golowin;,citation_author=Carlos González-García;,citation_author=Krzysztof J. Gorgolewski;,citation_author=Cheryl L. Grady;,citation_author=Mikella A. Green;,citation_author=João F. Guassi Moreira;,citation_author=Olivia Guest;,citation_author=Shabnam Hakimi;,citation_author=J. Paul Hamilton;,citation_author=Roeland Hancock;,citation_author=Giacomo Handjaras;,citation_author=Bronson B. Harry;,citation_author=Colin Hawco;,citation_author=Peer Herholz;,citation_author=Gabrielle Herman;,citation_author=Stephan Heunis;,citation_author=Felix Hoffstaedter;,citation_author=Jeremy Hogeveen;,citation_author=Susan Holmes;,citation_author=Chuan-Peng Hu;,citation_author=Scott A. Huettel;,citation_author=Matthew E. Hughes;,citation_author=Vittorio Iacovella;,citation_author=Alexandru D. Iordan;,citation_author=Peder M. Isager;,citation_author=Ayse I. Isik;,citation_author=Andrew Jahn;,citation_author=Matthew R. Johnson;,citation_author=Tom Johnstone;,citation_author=Michael J. E. Joseph;,citation_author=Anthony C. Juliano;,citation_author=Joseph W. Kable;,citation_author=Michalis Kassinopoulos;,citation_author=Cemal Koba;,citation_author=Xiang-Zhen Kong;,citation_author=Timothy R. Koscik;,citation_author=Nuri Erkut Kucukboyaci;,citation_author=Brice A. Kuhl;,citation_author=Sebastian Kupek;,citation_author=Angela R. Laird;,citation_author=Claus Lamm;,citation_author=Robert Langner;,citation_author=Nina Lauharatanahirun;,citation_author=Hongmi Lee;,citation_author=Sangil Lee;,citation_author=Alexander Leemans;,citation_author=Andrea Leo;,citation_author=Elise Lesage;,citation_author=Flora Li;,citation_author=Monica Y. C. Li;,citation_author=Phui Cheng Lim;,citation_author=Evan N. Lintz;,citation_author=Schuyler W. Liphardt;,citation_author=Annabel B. Losecaat Vermeer;,citation_author=Bradley C. Love;,citation_author=Michael L. Mack;,citation_author=Norberto Malpica;,citation_author=Theo Marins;,citation_author=Camille Maumet;,citation_author=Kelsey McDonald;,citation_author=Joseph T. McGuire;,citation_author=Helena Melero;,citation_author=Adriana S. Méndez Leal;,citation_author=Benjamin Meyer;,citation_author=Kristin N. Meyer;,citation_author=Glad Mihai;,citation_author=Georgios D. Mitsis;,citation_author=Jorge Moll;,citation_author=Dylan M. Nielson;,citation_author=Gustav Nilsonne;,citation_author=Michael P. Notter;,citation_author=Emanuele Olivetti;,citation_author=Adrian I. Onicas;,citation_author=Paolo Papale;,citation_author=Kaustubh R. Patil;,citation_author=Jonathan E. Peelle;,citation_author=Alexandre Pérez;,citation_author=Doris Pischedda;,citation_author=Jean-Baptiste Poline;,citation_author=Yanina Prystauka;,citation_author=Shruti Ray;,citation_author=Patricia A. Reuter-Lorenz;,citation_author=Richard C. Reynolds;,citation_author=Emiliano Ricciardi;,citation_author=Jenny R. Rieck;,citation_author=Anais M. Rodriguez-Thompson;,citation_author=Anthony Romyn;,citation_author=Taylor Salo;,citation_author=Gregory R. Samanez-Larkin;,citation_author=Emilio Sanz-Morales;,citation_author=Margaret L. Schlichting;,citation_author=Douglas H. Schultz;,citation_author=Qiang Shen;,citation_author=Margaret A. Sheridan;,citation_author=Jennifer A. Silvers;,citation_author=Kenny Skagerlund;,citation_author=Alec Smith;,citation_author=David V. Smith;,citation_author=Peter Sokol-Hessner;,citation_author=Simon R. Steinkamp;,citation_author=Sarah M. Tashjian;,citation_author=Bertrand Thirion;,citation_author=John N. Thorp;,citation_author=Gustav Tinghög;,citation_author=Loreen Tisdall;,citation_author=Steven H. Tompson;,citation_author=Claudio Toro-Serey;,citation_author=Juan Jesus Torre Tresols;,citation_author=Leonardo Tozzi;,citation_author=Vuong Truong;,citation_author=Luca Turella;,citation_author=Anna E. ‘t Veer;,citation_author=Tom Verguts;,citation_author=Jean M. Vettel;,citation_author=Sagana Vijayarajah;,citation_author=Khoi Vo;,citation_author=Matthew B. Wall;,citation_author=Wouter D. Weeda;,citation_author=Susanne Weis;,citation_author=David J. White;,citation_author=David Wisniewski;,citation_author=Alba Xifra-Porxas;,citation_author=Emily A. Yearling;,citation_author=Sangsuk Yoon;,citation_author=Rui Yuan;,citation_author=Kenneth S. L. Yuen;,citation_author=Lei Zhang;,citation_author=Xu Zhang;,citation_author=Joshua E. Zosky;,citation_author=Thomas E. Nichols;,citation_author=Russell A. Poldrack;,citation_author=Tom Schonberg;,citation_publication_date=2020-06;,citation_cover_date=2020-06;,citation_year=2020;,citation_fulltext_html_url=https://www.nature.com/articles/s41586-020-2314-9;,citation_issue=7810;,citation_doi=10.1038/s41586-020-2314-9;,citation_volume=582;,citation_language=en;,citation_journal_title=Nature;">
+<meta name="citation_reference" content="citation_title=Same data, different analysts: Variation in effect sizes due to analytical decisions in ecology and evolutionary biology;,citation_author=Elliot Gould;,citation_author=Hannah S. Fraser;,citation_author=Timothy H. Parker;,citation_author=Shinichi Nakagawa;,citation_author=Simon C. Griffith;,citation_author=Peter A. Vesk;,citation_author=Fiona Fidler;,citation_author=Daniel G. Hamilton;,citation_author=Robin N. Abbey-Lee;,citation_author=Jessica K. Abbott;,citation_author=Luis A. Aguirre;,citation_author=Carles Alcaraz;,citation_author=Irith Aloni;,citation_author=Drew Altschul;,citation_author=Kunal Arekar;,citation_author=Jeff W. Atkins;,citation_author=Joe Atkinson;,citation_author=Christopher M. Baker;,citation_author=Meghan Barrett;,citation_author=Kristian Bell;,citation_author=Suleiman Kehinde Bello;,citation_author=Iván Beltrán;,citation_author=Bernd J. Berauer;,citation_author=Michael Grant Bertram;,citation_author=Peter D. Billman;,citation_author=Charlie K. Blake;,citation_author=Shannon Blake;,citation_author=Louis Bliard;,citation_author=Andrea Bonisoli-Alquati;,citation_author=Timothée Bonnet;,citation_author=Camille Nina Marion Bordes;,citation_author=Aneesh P. H. Bose;,citation_author=Thomas Botterill-James;,citation_author=Melissa Anna Boyd;,citation_author=Sarah A. Boyle;,citation_author=Tom Bradfer-Lawrence;,citation_author=Jennifer Bradham;,citation_author=Jack A. Brand;,citation_author=Martin I. Brengdahl;,citation_author=Martin Bulla;,citation_author=Luc Bussière;,citation_author=Ettore Camerlenghi;,citation_author=Sara E. Campbell;,citation_author=Leonardo L. F. Campos;,citation_author=Anthony Caravaggi;,citation_author=Pedro Cardoso;,citation_author=Charles J. W. Carroll;,citation_author=Therese A. Catanach;,citation_author=Xuan Chen;,citation_author=Heung Ying Janet Chik;,citation_author=Emily Sarah Choy;,citation_author=Alec Philip Christie;,citation_author=Angela Chuang;,citation_author=Amanda J. Chunco;,citation_author=Bethany L. Clark;,citation_author=Andrea Contina;,citation_author=Garth A. Covernton;,citation_author=Murray P. Cox;,citation_author=Kimberly A. Cressman;,citation_author=Marco Crotti;,citation_author=Connor Davidson Crouch;,citation_author=Pietro B. D’Amelio;,citation_author=Alexandra Allison Sousa;,citation_author=Timm Fabian Döbert;,citation_author=Ralph Dobler;,citation_author=Adam J. Dobson;,citation_author=Tim S. Doherty;,citation_author=Szymon Marian Drobniak;,citation_author=Alexandra Grace Duffy;,citation_author=Alison B. Duncan;,citation_author=Robert P. Dunn;,citation_author=Jamie Dunning;,citation_author=Trishna Dutta;,citation_author=Luke Eberhart-Hertel;,citation_author=Jared Alan Elmore;,citation_author=Mahmoud Medhat Elsherif;,citation_author=Holly M. English;,citation_author=David C. Ensminger;,citation_author=Ulrich Rainer Ernst;,citation_author=Stephen M. Ferguson;,citation_author=Esteban Fernandez-Juricic;,citation_author=Thalita Ferreira-Arruda;,citation_author=John Fieberg;,citation_author=Elizabeth A. Finch;,citation_author=Evan A. Fiorenza;,citation_author=David N. Fisher;,citation_author=Amélie Fontaine;,citation_author=Wolfgang Forstmeier;,citation_author=Yoan Fourcade;,citation_author=Graham S. Frank;,citation_author=Cathryn A. Freund;,citation_author=Eduardo Fuentes-Lillo;,citation_author=Sara L. Gandy;,citation_author=Dustin G. Gannon;,citation_author=Ana I. García-Cervigón;,citation_author=Alexis C. Garretson;,citation_author=Xuezhen Ge;,citation_author=William L. Geary;,citation_author=Charly Géron;,citation_author=Marc Gilles;,citation_author=Antje Girndt;,citation_author=Daniel Gliksman;,citation_author=Harrison B. Goldspiel;,citation_author=Dylan G. E. Gomes;,citation_author=Megan Kate Good;,citation_author=Sarah C. Goslee;,citation_author=J. Stephen Gosnell;,citation_author=Eliza M. Grames;,citation_author=Paolo Gratton;,citation_author=Nicholas M. Grebe;,citation_author=Skye M. Greenler;,citation_author=Maaike Griffioen;,citation_author=Daniel M. Griffith;,citation_author=Frances J. Griffith;,citation_author=Jake J. Grossman;,citation_author=Ali Güncan;,citation_author=Stef Haesen;,citation_author=James G. Hagan;,citation_author=Heather A. Hager;,citation_author=Jonathan Philo Harris;,citation_author=Natasha Dean Harrison;,citation_author=Sarah Syedia Hasnain;,citation_author=Justin Chase Havird;,citation_author=Andrew J. Heaton;,citation_author=María Laura Herrera-Chaustre;,citation_author=Tanner J. Howard;,citation_author=Bin-Yan Hsu;,citation_author=Fabiola Iannarilli;,citation_author=Esperanza C. Iranzo;,citation_author=Erik N. K. Iverson;,citation_author=Saheed Olaide Jimoh;,citation_author=Douglas H. Johnson;,citation_author=Martin Johnsson;,citation_author=Jesse Jorna;,citation_author=Tommaso Jucker;,citation_author=Martin Jung;,citation_author=Ineta Kačergytė;,citation_author=Oliver Kaltz;,citation_author=Alison Ke;,citation_author=Clint D. Kelly;,citation_author=Katharine Keogan;,citation_author=Friedrich Wolfgang Keppeler;,citation_author=Alexander K. Killion;,citation_author=Dongmin Kim;,citation_author=David P. Kochan;,citation_author=Peter Korsten;,citation_author=Shan Kothari;,citation_author=Jonas Kuppler;,citation_author=Jillian M. Kusch;,citation_author=Malgorzata Lagisz;,citation_author=Kristen Marianne Lalla;,citation_author=Daniel J. Larkin;,citation_author=Courtney L. Larson;,citation_author=Katherine S. Lauck;,citation_author=M. Elise Lauterbur;,citation_author=Alan Law;,citation_author=Don-Jean Léandri-Breton;,citation_author=Jonas J. Lembrechts;,citation_author=Kiara L’Herpiniere;,citation_author=Eva J. P. Lievens;,citation_author=Daniela Oliveira Lima;,citation_author=Shane Lindsay;,citation_author=Martin Luquet;,citation_author=Ross MacLeod;,citation_author=Kirsty H. Macphie;,citation_author=Kit Magellan;,citation_author=Magdalena M. Mair;,citation_author=Lisa E. Malm;,citation_author=Stefano Mammola;,citation_author=Caitlin P. Mandeville;,citation_author=Michael Manhart;,citation_author=Laura Milena Manrique-Garzon;,citation_author=Elina Mäntylä;,citation_author=Philippe Marchand;,citation_author=Benjamin Michael Marshall;,citation_author=Charles A. Martin;,citation_author=Dominic Andreas Martin;,citation_author=Jake Mitchell Martin;,citation_author=April Robin Martinig;,citation_author=Erin S. McCallum;,citation_author=Mark McCauley;,citation_author=Sabrina M. McNew;,citation_author=Scott J. Meiners;,citation_author=Thomas Merkling;,citation_author=Marcus Michelangeli;,citation_author=Maria Moiron;,citation_author=Bruno Moreira;,citation_author=Jennifer Mortensen;,citation_author=Benjamin Mos;,citation_author=Taofeek Olatunbosun Muraina;,citation_author=Penelope Wrenn Murphy;,citation_author=Luca Nelli;,citation_author=Petri Niemelä;,citation_author=Josh Nightingale;,citation_author=Gustav Nilsonne;,citation_author=Sergio Nolazco;,citation_author=Sabine S. Nooten;,citation_author=Jessie Lanterman Novotny;,citation_author=Agnes Birgitta Olin;,citation_author=Chris L. Organ;,citation_author=Kate L. Ostevik;,citation_author=Facundo Xavier Palacio;,citation_author=Matthieu Paquet;,citation_author=Darren James Parker;,citation_author=David J. Pascall;,citation_author=Valerie J. Pasquarella;,citation_author=John Harold Paterson;,citation_author=Ana Payo-Payo;,citation_author=Karen Marie Pedersen;,citation_author=Grégoire Perez;,citation_author=Kayla I. Perry;,citation_author=Patrice Pottier;,citation_author=Michael J. Proulx;,citation_author=Raphaël Proulx;,citation_author=Jessica L. Pruett;,citation_author=Veronarindra Ramananjato;,citation_author=Finaritra Tolotra Randimbiarison;,citation_author=Onja H. Razafindratsima;,citation_author=Diana J. Rennison;,citation_author=Federico Riva;,citation_author=Sepand Riyahi;,citation_author=Michael James Roast;,citation_author=Felipe Pereira Rocha;,citation_author=Dominique G. Roche;,citation_author=Cristian Román-Palacios;,citation_author=Michael S. Rosenberg;,citation_author=Jessica Ross;,citation_author=Freya E. Rowland;,citation_author=Deusdedith Rugemalila;,citation_author=Avery L. Russell;,citation_author=Suvi Ruuskanen;,citation_author=Patrick Saccone;,citation_author=Asaf Sadeh;,citation_author=Stephen M. Salazar;,citation_author=Kris Sales;,citation_author=Pablo Salmón;,citation_author=Alfredo Sánchez-Tójar;,citation_author=Leticia Pereira Santos;,citation_author=Francesca Santostefano;,citation_author=Hayden T. Schilling;,citation_author=Marcus Schmidt;,citation_author=Tim Schmoll;,citation_author=Adam C. Schneider;,citation_author=Allie E. Schrock;,citation_author=Julia Schroeder;,citation_author=Nicolas Schtickzelle;,citation_author=Nick L. Schultz;,citation_author=Drew A. Scott;,citation_author=Michael Peter Scroggie;,citation_author=Julie Teresa Shapiro;,citation_author=Nitika Sharma;,citation_author=Caroline L. Shearer;,citation_author=Diego Simón;,citation_author=Michael I. Sitvarin;,citation_author=Fabrício Luiz Skupien;,citation_author=Heather Lea Slinn;,citation_author=Grania Polly Smith;,citation_author=Jeremy A. Smith;,citation_author=Rahel Sollmann;,citation_author=Kaitlin Stack Whitney;,citation_author=Shannon Michael Still;,citation_author=Erica F. Stuber;,citation_author=Guy F. Sutton;,citation_author=Ben Swallow;,citation_author=Conor Claverie Taff;,citation_author=Elina Takola;,citation_author=Andrew J. Tanentzap;,citation_author=Rocío Tarjuelo;,citation_author=Richard J. Telford;,citation_author=Christopher J. Thawley;,citation_author=Hugo Thierry;,citation_author=Jacqueline Thomson;,citation_author=Svenja Tidau;,citation_author=Emily M. Tompkins;,citation_author=Claire Marie Tortorelli;,citation_author=Andrew Trlica;,citation_author=Biz R. Turnell;,citation_author=Lara Urban;,citation_author=Stijn Van de Vondel;,citation_author=Jessica Eva Megan Wal;,citation_author=Jens Van Eeckhoven;,citation_author=Francis Oordt;,citation_author=K. Michelle Vanderwel;,citation_author=Mark C. Vanderwel;,citation_author=Karen J. Vanderwolf;,citation_author=Juliana Vélez;,citation_author=Diana Carolina Vergara-Florez;,citation_author=Brian C. Verrelli;,citation_author=Marcus Vinícius Vieira;,citation_author=Nora Villamil;,citation_author=Valerio Vitali;,citation_author=Julien Vollering;,citation_author=Jeffrey Walker;,citation_author=Xanthe J. Walker;,citation_author=Jonathan A. Walter;,citation_author=Pawel Waryszak;,citation_author=Ryan J. Weaver;,citation_author=Ronja E. M. Wedegärtner;,citation_author=Daniel L. Weller;,citation_author=Shannon Whelan;,citation_publication_date=2025-02-06;,citation_cover_date=2025-02-06;,citation_year=2025;,citation_fulltext_html_url=https://doi.org/10.1186/s12915-024-02101-x;,citation_issue=1;,citation_doi=10.1186/s12915-024-02101-x;,citation_volume=23;,citation_journal_title=BMC Biology;">
+<meta name="citation_reference" content="citation_title=Preventing harmful data practices by using participatory input to navigate the machine learning multiverse;,citation_author=Jan Simson;,citation_author=Fiona Draxler;,citation_author=Samuel Mehr;,citation_author=Christoph Kern;,citation_publication_date=2025-04-25;,citation_cover_date=2025-04-25;,citation_year=2025;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3706598.3713482;,citation_doi=10.1145/3706598.3713482;,citation_conference=Association for Computing Machinery;,citation_series_title=CHI ’25;">
+<meta name="citation_reference" content="citation_title=Paths explored, paths omitted, paths obscured: Decision points &amp;amp;amp; selective reporting in end-to-end data analysis;,citation_author=Yang Liu;,citation_author=Tim Althoff;,citation_author=Jeffrey Heer;,citation_publication_date=2020-04-23;,citation_cover_date=2020-04-23;,citation_year=2020;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3313831.3376533;,citation_doi=10.1145/3313831.3376533;,citation_conference=Association for Computing Machinery;,citation_series_title=CHI ’20;">
+<meta name="citation_reference" content="citation_title=Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP);,citation_author=Iz Beltagy;,citation_author=Kyle Lo;,citation_author=Arman Cohan;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_fulltext_html_url=https://www.aclweb.org/anthology/D19-1371;,citation_doi=10.18653/v1/D19-1371;,citation_language=en;,citation_conference=Association for Computational Linguistics;">
+<meta name="citation_reference" content="citation_title=BioBERT: a pre-trained biomedical language representation model for biomedical text mining;,citation_author=Jinhyuk Lee;,citation_author=Wonjin Yoon;,citation_author=Sungdong Kim;,citation_author=Donghyeon Kim;,citation_author=Sunkyu Kim;,citation_author=Chan Ho So;,citation_author=Jaewoo Kang;,citation_editor=Jonathan Wren;,citation_publication_date=2020-02-15;,citation_cover_date=2020-02-15;,citation_year=2020;,citation_fulltext_html_url=https://academic.oup.com/bioinformatics/article/36/4/1234/5566506;,citation_issue=4;,citation_doi=10.1093/bioinformatics/btz682;,citation_volume=36;,citation_language=en;,citation_journal_title=Bioinformatics;">
+<meta name="citation_reference" content="citation_title=RoBERTa: A robustly optimized BERT pretraining approach;,citation_author=Yinhan Liu;,citation_author=Myle Ott;,citation_author=Naman Goyal;,citation_author=Jingfei Du;,citation_author=Mandar Joshi;,citation_author=Danqi Chen;,citation_author=Omer Levy;,citation_author=Mike Lewis;,citation_author=Luke Zettlemoyer;,citation_author=Veselin Stoyanov;,citation_doi=10.48550/arXiv.1907.11692;">
+<meta name="citation_reference" content="citation_title=NAACL-HLT 2019;,citation_author=Jacob Devlin;,citation_author=Ming-Wei Chang;,citation_author=Kenton Lee;,citation_author=Kristina Toutanova;,citation_editor=Jill Burstein;,citation_editor=Christy Doran;,citation_editor=Thamar Solorio;,citation_publication_date=2019-06;,citation_cover_date=2019-06;,citation_year=2019;,citation_fulltext_html_url=https://aclanthology.org/N19-1423/;,citation_doi=10.18653/v1/N19-1423;,citation_conference=Association for Computational Linguistics;">
+<meta name="citation_reference" content="citation_title=Transformer-XL: Attentive language models beyond a fixed-length context;,citation_author=Zihang Dai;,citation_author=Zhilin Yang;,citation_author=Yiming Yang;,citation_author=Jaime Carbonell;,citation_author=Quoc V. Le;,citation_author=Ruslan Salakhutdinov;,citation_doi=10.48550/arXiv.1901.02860;">
+<meta name="citation_reference" content="citation_title=XLNet: Generalized Autoregressive Pretraining for Language Understanding;,citation_author=Zhilin Yang;,citation_author=Zihang Dai;,citation_author=Yiming Yang;,citation_author=Jaime Carbonell;,citation_author=Ruslan Salakhutdinov;,citation_author=Quoc V. Le;,citation_doi=10.48550/arXiv.1906.08237;,citation_language=en;">
+<meta name="citation_reference" content="citation_title=Decision-making under uncertainty in research synthesis: Designing for the garden of forking paths;,citation_author=Alex Kale;,citation_author=Matthew Kay;,citation_author=Jessica Hullman;,citation_publication_date=2019-05-02;,citation_cover_date=2019-05-02;,citation_year=2019;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3290605.3300432;,citation_doi=10.1145/3290605.3300432;,citation_conference=Association for Computing Machinery;,citation_series_title=CHI ’19;">
+<meta name="citation_reference" content="citation_title=Futzing and moseying: Interviews with professional data analysts on exploration practices;,citation_author=Sara Alspaugh;,citation_author=Nava Zokaei;,citation_author=Andrea Liu;,citation_author=Cindy Jin;,citation_author=Marti A. Hearst;,citation_publication_date=2019-01;,citation_cover_date=2019-01;,citation_year=2019;,citation_fulltext_html_url=https://ieeexplore.ieee.org/document/8440815;,citation_issue=1;,citation_doi=10.1109/TVCG.2018.2865040;,citation_volume=25;,citation_journal_title=IEEE Transactions on Visualization and Computer Graphics;">
+</head>
+
+  <body class="quarto-notebook quarto-light">
+    <div id="quarto-embed-header" class="headroom fixed-top bg-primary">
+      
+      <a onclick="window.quartoBackToArticle(); return false;" class="btn btn-primary quarto-back-link" href=""><i class="bi bi-caret-left"></i> Back to Article</a>
+      <h6><i class="bi bi-journal-code"></i> Article Notebook</h6>
+
+            <a href="./index.qmd" class="btn btn-primary quarto-download-embed" download="index.qmd">Download Source</a>
+          </div>
+
+     <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Analysing decisions in data analysis</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+            <div class="quarto-title-meta-author">
+          <div class="quarto-title-meta-heading">Authors</div>
+          <div class="quarto-title-meta-heading">Affiliation</div>
+          
+                <div class="quarto-title-meta-contents">
+            <p class="author">H. Sherry Zhang </p>
+          </div>
+                <div class="quarto-title-meta-contents">
+                    <p class="affiliation">
+                        University of Texas at Austin
+                      </p>
+                  </div>
+                      <div class="quarto-title-meta-contents">
+            <p class="author">Roger D. Peng </p>
+          </div>
+                <div class="quarto-title-meta-contents">
+                    <p class="affiliation">
+                        University of Texas at Austin
+                      </p>
+                  </div>
+                    </div>
+        
+        <div class="quarto-title-meta">
+
+                      
+          
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      </div>
+    </div>
+
+    <div>
+      <div class="abstract">
+        <div class="block-title">Abstract</div>
+        this is the abstract
+      </div>
+    </div>
+
+
+    <div class="quarto-other-links-text-target">
+    </div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">2</span> Background</a>
+  <ul class="collapse">
+  <li><a href="#recording-decisions-in-data-analysis" id="toc-recording-decisions-in-data-analysis" class="nav-link" data-scroll-target="#recording-decisions-in-data-analysis"><span class="header-section-number">2.1</span> Recording decisions in data analysis</a></li>
+  <li><a href="#automatic-reading-of-literature-with-llm" id="toc-automatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</a></li>
+  <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</a></li>
+  <li><a href="#decision-quality-summary" id="toc-decision-quality-summary" class="nav-link" data-scroll-target="#decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</a></li>
+  </ul></li>
+  <li><a href="#calculate-paper-similarity" id="toc-calculate-paper-similarity" class="nav-link" data-scroll-target="#calculate-paper-similarity"><span class="header-section-number">3</span> Calculate paper similarity</a>
+  <ul class="collapse">
+  <li><a href="#sensitivity-analysis" id="toc-sensitivity-analysis" class="nav-link" data-scroll-target="#sensitivity-analysis"><span class="header-section-number">3.1</span> Sensitivity analysis</a></li>
+  </ul></li>
+  <li><a href="#applications" id="toc-applications" class="nav-link" data-scroll-target="#applications"><span class="header-section-number">4</span> Applications</a>
+  <ul class="collapse">
+  <li><a href="#air-pollution-mortality-modelling" id="toc-air-pollution-mortality-modelling" class="nav-link" data-scroll-target="#air-pollution-mortality-modelling"><span class="header-section-number">4.1</span> Air pollution mortality modelling</a></li>
+  <li><a href="#species-distribution-modelling" id="toc-species-distribution-modelling" class="nav-link" data-scroll-target="#species-distribution-modelling"><span class="header-section-number">4.2</span> Species distribution modelling</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">6</span> Reference</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">      
+
+       <section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Something about “analysis review” - Roger thinks it’s a better to have a new word for this.</p>
+<p>provide a baseline understand - place to start</p>
+<p>demonstrate - analytically homogeneous - the table won’t look like that</p>
+<p>In this work, we design a tabular format to record the choices made by analysts during data analysis. Using large language models, we automatically extract these choices from a set of research papers focused on specific topics, e.g.&nbsp;air pollution modelling. This allows us to analyze these choices as data – tracking how they’ve changed over time or query the possible methodologies used in similar studies. We also introduce a workflow to cluster paper based on decision similarity, using both the decisions themselves and the justifications authors provide for their choices.</p>
+</section>
+<section id="background" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Background</h1>
+<p>Data analysis as an complicated, iterative process to make sense [ref] of the data collected. The iterative process of formulating hypothesis <span class="citation" data-cites="jun2022">Jun et al. (<a href="#ref-jun2022" role="doc-biblioref">2022</a>)</span>.</p>
+<p>Choices are made at nearly every stage of data analysis, ranging from variable pre-processing variables, variable and lag selection in model formulation, to the specification of smoothing parameter during model construction. These possible choices contribute to what <span class="citation" data-cites="gelman2014">Gelman and Loken (<a href="#ref-gelman2014" role="doc-biblioref">2014</a>)</span> describe as the “garden of forking paths”. These choices can introduce substantial variability in results, which has been demonstrated in many-analyst experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. A prominent example is <span class="citation" data-cites="silberzahn2018">Silberzahn et al. (<a href="#ref-silberzahn2018" role="doc-biblioref">2018</a>)</span> where researchers reported a wide range of point estimates and 95% confidence intervals for the effect of soccer players’ skin tone on the number of red cards awarded by referees (odds ratio from 0.89 to 2.93). Similar findings have emerged in other domains, including structural equation modeling <span class="citation" data-cites="sarstedt2024">(<a href="#ref-sarstedt2024" role="doc-biblioref">Sarstedt et al. 2024</a>)</span>, applied microeconomics <span class="citation" data-cites="huntington-klein2021">(<a href="#ref-huntington-klein2021" role="doc-biblioref">Huntington-Klein et al. 2021</a>)</span>, neuroimaging <span class="citation" data-cites="botvinik-nezer2020">(<a href="#ref-botvinik-nezer2020" role="doc-biblioref">Botvinik-Nezer et al. 2020</a>)</span>, and ecology and evolutionary biology <span class="citation" data-cites="gould2025">(<a href="#ref-gould2025" role="doc-biblioref">Gould et al. 2025</a>)</span>.</p>
+<p>Another line of work focuses on developing software tools to support analysts in making more informed decisions. For example, the <code>Tisane</code> package <span class="citation" data-cites="jun2022">(<a href="#ref-jun2022" role="doc-biblioref">Jun et al. 2022</a>)</span> integrates conceptual ideas, such as DAGs, and modelling structure (group/ cluster/ hierarchical structure), to assist junior researchers in specifying GLM and GLMM model. The <code>DeclareDesign</code> package <span class="citation" data-cites="blair2019">(<a href="#ref-blair2019" role="doc-biblioref">Blair et al. 2019</a>)</span> introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest. This approach has been applied in randomized controlled trial <span class="citation" data-cites="bishop2024">(<a href="#ref-bishop2024" role="doc-biblioref">Bishop and Hulme 2024</a>)</span> .</p>
+<p>The <code>multiverse</code> package</p>
+<ul>
+<li>facilitates the specification and execution of multiple parallel choices for sensitivity analysis, allowing researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.</li>
+</ul>
+<p>Study decisions in data analysis:</p>
+<ul>
+<li>interview analysts and researchers to provide recommendation for data analysis practices <span class="citation" data-cites="kale2019 alspaugh2019 liu2020">(<a href="#ref-kale2019" role="doc-biblioref">Kale, Kay, and Hullman 2019</a>; <a href="#ref-alspaugh2019" role="doc-biblioref">Alspaugh et al. 2019</a>; <a href="#ref-liu2020" role="doc-biblioref">Yang Liu, Althoff, and Heer 2020</a>)</span>.</li>
+<li><span class="citation" data-cites="liu2020">Yang Liu, Althoff, and Heer (<a href="#ref-liu2020" role="doc-biblioref">2020</a>)</span> provides visualization to communicate the decision processes through the Analytic Decision Graphs (ADG)</li>
+<li><span class="citation" data-cites="simson2025">Simson et al. (<a href="#ref-simson2025" role="doc-biblioref">2025</a>)</span> conducts a participatory AI study to demonstrate the “garden of forking paths” of decisions in data analysis and how it affects ML fairness</li>
+</ul>
+<section id="recording-decisions-in-data-analysis" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="recording-decisions-in-data-analysis"><span class="header-section-number">2.1</span> Recording decisions in data analysis</h2>
+<ul>
+<li>give example from extracting decision from sentences of a paper</li>
+<li>adapt from the tidy data principle - each row is a decision <span class="citation" data-cites="wickham2014">Wickham (<a href="#ref-wickham2014" role="doc-biblioref">2014</a>)</span><br>
+</li>
+<li>some decisions are related to how the variable is estimated spatially and temporally</li>
+<li>model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)</li>
+<li>sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)</li>
+<li>sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom)</li>
+</ul>
+<p>A hypothetical database of decisions may look as follows:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Paper</th>
+<th>ID</th>
+<th>Model</th>
+<th>variable</th>
+<th>method</th>
+<th>parameter</th>
+<th>type</th>
+<th>reason</th>
+<th>decision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ostro</td>
+<td>1</td>
+<td>Poisson regression</td>
+<td>temperature</td>
+<td>smoothing spline</td>
+<td>degree of freedom</td>
+<td>parameter</td>
+<td>NA</td>
+<td>3 degree of freedom</td>
+</tr>
+<tr class="even">
+<td>ostro</td>
+<td>2</td>
+<td>Poisson regression</td>
+<td>temperature</td>
+<td>smoothing spline</td>
+<td>degree of freedom</td>
+<td>temporal</td>
+<td>NA</td>
+<td>1-day lag</td>
+</tr>
+<tr class="odd">
+<td>ostro</td>
+<td>3</td>
+<td>Poisson regression</td>
+<td>relative humidity</td>
+<td>LOESS</td>
+<td>smoothing parameter</td>
+<td>parameter</td>
+<td>to minimize Akaike’s Information Criterion</td>
+<td>NA</td>
+</tr>
+<tr class="even">
+<td>ostro</td>
+<td>4</td>
+<td>Poisson regression</td>
+<td>model</td>
+<td>NA</td>
+<td>NA</td>
+<td>spatial</td>
+<td>to account for variation among cities</td>
+<td>separate regression models fit in each city</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="automatic-reading-of-literature-with-llm" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</h2>
+<ul>
+<li>We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini’s output. See the section sensitivity analysis for the comparison of the two models.</li>
+<li>Claude is decoder only, Gemini is an encoder–decoder model
+<ul>
+<li>these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction</li>
+</ul></li>
+<li>prompt: instruct the LLM to produce a markdown file with decisions included in a JSON block with the fields described in Section xxx</li>
+<li>use the <code>ellmer</code> package <span class="citation" data-cites="ellmer">(<a href="#ref-ellmer" role="doc-biblioref">Wickham, Cheng, and Jacobs 2025</a>)</span> to connect to Gemini API to process the pdf documents in R.</li>
+<li>experiment with seed and temperature</li>
+<li>Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.</li>
+</ul>
+</section>
+<section id="review-the-llm-output" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</h2>
+<ul>
+<li>something about result validation of LLM output</li>
+</ul>
+<p>The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) <em>overwrite</em> – modify the content of a particular cell, equivalently <code>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</code>, 2) <em>delete</em> – remove a particular cell, <code>dplyr::filter(!(CONDITION))</code>, and 3) <em>add</em> – manually enter a decision, <code>dplyr::bind_rows()</code>. <a href="#fig-shiny" class="quarto-xref">Figure&nbsp;1</a> illustrates the <em>overwrite</em> action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from “generalized additive Poisson time series regression” to the less verbose “Poisson regression”. Upon confirmation, the corresponding <code>tidyverse</code> code is generated, and users can download the edited table and incorporate the code into their R script.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [1]:</pre></div><div id="cell-fig-shiny" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"figures/shiny.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-shiny" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-shiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
+<a href="figures/shiny.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition – expressed using dplyr::filter() syntax (e.g., paper == anderson2008size&quot;), (3) The user edits the model column to “Poisson regression” and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding tidyverse code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button."><img src="figures/shiny.png" class="img-fluid figure-img" width="3456"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition – expressed using <code>dplyr::filter()</code> syntax (e.g., <code>paper == anderson2008size"</code>), (3) The user edits the <code>model</code> column to “Poisson regression” and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding <code>tidyverse</code> code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button.
+</figcaption>
+</figure>
+</div>
+</div>
+</div></div>
+</section>
+<section id="decision-quality-summary" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</h2>
+</section>
+</section>
+<section id="calculate-paper-similarity" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Calculate paper similarity</h1>
+<ul>
+<li>pre-processing
+<ul>
+<li>standardize statistical methods its corresponding parameters (LOESS, smoothing spline, etc)</li>
+<li>group variables into broader categories: time, temperature, humidity, PM</li>
+</ul></li>
+<li>identify the most frequent analysis decisions across papers</li>
+<li>retain only papers that report more than x such decisions</li>
+<li>measure similarity between decisions and their justificaiton using NLP
+<ul>
+<li>word embedding with attention mechanism, instead of bag of word,</li>
+<li>specific NLP models (default to <code>bert-base-uncased</code>), aggregation methods from word to text</li>
+</ul></li>
+<li>compute paper similarity score for each paper pair by aggregating decision-level compoarisons
+<ul>
+<li>check/ report on the number of decisions compared in each paper pair</li>
+</ul></li>
+<li>similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices</li>
+</ul>
+<section id="sensitivity-analysis" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sensitivity-analysis"><span class="header-section-number">3.1</span> Sensitivity analysis</h2>
+<p>sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters</p>
+<ul>
+<li><p>standard <code>BERT</code> <span class="citation" data-cites="devlin2019">(<a href="#ref-devlin2019" role="doc-biblioref">Devlin et al. 2019</a>)</span>, <code>Roberta</code> <span class="citation" data-cites="liu">(<a href="#ref-liu" role="doc-biblioref">Yinhan Liu et al., n.d.</a>)</span>: trained on a much larger dataset (160GB v.s. BERT’s 15GB), <code>transformer-xl</code> <span class="citation" data-cites="dai">(<a href="#ref-dai" role="doc-biblioref">Dai et al., n.d.</a>)</span>, <code>xlnet</code> by Google Brain <span class="citation" data-cites="yang">(<a href="#ref-yang" role="doc-biblioref">Yang et al., n.d.</a>)</span>, and two domain-trained BERT models: <code>sciBert</code> <span class="citation" data-cites="beltagy2019">(<a href="#ref-beltagy2019" role="doc-biblioref">Beltagy, Lo, and Cohan 2019</a>)</span> and <code>bioBert</code><span class="citation" data-cites="lee2020">(<a href="#ref-lee2020" role="doc-biblioref">Lee et al. 2020</a>)</span>, trained on PubMed and PMC data.</p></li>
+<li><p>A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)</p></li>
+</ul>
+</section>
+</section>
+<section id="applications" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Applications</h1>
+<section id="air-pollution-mortality-modelling" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="air-pollution-mortality-modelling"><span class="header-section-number">4.1</span> Air pollution mortality modelling</h2>
+<ul>
+<li>look at for one type of decision (time) - what are the choices made by different papers</li>
+<li>look at whether decisions changes across time</li>
+<li>Visualize the decision database: apply clustering algorithm and visualize the database through <code>sigma.js</code></li>
+</ul>
+</section>
+<section id="species-distribution-modelling" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="species-distribution-modelling"><span class="header-section-number">4.2</span> Species distribution modelling</h2>
+</section>
+</section>
+<section id="discussion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Discussion</h1>
+<ul>
+<li>Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.</li>
+<li>people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.</li>
+<li>Validation of the output:</li>
+</ul>
+</section>
+<section id="reference" class="level1 unnumbered" data-number="6">
+<h1 class="unnumbered" data-number="6"><span class="header-section-number">6</span> Reference</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-alspaugh2019" class="csl-entry" role="listitem">
+Alspaugh, Sara, Nava Zokaei, Andrea Liu, Cindy Jin, and Marti A. Hearst. 2019. <span>“Futzing and Moseying: Interviews with Professional Data Analysts on Exploration Practices.”</span> <em>IEEE Transactions on Visualization and Computer Graphics</em> 25 (1): 22–31. <a href="https://doi.org/10.1109/TVCG.2018.2865040">https://doi.org/10.1109/TVCG.2018.2865040</a>.
+</div>
+<div id="ref-beltagy2019" class="csl-entry" role="listitem">
+Beltagy, Iz, Kyle Lo, and Arman Cohan. 2019. <span>“Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP).”</span> In, 3613–18. Hong Kong, China: Association for Computational Linguistics. <a href="https://doi.org/10.18653/v1/D19-1371">https://doi.org/10.18653/v1/D19-1371</a>.
+</div>
+<div id="ref-bishop2024" class="csl-entry" role="listitem">
+Bishop, Dorothy V. M., and Charles Hulme. 2024. <span>“When Alternative Analyses of the Same Data Come to Different Conclusions: A Tutorial Using DeclareDesign With a Worked Real-World Example.”</span> <em>Advances in Methods and Practices in Psychological Science</em> 7 (3): 25152459241267904. <a href="https://doi.org/10.1177/25152459241267904">https://doi.org/10.1177/25152459241267904</a>.
+</div>
+<div id="ref-blair2019" class="csl-entry" role="listitem">
+Blair, Graeme, Jasper Cooper, Alexander Coppock, and Macartan Humphreys. 2019. <span>“Declaring and Diagnosing Research Designs.”</span> <em>American Political Science Review</em> 113 (3): 838–59. <a href="https://doi.org/10.1017/S0003055419000194">https://doi.org/10.1017/S0003055419000194</a>.
+</div>
+<div id="ref-botvinik-nezer2020" class="csl-entry" role="listitem">
+Botvinik-Nezer, Rotem, Felix Holzmeister, Colin F. Camerer, Anna Dreber, Juergen Huber, Magnus Johannesson, Michael Kirchler, et al. 2020. <span>“Variability in the Analysis of a Single Neuroimaging Dataset by Many Teams.”</span> <em>Nature</em> 582 (7810): 84–88. <a href="https://doi.org/10.1038/s41586-020-2314-9">https://doi.org/10.1038/s41586-020-2314-9</a>.
+</div>
+<div id="ref-dai" class="csl-entry" role="listitem">
+Dai, Zihang, Zhilin Yang, Yiming Yang, Jaime Carbonell, Quoc V. Le, and Ruslan Salakhutdinov. n.d. <span>“Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context.”</span> <a href="https://doi.org/10.48550/arXiv.1901.02860">https://doi.org/10.48550/arXiv.1901.02860</a>.
+</div>
+<div id="ref-devlin2019" class="csl-entry" role="listitem">
+Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. <span>“NAACL-HLT 2019.”</span> In, edited by Jill Burstein, Christy Doran, and Thamar Solorio, 41714186. Minneapolis, Minnesota: Association for Computational Linguistics. <a href="https://doi.org/10.18653/v1/N19-1423">https://doi.org/10.18653/v1/N19-1423</a>.
+</div>
+<div id="ref-gelman2014" class="csl-entry" role="listitem">
+Gelman, Andrew, and Eric Loken. 2014. <span>“The Statistical Crisis in Science.”</span> <em>American Scientist</em> 102 (6): 460–65. <a href="https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1">https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1</a>.
+</div>
+<div id="ref-gould2025" class="csl-entry" role="listitem">
+Gould, Elliot, Hannah S. Fraser, Timothy H. Parker, Shinichi Nakagawa, Simon C. Griffith, Peter A. Vesk, Fiona Fidler, et al. 2025. <span>“Same Data, Different Analysts: Variation in Effect Sizes Due to Analytical Decisions in Ecology and Evolutionary Biology.”</span> <em>BMC Biology</em> 23 (1): 35. <a href="https://doi.org/10.1186/s12915-024-02101-x">https://doi.org/10.1186/s12915-024-02101-x</a>.
+</div>
+<div id="ref-huntington-klein2021" class="csl-entry" role="listitem">
+Huntington-Klein, Nick, Andreu Arenas, Emily Beam, Marco Bertoni, Jeffrey R. Bloem, Pralhad Burli, Naibin Chen, et al. 2021. <span>“The Influence of Hidden Researcher Decisions in Applied Microeconomics.”</span> <em>Economic Inquiry</em> 59 (3): 944–60. <a href="https://doi.org/10.1111/ecin.12992">https://doi.org/10.1111/ecin.12992</a>.
+</div>
+<div id="ref-jun2022" class="csl-entry" role="listitem">
+Jun, Eunice, Melissa Birchfield, Nicole De Moura, Jeffrey Heer, and René Just. 2022. <span>“Hypothesis Formalization: Empirical Findings, Software Limitations, and Design Implications.”</span> <em>ACM Transactions on Computer-Human Interaction</em> 29 (1): 1–28. <a href="https://doi.org/10.1145/3476980">https://doi.org/10.1145/3476980</a>.
+</div>
+<div id="ref-kale2019" class="csl-entry" role="listitem">
+Kale, Alex, Matthew Kay, and Jessica Hullman. 2019. <span>“Decision-Making Under Uncertainty in Research Synthesis: Designing for the Garden of Forking Paths.”</span> In, 114. CHI ’19. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/3290605.3300432">https://doi.org/10.1145/3290605.3300432</a>.
+</div>
+<div id="ref-lee2020" class="csl-entry" role="listitem">
+Lee, Jinhyuk, Wonjin Yoon, Sungdong Kim, Donghyeon Kim, Sunkyu Kim, Chan Ho So, and Jaewoo Kang. 2020. <span>“BioBERT: A Pre-Trained Biomedical Language Representation Model for Biomedical Text Mining.”</span> Edited by Jonathan Wren. <em>Bioinformatics</em> 36 (4): 1234–40. <a href="https://doi.org/10.1093/bioinformatics/btz682">https://doi.org/10.1093/bioinformatics/btz682</a>.
+</div>
+<div id="ref-liu2020" class="csl-entry" role="listitem">
+Liu, Yang, Tim Althoff, and Jeffrey Heer. 2020. <span>“Paths Explored, Paths Omitted, Paths Obscured: Decision Points &amp; Selective Reporting in End-to-End Data Analysis.”</span> In, 114. CHI ’20. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/3313831.3376533">https://doi.org/10.1145/3313831.3376533</a>.
+</div>
+<div id="ref-liu" class="csl-entry" role="listitem">
+Liu, Yinhan, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. n.d. <span>“RoBERTa: A Robustly Optimized BERT Pretraining Approach.”</span> <a href="https://doi.org/10.48550/arXiv.1907.11692">https://doi.org/10.48550/arXiv.1907.11692</a>.
+</div>
+<div id="ref-sarstedt2024" class="csl-entry" role="listitem">
+Sarstedt, Marko, Susanne J. Adler, Christian M. Ringle, Gyeongcheol Cho, Adamantios Diamantopoulos, Heungsun Hwang, and Benjamin D. Liengaard. 2024. <span>“Same Model, Same Data, but Different Outcomes: Evaluating the Impact of Method Choices in Structural Equation Modeling.”</span> <em>Journal of Product Innovation Management</em> 41 (6): 1100–1117. <a href="https://doi.org/10.1111/jpim.12738">https://doi.org/10.1111/jpim.12738</a>.
+</div>
+<div id="ref-silberzahn2018" class="csl-entry" role="listitem">
+Silberzahn, R., E. L. Uhlmann, D. P. Martin, P. Anselmi, F. Aust, E. Awtrey, Š. Bahník, et al. 2018. <span>“Many Analysts, One Data Set: Making Transparent How Variations in Analytic Choices Affect Results.”</span> <em>Advances in Methods and Practices in Psychological Science</em> 1 (3): 337–56. <a href="https://doi.org/10.1177/2515245917747646">https://doi.org/10.1177/2515245917747646</a>.
+</div>
+<div id="ref-simson2025" class="csl-entry" role="listitem">
+Simson, Jan, Fiona Draxler, Samuel Mehr, and Christoph Kern. 2025. <span>“Preventing Harmful Data Practices by Using Participatory Input to Navigate the Machine Learning Multiverse.”</span> In, 130. CHI ’25. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/3706598.3713482">https://doi.org/10.1145/3706598.3713482</a>.
+</div>
+<div id="ref-wickham2014" class="csl-entry" role="listitem">
+Wickham, Hadley. 2014. <span>“Tidy Data.”</span> <em>Journal of Statistical Software</em> 59 (September): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+<div id="ref-ellmer" class="csl-entry" role="listitem">
+Wickham, Hadley, Joe Cheng, and Aaron Jacobs. 2025. <em>Ellmer: Chat with Large Language Models</em>. <a href="https://CRAN.R-project.org/package=ellmer">https://CRAN.R-project.org/package=ellmer</a>.
+</div>
+<div id="ref-yang" class="csl-entry" role="listitem">
+Yang, Zhilin, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan Salakhutdinov, and Quoc V. Le. n.d. <span>“XLNet: Generalized Autoregressive Pretraining for Language Understanding.”</span> <a href="https://doi.org/10.48550/arXiv.1906.08237">https://doi.org/10.48550/arXiv.1906.08237</a>.
+</div>
+</div>
+</section>
+     </main>
+<!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script> 
+  
+</body></html>

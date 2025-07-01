@@ -58,7 +58,7 @@ A hypothetical database of decisions may look as follows:
 | ostro | 3 | Poisson regression | relative humidity | LOESS | smoothing parameter | parameter | to minimize Akaike's Information Criterion | NA |
 | ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city |
 
-## Austomatic reading of literature with LLM
+## Automatic reading of literature with LLM
 
 -   We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini's output. See the section sensitivity analysis for the comparison of the two models.
 -   Claude is decoder only, Gemini is an encoder–decoder model
@@ -70,15 +70,16 @@ A hypothetical database of decisions may look as follows:
 
 ## Review the LLM output
 
-(the shiny app)
+- something about result validation of LLM output
 
--   screenshot of the interface
--   The current application includes three actions:
-    -   modify a row (`dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`),
-    -   delete unrelated decisions (`dplyr::filter(!(CONDITION))`), and
-    -   manually add a decision (`dplyr::bind_rows()`)
--   All the actions will generate the corresponding codes.
--   The download button will download the modified decision database as a csv file
+The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) *overwrite* -- modify the content of a particular cell, equivalently `dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`, 2) *delete* -- remove a particular cell, `dplyr::filter(!(CONDITION))`, and 3) *add* -- manually enter a decision, `dplyr::bind_rows()`. @fig-shiny illustrates the *overwrite* action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from "generalized additive Poisson time series regression" to the less verbose "Poisson regression". Upon confirmation, the corresponding `tidyverse` code is generated, and users can download the edited table and incorporate the code into their R script.
+
+```{r}
+#| echo: false
+#| label: fig-shiny
+#| fig-cap: 'The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition -- expressed using `dplyr::filter()` syntax (e.g., `paper == anderson2008size"`), (3) The user edits the `model` column to "Poisson regression" and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding `tidyverse` code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button.'
+knitr::include_graphics("figures/shiny.png")
+```
 
 ## Decision quality summary
 
@@ -101,6 +102,8 @@ A hypothetical database of decisions may look as follows:
 sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
 
 -   standard `BERT` [@devlin2019], `Roberta` [@liu]: trained on a much larger dataset (160GB v.s. BERT's 15GB), `transformer-xl` [@dai], `xlnet` by Google Brain [@yang], and two domain-trained BERT models: `sciBert` [@beltagy2019] and `bioBert`[@lee2020], trained on PubMed and PMC data.
+
+- A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 
 # Applications
 

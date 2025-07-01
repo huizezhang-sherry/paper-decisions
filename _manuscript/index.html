@@ -54,6 +54,9 @@ div.csl-indent {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-8a894fcc3cb5e37eb5bf30def131be2f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script async="" src="https://hypothes.is/embed.js"></script>
 <script>
   window.document.addEventListener("DOMContentLoaded", function (_event) {
@@ -156,7 +159,7 @@ div.csl-indent {
   <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">2</span> Background</a>
   <ul class="collapse">
   <li><a href="#recording-decisions-in-data-analysis" id="toc-recording-decisions-in-data-analysis" class="nav-link" data-scroll-target="#recording-decisions-in-data-analysis"><span class="header-section-number">2.1</span> Recording decisions in data analysis</a></li>
-  <li><a href="#austomatic-reading-of-literature-with-llm" id="toc-austomatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#austomatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Austomatic reading of literature with LLM</a></li>
+  <li><a href="#automatic-reading-of-literature-with-llm" id="toc-automatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</a></li>
   <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</a></li>
   <li><a href="#decision-quality-summary" id="toc-decision-quality-summary" class="nav-link" data-scroll-target="#decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</a></li>
   </ul></li>
@@ -172,7 +175,7 @@ div.csl-indent {
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">6</span> Reference</a></li>
   </ul>
-<div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="appendix/appendix-preview.html"><i class="bi bi-journal-code"></i>Appendix to "Analysing decisions in data analysis"</a></li></ul></div></nav>
+<div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="appendix/appendix-preview.html"><i class="bi bi-journal-code"></i>Appendix to "Analysing decisions in data analysis"</a></li><li><a href="index-preview.html"><i class="bi bi-journal-code"></i>Article Notebook</a></li></ul></div></nav>
 </div>
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
 </div>
@@ -185,6 +188,9 @@ div.csl-indent {
 
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Something about “analysis review” - Roger thinks it’s a better to have a new word for this.</p>
+<p>provide a baseline understand - place to start</p>
+<p>demonstrate - analytically homogeneous - the table won’t look like that</p>
 <p>In this work, we design a tabular format to record the choices made by analysts during data analysis. Using large language models, we automatically extract these choices from a set of research papers focused on specific topics, e.g.&nbsp;air pollution modelling. This allows us to analyze these choices as data – tracking how they’ve changed over time or query the possible methodologies used in similar studies. We also introduce a workflow to cluster paper based on decision similarity, using both the decisions themselves and the justifications authors provide for their choices.</p>
 </section>
 <section id="background" class="level1" data-number="2">
@@ -287,30 +293,40 @@ div.csl-indent {
 </tbody>
 </table>
 </section>
-<section id="austomatic-reading-of-literature-with-llm" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="austomatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Austomatic reading of literature with LLM</h2>
+<section id="automatic-reading-of-literature-with-llm" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</h2>
 <ul>
-<li><p>We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini’s output. See the section sensitivity analysis for the comparison of the two models.</p></li>
-<li><p>prompt: instruct the LLM to produce a markdown file with decisions included in a JSON block with the fields described in Section xxx</p></li>
-<li><p>use the <code>ellmer</code> package <span class="citation" data-cites="ellmer">(<a href="#ref-ellmer" role="doc-biblioref">Wickham, Cheng, and Jacobs 2025</a>)</span> to connect to Gemini API to process the pdf documents in R.</p></li>
-<li><p>Our task differs from conventional text extraction using large language models (LLM) in that it requires higher-order reasoning to identify the decisions made by the authors.</p></li>
-<li><p>A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)</p></li>
+<li>We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini’s output. See the section sensitivity analysis for the comparison of the two models.</li>
+<li>Claude is decoder only, Gemini is an encoder–decoder model
+<ul>
+<li>these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction</li>
+</ul></li>
+<li>prompt: instruct the LLM to produce a markdown file with decisions included in a JSON block with the fields described in Section xxx</li>
+<li>use the <code>ellmer</code> package <span class="citation" data-cites="ellmer">(<a href="#ref-ellmer" role="doc-biblioref">Wickham, Cheng, and Jacobs 2025</a>)</span> to connect to Gemini API to process the pdf documents in R.</li>
+<li>experiment with seed and temperature</li>
+<li>Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.</li>
 </ul>
 </section>
 <section id="review-the-llm-output" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</h2>
-<p>(the shiny app)</p>
 <ul>
-<li>screenshot of the interface</li>
-<li>The current application includes three actions:
-<ul>
-<li>modify a row (<code>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</code>),</li>
-<li>delete unrelated decisions (<code>dplyr::filter(!(CONDITION))</code>), and</li>
-<li>manually add a decision (<code>dplyr::bind_rows()</code>)</li>
-</ul></li>
-<li>All the actions will generate the corresponding codes.</li>
-<li>The download button will download the modified decision database as a csv file</li>
+<li>something about result validation of LLM output</li>
 </ul>
+<p>The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) <em>overwrite</em> – modify the content of a particular cell, equivalently <code>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</code>, 2) <em>delete</em> – remove a particular cell, <code>dplyr::filter(!(CONDITION))</code>, and 3) <em>add</em> – manually enter a decision, <code>dplyr::bind_rows()</code>. <a href="#fig-shiny" class="quarto-xref">Figure&nbsp;1</a> illustrates the <em>overwrite</em> action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from “generalized additive Poisson time series regression” to the less verbose “Poisson regression”. Upon confirmation, the corresponding <code>tidyverse</code> code is generated, and users can download the edited table and incorporate the code into their R script.</p>
+<div id="cell-fig-shiny" class="cell">
+<div class="cell-output-display">
+<div id="fig-shiny" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-shiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/shiny.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition – expressed using dplyr::filter() syntax (e.g., paper == anderson2008size&quot;), (3) The user edits the model column to “Poisson regression” and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding tidyverse code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button."><img src="figures/shiny.png" class="img-fluid figure-img" width="3456"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shiny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition – expressed using <code>dplyr::filter()</code> syntax (e.g., <code>paper == anderson2008size"</code>), (3) The user edits the <code>model</code> column to “Poisson regression” and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding <code>tidyverse</code> code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button.
+</figcaption>
+</figure>
+</div>
+</div>
+<a class="quarto-notebook-link" id="nblink-1" href="index-preview.html#cell-fig-shiny">Source: Article Notebook</a></div>
 </section>
 <section id="decision-quality-summary" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</h2>
@@ -339,8 +355,10 @@ div.csl-indent {
 </ul>
 <section id="sensitivity-analysis" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sensitivity-analysis"><span class="header-section-number">3.1</span> Sensitivity analysis</h2>
+<p>sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters</p>
 <ul>
-<li>standard <code>BERT</code> <span class="citation" data-cites="devlin2019">(<a href="#ref-devlin2019" role="doc-biblioref">Devlin et al. 2019</a>)</span>, <code>Roberta</code> <span class="citation" data-cites="liu">(<a href="#ref-liu" role="doc-biblioref">Yinhan Liu et al., n.d.</a>)</span>: trained on a much larger dataset (160GB v.s. BERT’s 15GB), <code>transformer-xl</code> <span class="citation" data-cites="dai">(<a href="#ref-dai" role="doc-biblioref">Dai et al., n.d.</a>)</span>, <code>xlnet</code> by Google Brain<span class="citation" data-cites="yang">(<a href="#ref-yang" role="doc-biblioref">Yang et al., n.d.</a>)</span>, and two domain-trained BERT models: <code>sciBert</code> <span class="citation" data-cites="beltagy2019">(<a href="#ref-beltagy2019" role="doc-biblioref">Beltagy, Lo, and Cohan 2019</a>)</span> and <code>bioBert</code><span class="citation" data-cites="lee2020">(<a href="#ref-lee2020" role="doc-biblioref">Lee et al. 2020</a>)</span>, trained on PubMed and PMC data.</li>
+<li><p>standard <code>BERT</code> <span class="citation" data-cites="devlin2019">(<a href="#ref-devlin2019" role="doc-biblioref">Devlin et al. 2019</a>)</span>, <code>Roberta</code> <span class="citation" data-cites="liu">(<a href="#ref-liu" role="doc-biblioref">Yinhan Liu et al., n.d.</a>)</span>: trained on a much larger dataset (160GB v.s. BERT’s 15GB), <code>transformer-xl</code> <span class="citation" data-cites="dai">(<a href="#ref-dai" role="doc-biblioref">Dai et al., n.d.</a>)</span>, <code>xlnet</code> by Google Brain <span class="citation" data-cites="yang">(<a href="#ref-yang" role="doc-biblioref">Yang et al., n.d.</a>)</span>, and two domain-trained BERT models: <code>sciBert</code> <span class="citation" data-cites="beltagy2019">(<a href="#ref-beltagy2019" role="doc-biblioref">Beltagy, Lo, and Cohan 2019</a>)</span> and <code>bioBert</code><span class="citation" data-cites="lee2020">(<a href="#ref-lee2020" role="doc-biblioref">Lee et al. 2020</a>)</span>, trained on PubMed and PMC data.</p></li>
+<li><p>A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)</p></li>
 </ul>
 </section>
 </section>
@@ -362,6 +380,8 @@ div.csl-indent {
 <h1 data-number="5"><span class="header-section-number">5</span> Discussion</h1>
 <ul>
 <li>Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.</li>
+<li>people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.</li>
+<li>Validation of the output:</li>
 </ul>
 </section>
 <section id="reference" class="level1 unnumbered" data-number="6">
@@ -835,6 +855,38 @@ Yang, Zhilin, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan Salakhutdinov, an
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
