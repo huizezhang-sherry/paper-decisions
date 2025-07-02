@@ -93,6 +93,9 @@ div.csl-indent {
 <meta name="citation_reference" content="citation_title=XLNet: Generalized Autoregressive Pretraining for Language Understanding;,citation_author=Zhilin Yang;,citation_author=Zihang Dai;,citation_author=Yiming Yang;,citation_author=Jaime Carbonell;,citation_author=Ruslan Salakhutdinov;,citation_author=Quoc V. Le;,citation_doi=10.48550/arXiv.1906.08237;,citation_language=en;">
 <meta name="citation_reference" content="citation_title=Decision-making under uncertainty in research synthesis: Designing for the garden of forking paths;,citation_author=Alex Kale;,citation_author=Matthew Kay;,citation_author=Jessica Hullman;,citation_publication_date=2019-05-02;,citation_cover_date=2019-05-02;,citation_year=2019;,citation_fulltext_html_url=https://dl.acm.org/doi/10.1145/3290605.3300432;,citation_doi=10.1145/3290605.3300432;,citation_conference=Association for Computing Machinery;,citation_series_title=CHI ’19;">
 <meta name="citation_reference" content="citation_title=Futzing and moseying: Interviews with professional data analysts on exploration practices;,citation_author=Sara Alspaugh;,citation_author=Nava Zokaei;,citation_author=Andrea Liu;,citation_author=Cindy Jin;,citation_author=Marti A. Hearst;,citation_publication_date=2019-01;,citation_cover_date=2019-01;,citation_year=2019;,citation_fulltext_html_url=https://ieeexplore.ieee.org/document/8440815;,citation_issue=1;,citation_doi=10.1109/TVCG.2018.2865040;,citation_volume=25;,citation_journal_title=IEEE Transactions on Visualization and Computer Graphics;">
+<meta name="citation_reference" content="citation_title=The effects of components of fine particulate air pollution on mortality in california: Results from CALFINE;,citation_author=Bart Ostro;,citation_author=Wen-Ying Feng;,citation_author=Rachel Broadwin;,citation_author=Shelley Green;,citation_author=Michael Lipsett;,citation_publication_date=2007-01;,citation_cover_date=2007-01;,citation_year=2007;,citation_fulltext_html_url=https://ehp.niehs.nih.gov/doi/10.1289/ehp.9281;,citation_issue=1;,citation_doi=10.1289/ehp.9281;,citation_volume=115;,citation_journal_title=Environmental Health Perspectives;">
+<meta name="citation_reference" content="citation_title=Fine particulate air pollution and mortality in nine california counties: Results from CALFINE;,citation_author=Bart Ostro;,citation_author=Rachel Broadwin;,citation_author=Shelley Green;,citation_author=Wen-Ying Feng;,citation_author=Michael Lipsett;,citation_publication_date=2006-01;,citation_cover_date=2006-01;,citation_year=2006;,citation_fulltext_html_url=https://ehp.niehs.nih.gov/doi/10.1289/ehp.8335;,citation_issue=1;,citation_doi=10.1289/ehp.8335;,citation_volume=114;,citation_journal_title=Environmental Health Perspectives;">
+<meta name="citation_reference" content="citation_title=Confounding and effect modification in the short-term effects of ambient particles on total mortality: Results from 29 european cities within the APHEA2 project;,citation_author=Klea Katsouyanni;,citation_author=Giota Touloumi;,citation_author=Evangelia Samoli;,citation_author=Alexandros Gryparis;,citation_author=Alain Le Tertre;,citation_author=Yannis Monopolis;,citation_author=Giuseppe Rossi;,citation_author=Denis Zmirou;,citation_author=Ferran Ballester;,citation_author=Azedine Boumghar;,citation_author=Hugh Ross Anderson;,citation_author=Bogdan Wojtyniak;,citation_author=Anna Paldy;,citation_author=Rony Braunstein;,citation_author=Juha Pekkanen;,citation_author=Christian Schindler;,citation_author=Joel Schwartz;,citation_publication_date=2001-09;,citation_cover_date=2001-09;,citation_year=2001;,citation_fulltext_html_url=https://journals.lww.com/epidem/fulltext/2001/09000/confounding_and_effect_modification_in_the.11.aspx;,citation_issue=5;,citation_volume=12;,citation_language=en-US;,citation_journal_title=Epidemiology;">
 </head>
 
 <body class="quarto-light">
@@ -156,24 +159,21 @@ div.csl-indent {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">2</span> Background</a>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">2</span> Background</a></li>
+  <li><a href="#extracting-decisions-from-data-analysis" id="toc-extracting-decisions-from-data-analysis" class="nav-link" data-scroll-target="#extracting-decisions-from-data-analysis"><span class="header-section-number">3</span> Extracting decisions from data analysis</a>
   <ul class="collapse">
-  <li><a href="#recording-decisions-in-data-analysis" id="toc-recording-decisions-in-data-analysis" class="nav-link" data-scroll-target="#recording-decisions-in-data-analysis"><span class="header-section-number">2.1</span> Recording decisions in data analysis</a></li>
-  <li><a href="#automatic-reading-of-literature-with-llm" id="toc-automatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</a></li>
-  <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</a></li>
-  <li><a href="#decision-quality-summary" id="toc-decision-quality-summary" class="nav-link" data-scroll-target="#decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</a></li>
+  <li><a href="#sec-decisions" id="toc-sec-decisions" class="nav-link" data-scroll-target="#sec-decisions"><span class="header-section-number">3.1</span> Decisions in data analysis</a></li>
+  <li><a href="#automatic-reading-of-literature-with-llm" id="toc-automatic-reading-of-literature-with-llm" class="nav-link" data-scroll-target="#automatic-reading-of-literature-with-llm"><span class="header-section-number">3.2</span> Automatic reading of literature with LLM</a></li>
+  <li><a href="#review-the-llm-output" id="toc-review-the-llm-output" class="nav-link" data-scroll-target="#review-the-llm-output"><span class="header-section-number">3.3</span> Review the LLM output</a></li>
   </ul></li>
-  <li><a href="#calculate-paper-similarity" id="toc-calculate-paper-similarity" class="nav-link" data-scroll-target="#calculate-paper-similarity"><span class="header-section-number">3</span> Calculate paper similarity</a>
+  <li><a href="#calculating-paper-similarity" id="toc-calculating-paper-similarity" class="nav-link" data-scroll-target="#calculating-paper-similarity"><span class="header-section-number">4</span> Calculating paper similarity</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">5</span> Results</a>
   <ul class="collapse">
-  <li><a href="#sensitivity-analysis" id="toc-sensitivity-analysis" class="nav-link" data-scroll-target="#sensitivity-analysis"><span class="header-section-number">3.1</span> Sensitivity analysis</a></li>
+  <li><a href="#sec-result" id="toc-sec-result" class="nav-link" data-scroll-target="#sec-result"><span class="header-section-number">5.1</span> Air pollution mortality modelling</a></li>
+  <li><a href="#sec-sensitivity" id="toc-sec-sensitivity" class="nav-link" data-scroll-target="#sec-sensitivity"><span class="header-section-number">5.2</span> Sensitivity analysis</a></li>
   </ul></li>
-  <li><a href="#applications" id="toc-applications" class="nav-link" data-scroll-target="#applications"><span class="header-section-number">4</span> Applications</a>
-  <ul class="collapse">
-  <li><a href="#air-pollution-mortality-modelling" id="toc-air-pollution-mortality-modelling" class="nav-link" data-scroll-target="#air-pollution-mortality-modelling"><span class="header-section-number">4.1</span> Air pollution mortality modelling</a></li>
-  <li><a href="#species-distribution-modelling" id="toc-species-distribution-modelling" class="nav-link" data-scroll-target="#species-distribution-modelling"><span class="header-section-number">4.2</span> Species distribution modelling</a></li>
-  </ul></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">6</span> Reference</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">6</span> Discussion</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">7</span> Reference</a></li>
   </ul>
 <div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="appendix/appendix-preview.html"><i class="bi bi-journal-code"></i>Appendix to "Analysing decisions in data analysis"</a></li><li><a href="index-preview.html"><i class="bi bi-journal-code"></i>Article Notebook</a></li></ul></div></nav>
 </div>
@@ -208,18 +208,19 @@ div.csl-indent {
 <li><span class="citation" data-cites="liu2020">Yang Liu, Althoff, and Heer (<a href="#ref-liu2020" role="doc-biblioref">2020</a>)</span> provides visualization to communicate the decision processes through the Analytic Decision Graphs (ADG)</li>
 <li><span class="citation" data-cites="simson2025">Simson et al. (<a href="#ref-simson2025" role="doc-biblioref">2025</a>)</span> conducts a participatory AI study to demonstrate the “garden of forking paths” of decisions in data analysis and how it affects ML fairness</li>
 </ul>
-<section id="recording-decisions-in-data-analysis" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="recording-decisions-in-data-analysis"><span class="header-section-number">2.1</span> Recording decisions in data analysis</h2>
+</section>
+<section id="extracting-decisions-from-data-analysis" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Extracting decisions from data analysis</h1>
+<section id="sec-decisions" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-decisions"><span class="header-section-number">3.1</span> Decisions in data analysis</h2>
 <ul>
-<li>give example from extracting decision from sentences of a paper</li>
-<li>adapt from the tidy data principle - each row is a decision <span class="citation" data-cites="wickham2014">Wickham (<a href="#ref-wickham2014" role="doc-biblioref">2014</a>)</span><br>
-</li>
+<li>what constitute a decision in data analysis</li>
+<li>adapt from the tidy data principle - each row is a decision <span class="citation" data-cites="wickham2014">Wickham (<a href="#ref-wickham2014" role="doc-biblioref">2014</a>)</span></li>
 <li>some decisions are related to how the variable is estimated spatially and temporally</li>
 <li>model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)</li>
-<li>sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)</li>
-<li>sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom)</li>
+<li>extract the exact text from the paper</li>
 </ul>
-<p>A hypothetical database of decisions may look as follows:</p>
+<p>An example decisions may look as follows:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 11%">
@@ -292,25 +293,44 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
+<p>However, decisions statements are often implicit, and the justifications may not directly align with the decisions themselves. We identify four common anomalies:</p>
+<ol type="1">
+<li><strong>Authors may combine multiple decisions into a single sentence</strong> for coherence and conciseness of the writing. Consider the following excerpt from <span class="citation" data-cites="ostro2006">Ostro et al. (<a href="#ref-ostro2006" role="doc-biblioref">2006</a>)</span>:</li>
+</ol>
+<blockquote class="blockquote">
+<p>Other covariates, such as day of the week and smoothing splines of 1-day lags of average temperature and humidity (each with 3 df), were also included in the model because they may be associated with daily mortality and are likely to vary over time in concert with air pollution levels.</p>
+</blockquote>
+<p>This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity. These decisions should be structured as separate entries.</p>
+<ol start="2" type="1">
+<li><p><strong>The justification does not directly address the decision choice.</strong> In the example above, the stated rationale (“and are likely to vary over time in concert with air pollution levels”) supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over alternatives, such as 2-day average of lags 0 and 1 (lag01) and single-day lag of 2 days (lag2). As such, the reason field should be recorded as NA.</p></li>
+<li><p><strong>Some decisions may be omitted because they are data-driven</strong>. For instance, <span class="citation" data-cites="katsouyanni2001">Katsouyanni et al. (<a href="#ref-katsouyanni2001" role="doc-biblioref">2001</a>)</span> states:</p></li>
+</ol>
+<blockquote class="blockquote">
+<p>The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion.</p>
+</blockquote>
+<p>In this case, while the method of selection (minimizing AIC) is specified, the actual degree of freedom used is not. Such data-driven decisions may be recorded with “NA” in the decision field, but the reason field should still be recorded as “by minimizing Akaike’s information criterion”</p>
+<ol start="4" type="1">
+<li><strong>Information required to interpret the decision may be distributed across multiple sections</strong>. In the previous example, “weather variables” refers to mean temperature and relative humidity, as defined earlier in the text. This requires cross-referencing across sections to identify the correct variables associated with each modeling choice.</li>
+</ol>
+<!-- | Paper | ID | Model | variable | method | parameter | type | reason | decision | -->
+<!-- |-----|--|--------|--------|--------|--------|--------|--------|--------| -->
+<!-- | ostro | xx | Poisson regression | temperature | smoothing spline | degree of freedom | parameter | NA | 3 df | -->
+<!-- | ostro | xx | Poisson regression | temperature | NA | NA | temporal | NA | 1-day lag | -->
+<!-- | ostro | xx | Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | NA | 4 df | -->
+<!-- | ostro | xx | Poisson regression | relative humidity | NA | NA | temporal | NA | 1-day lag | -->
+<!-- | katsouyanni2001 | xx | generalized additive models (GAM) Poisson regression | mean temperature | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
+<!-- | katsouyanni2001 | xx | generalized additive models (GAM)  Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
 </section>
-<section id="automatic-reading-of-literature-with-llm" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="automatic-reading-of-literature-with-llm"><span class="header-section-number">2.2</span> Automatic reading of literature with LLM</h2>
-<ul>
-<li>We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini’s output. See the section sensitivity analysis for the comparison of the two models.</li>
-<li>Claude is decoder only, Gemini is an encoder–decoder model
-<ul>
-<li>these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction</li>
-</ul></li>
-<li>prompt: instruct the LLM to produce a markdown file with decisions included in a JSON block with the fields described in Section xxx</li>
-<li>use the <code>ellmer</code> package <span class="citation" data-cites="ellmer">(<a href="#ref-ellmer" role="doc-biblioref">Wickham, Cheng, and Jacobs 2025</a>)</span> to connect to Gemini API to process the pdf documents in R.</li>
-<li>experiment with seed and temperature</li>
-<li>Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.</li>
-</ul>
+<section id="automatic-reading-of-literature-with-llm" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="automatic-reading-of-literature-with-llm"><span class="header-section-number">3.2</span> Automatic reading of literature with LLM</h2>
+<p>While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text [ref]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.</p>
+<p>Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text – capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The <code>ellmer</code> package <span class="citation" data-cites="ellmer">(<a href="#ref-ellmer" role="doc-biblioref">Wickham, Cheng, and Jacobs 2025</a>)</span> in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs. <strong>?@fig-llm</strong> shows the overall workflow for decision extract using LLMs.</p>
 </section>
-<section id="review-the-llm-output" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="review-the-llm-output"><span class="header-section-number">2.3</span> Review the LLM output</h2>
+<section id="review-the-llm-output" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="review-the-llm-output"><span class="header-section-number">3.3</span> Review the LLM output</h2>
 <ul>
 <li>something about result validation of LLM output</li>
+<li>The sensitivity of the two models to the prompt and the model parameters, such as temperature and seed, is discussed in <a href="#sec-sensitivity" class="quarto-xref">Section&nbsp;5.2</a>.</li>
 </ul>
 <p>The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) <em>overwrite</em> – modify the content of a particular cell, equivalently <code>dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))</code>, 2) <em>delete</em> – remove a particular cell, <code>dplyr::filter(!(CONDITION))</code>, and 3) <em>add</em> – manually enter a decision, <code>dplyr::bind_rows()</code>. <a href="#fig-shiny" class="quarto-xref">Figure&nbsp;1</a> illustrates the <em>overwrite</em> action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from “generalized additive Poisson time series regression” to the less verbose “Poisson regression”. Upon confirmation, the corresponding <code>tidyverse</code> code is generated, and users can download the edited table and incorporate the code into their R script.</p>
 <div id="cell-fig-shiny" class="cell">
@@ -328,12 +348,9 @@ Figure&nbsp;1: The Shiny application interface for editting Large Language Model
 </div>
 <a class="quarto-notebook-link" id="nblink-1" href="index-preview.html#cell-fig-shiny">Source: Article Notebook</a></div>
 </section>
-<section id="decision-quality-summary" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="decision-quality-summary"><span class="header-section-number">2.4</span> Decision quality summary</h2>
 </section>
-</section>
-<section id="calculate-paper-similarity" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Calculate paper similarity</h1>
+<section id="calculating-paper-similarity" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Calculating paper similarity</h1>
 <ul>
 <li>pre-processing
 <ul>
@@ -353,8 +370,22 @@ Figure&nbsp;1: The Shiny application interface for editting Large Language Model
 </ul></li>
 <li>similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices</li>
 </ul>
-<section id="sensitivity-analysis" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="sensitivity-analysis"><span class="header-section-number">3.1</span> Sensitivity analysis</h2>
+</section>
+<section id="results" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Results</h1>
+<section id="sec-result" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-result"><span class="header-section-number">5.1</span> Air pollution mortality modelling</h2>
+<p>Decision quality summary</p>
+<ul>
+<li>look at for one type of decision (time) - what are the choices made by different papers</li>
+<li>look at whether decisions changes across time</li>
+<li>Visualize the decision database: apply clustering algorithm and visualize the database through <code>sigma.js</code></li>
+</ul>
+</section>
+<section id="sec-sensitivity" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-sensitivity"><span class="header-section-number">5.2</span> Sensitivity analysis</h2>
+<!-- -   Claude is decoder only, Gemini is an encoder–decoder model -->
+<!--     -   these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction -->
 <p>sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters</p>
 <ul>
 <li><p>standard <code>BERT</code> <span class="citation" data-cites="devlin2019">(<a href="#ref-devlin2019" role="doc-biblioref">Devlin et al. 2019</a>)</span>, <code>Roberta</code> <span class="citation" data-cites="liu">(<a href="#ref-liu" role="doc-biblioref">Yinhan Liu et al., n.d.</a>)</span>: trained on a much larger dataset (160GB v.s. BERT’s 15GB), <code>transformer-xl</code> <span class="citation" data-cites="dai">(<a href="#ref-dai" role="doc-biblioref">Dai et al., n.d.</a>)</span>, <code>xlnet</code> by Google Brain <span class="citation" data-cites="yang">(<a href="#ref-yang" role="doc-biblioref">Yang et al., n.d.</a>)</span>, and two domain-trained BERT models: <code>sciBert</code> <span class="citation" data-cites="beltagy2019">(<a href="#ref-beltagy2019" role="doc-biblioref">Beltagy, Lo, and Cohan 2019</a>)</span> and <code>bioBert</code><span class="citation" data-cites="lee2020">(<a href="#ref-lee2020" role="doc-biblioref">Lee et al. 2020</a>)</span>, trained on PubMed and PMC data.</p></li>
@@ -362,34 +393,21 @@ Figure&nbsp;1: The Shiny application interface for editting Large Language Model
 </ul>
 </section>
 </section>
-<section id="applications" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Applications</h1>
-<section id="air-pollution-mortality-modelling" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="air-pollution-mortality-modelling"><span class="header-section-number">4.1</span> Air pollution mortality modelling</h2>
-<ul>
-<li>look at for one type of decision (time) - what are the choices made by different papers</li>
-<li>look at whether decisions changes across time</li>
-<li>Visualize the decision database: apply clustering algorithm and visualize the database through <code>sigma.js</code></li>
-</ul>
-</section>
-<section id="species-distribution-modelling" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="species-distribution-modelling"><span class="header-section-number">4.2</span> Species distribution modelling</h2>
-</section>
-</section>
-<section id="discussion" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Discussion</h1>
+<section id="discussion" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Discussion</h1>
 <ul>
 <li>Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.</li>
 <li>people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.</li>
 <li>Validation of the output:</li>
 </ul>
+<p>the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.</p>
 </section>
-<section id="reference" class="level1 unnumbered" data-number="6">
+<section id="reference" class="level1 unnumbered" data-number="7">
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 Reference</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">7 Reference</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-alspaugh2019" class="csl-entry" role="listitem">
 Alspaugh, Sara, Nava Zokaei, Andrea Liu, Cindy Jin, and Marti A. Hearst. 2019. <span>“Futzing and Moseying: Interviews with Professional Data Analysts on Exploration Practices.”</span> <em>IEEE Transactions on Visualization and Computer Graphics</em> 25 (1): 22–31. <a href="https://doi.org/10.1109/TVCG.2018.2865040">https://doi.org/10.1109/TVCG.2018.2865040</a>.
 </div>
@@ -426,6 +444,9 @@ Jun, Eunice, Melissa Birchfield, Nicole De Moura, Jeffrey Heer, and René Just. 
 <div id="ref-kale2019" class="csl-entry" role="listitem">
 Kale, Alex, Matthew Kay, and Jessica Hullman. 2019. <span>“Decision-Making Under Uncertainty in Research Synthesis: Designing for the Garden of Forking Paths.”</span> In, 114. CHI ’19. New York, NY, USA: Association for Computing Machinery. <a href="https://doi.org/10.1145/3290605.3300432">https://doi.org/10.1145/3290605.3300432</a>.
 </div>
+<div id="ref-katsouyanni2001" class="csl-entry" role="listitem">
+Katsouyanni, Klea, Giota Touloumi, Evangelia Samoli, Alexandros Gryparis, Alain Le Tertre, Yannis Monopolis, Giuseppe Rossi, et al. 2001. <span>“Confounding and Effect Modification in the Short-Term Effects of Ambient Particles on Total Mortality: Results from 29 European Cities Within the APHEA2 Project.”</span> <em>Epidemiology</em> 12 (5): 521. <a href="https://journals.lww.com/epidem/fulltext/2001/09000/confounding_and_effect_modification_in_the.11.aspx">https://journals.lww.com/epidem/fulltext/2001/09000/confounding_and_effect_modification_in_the.11.aspx</a>.
+</div>
 <div id="ref-lee2020" class="csl-entry" role="listitem">
 Lee, Jinhyuk, Wonjin Yoon, Sungdong Kim, Donghyeon Kim, Sunkyu Kim, Chan Ho So, and Jaewoo Kang. 2020. <span>“BioBERT: A Pre-Trained Biomedical Language Representation Model for Biomedical Text Mining.”</span> Edited by Jonathan Wren. <em>Bioinformatics</em> 36 (4): 1234–40. <a href="https://doi.org/10.1093/bioinformatics/btz682">https://doi.org/10.1093/bioinformatics/btz682</a>.
 </div>
@@ -434,6 +455,9 @@ Liu, Yang, Tim Althoff, and Jeffrey Heer. 2020. <span>“Paths Explored, Paths O
 </div>
 <div id="ref-liu" class="csl-entry" role="listitem">
 Liu, Yinhan, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. n.d. <span>“RoBERTa: A Robustly Optimized BERT Pretraining Approach.”</span> <a href="https://doi.org/10.48550/arXiv.1907.11692">https://doi.org/10.48550/arXiv.1907.11692</a>.
+</div>
+<div id="ref-ostro2006" class="csl-entry" role="listitem">
+Ostro, Bart, Rachel Broadwin, Shelley Green, Wen-Ying Feng, and Michael Lipsett. 2006. <span>“Fine Particulate Air Pollution and Mortality in Nine California Counties: Results from CALFINE.”</span> <em>Environmental Health Perspectives</em> 114 (1): 29–33. <a href="https://doi.org/10.1289/ehp.8335">https://doi.org/10.1289/ehp.8335</a>.
 </div>
 <div id="ref-sarstedt2024" class="csl-entry" role="listitem">
 Sarstedt, Marko, Susanne J. Adler, Christian M. Ringle, Gyeongcheol Cho, Adamantios Diamantopoulos, Heungsun Hwang, and Benjamin D. Liengaard. 2024. <span>“Same Model, Same Data, but Different Outcomes: Evaluating the Impact of Method Choices in Structural Equation Modeling.”</span> <em>Journal of Product Innovation Management</em> 41 (6): 1100–1117. <a href="https://doi.org/10.1111/jpim.12738">https://doi.org/10.1111/jpim.12738</a>.

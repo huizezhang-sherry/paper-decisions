@@ -40,16 +40,17 @@ Study decisions in data analysis:
 -   @liu2020 provides visualization to communicate the decision processes through the Analytic Decision Graphs (ADG)
 -   @simson2025 conducts a participatory AI study to demonstrate the "garden of forking paths" of decisions in data analysis and how it affects ML fairness
 
-## Recording decisions in data analysis
+# Extracting decisions from data analysis
 
--   give example from extracting decision from sentences of a paper
--   adapt from the tidy data principle - each row is a decision @wickham2014\
--   some decisions are related to how the variable is estimated spatially and temporally
--   model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
--   sometimes the decisions are not explicitly stated in the paper (use AIC to choose the degree of freedom in a smoothing spline)
--   sometimes the reason is not explicitly stated (e.g., why 3 degree of freedom)
+## Decisions in data analysis {#sec-decisions}
 
-A hypothetical database of decisions may look as follows:
+- what constitute a decision in data analysis 
+- adapt from the tidy data principle - each row is a decision @wickham2014
+- some decisions are related to how the variable is estimated spatially and temporally
+- model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
+- extract the exact text from the paper
+
+An example decisions may look as follows:
 
 | Paper | ID | Model | variable | method | parameter | type | reason | decision |
 |--------|--------|--------|--------|--------|--------|--------|--------|--------|
@@ -58,19 +59,44 @@ A hypothetical database of decisions may look as follows:
 | ostro | 3 | Poisson regression | relative humidity | LOESS | smoothing parameter | parameter | to minimize Akaike's Information Criterion | NA |
 | ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city |
 
+However, decisions statements are often implicit, and the justifications may not directly align with the decisions themselves. We identify four common anomalies: 
+
+1. **Authors may combine multiple decisions into a single sentence** for coherence and conciseness of the writing. Consider the following excerpt from @ostro2006:
+
+> Other covariates, such as day of the week and smoothing splines of 1-day lags of average temperature and humidity (each with 3 df), were also included in the model because they may be associated with daily mortality and are likely to vary over time in concert with air pollution levels.
+
+This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity. These decisions should be structured as separate entries. 
+
+2. **The justification does not directly address the decision choice.** In the example above, the stated rationale ("and are likely to vary over time in concert with air pollution levels") supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over alternatives, such as 2-day average of lags 0 and 1 (lag01) and single-day lag of 2 days (lag2). As such, the reason field should be recorded as NA.
+
+3. **Some decisions may be omitted because they are data-driven**. For instance, @katsouyanni2001 states:
+
+> The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion.
+
+In this case, while the method of selection (minimizing AIC) is specified, the actual degree of freedom used is not. Such data-driven decisions may be recorded with "NA" in the decision field, but the reason field should still be recorded as "by minimizing Akaike’s information criterion"
+
+4. **Information required to interpret the decision may be distributed across multiple sections**. In the previous example, "weather variables" refers to mean temperature and relative humidity, as defined earlier in the text. This requires cross-referencing across sections to identify the correct variables associated with each modeling choice.
+
+
+<!-- | Paper | ID | Model | variable | method | parameter | type | reason | decision | -->
+<!-- |-----|--|--------|--------|--------|--------|--------|--------|--------| -->
+<!-- | ostro | xx | Poisson regression | temperature | smoothing spline | degree of freedom | parameter | NA | 3 df | -->
+<!-- | ostro | xx | Poisson regression | temperature | NA | NA | temporal | NA | 1-day lag | -->
+<!-- | ostro | xx | Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | NA | 4 df | -->
+<!-- | ostro | xx | Poisson regression | relative humidity | NA | NA | temporal | NA | 1-day lag | -->
+<!-- | katsouyanni2001 | xx | generalized additive models (GAM) Poisson regression | mean temperature | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
+<!-- | katsouyanni2001 | xx | generalized additive models (GAM)  Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
+
 ## Automatic reading of literature with LLM
 
--   We use LLM to automatic process the literature to output analysis decisions. Currently, two LLMs, Antropic Claude and Google Gemini, are able to take input of pdf documents and the results reported in this paper is based on Gemini's output. See the section sensitivity analysis for the comparison of the two models.
--   Claude is decoder only, Gemini is an encoder–decoder model
-    -   these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction
--   prompt: instruct the LLM to produce a markdown file with decisions included in a JSON block with the fields described in Section xxx
--   use the `ellmer` package [@ellmer] to connect to Gemini API to process the pdf documents in R.
--   experiment with seed and temperature
--   Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
+While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes. 
+
+Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs. @fig-llm shows the overall workflow for decision extract using LLMs.
 
 ## Review the LLM output
 
 - something about result validation of LLM output
+- The sensitivity of the two models to the prompt and the model parameters, such as temperature and seed, is discussed in @sec-sensitivity. 
 
 The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) *overwrite* -- modify the content of a particular cell, equivalently `dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`, 2) *delete* -- remove a particular cell, `dplyr::filter(!(CONDITION))`, and 3) *add* -- manually enter a decision, `dplyr::bind_rows()`. @fig-shiny illustrates the *overwrite* action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from "generalized additive Poisson time series regression" to the less verbose "Poisson regression". Upon confirmation, the corresponding `tidyverse` code is generated, and users can download the edited table and incorporate the code into their R script.
 
@@ -81,9 +107,7 @@ The shiny app is designed to provide users a visual interface to review and edit
 knitr::include_graphics("figures/shiny.png")
 ```
 
-## Decision quality summary
-
-# Calculate paper similarity
+# Calculating paper similarity
 
 -   pre-processing
     -   standardize statistical methods its corresponding parameters (LOESS, smoothing spline, etc)
@@ -97,28 +121,33 @@ knitr::include_graphics("figures/shiny.png")
     -   check/ report on the number of decisions compared in each paper pair
 -   similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices
 
-## Sensitivity analysis
+# Results
 
-sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
+## Air pollution mortality modelling {#sec-result}
 
--   standard `BERT` [@devlin2019], `Roberta` [@liu]: trained on a much larger dataset (160GB v.s. BERT's 15GB), `transformer-xl` [@dai], `xlnet` by Google Brain [@yang], and two domain-trained BERT models: `sciBert` [@beltagy2019] and `bioBert`[@lee2020], trained on PubMed and PMC data.
-
-- A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
-
-# Applications
-
-## Air pollution mortality modelling
+Decision quality summary
 
 -   look at for one type of decision (time) - what are the choices made by different papers
 -   look at whether decisions changes across time
 -   Visualize the decision database: apply clustering algorithm and visualize the database through `sigma.js`
 
-## Species distribution modelling
+## Sensitivity analysis {#sec-sensitivity}
+
+<!-- -   Claude is decoder only, Gemini is an encoder–decoder model -->
+<!--     -   these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction -->
+
+sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
+
+-   standard `BERT` [@devlin2019], `Roberta` [@liu]: trained on a much larger dataset (160GB v.s. BERT's 15GB), `transformer-xl` [@dai], `xlnet` by Google Brain [@yang], and two domain-trained BERT models: `sciBert` [@beltagy2019] and `bioBert`[@lee2020], trained on PubMed and PMC data.
+
+-   A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 
 # Discussion
 
 -   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
 -   Validation of the output:
+
+the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching. 
 
 # Reference
