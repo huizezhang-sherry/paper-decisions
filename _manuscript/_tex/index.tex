@@ -304,26 +304,90 @@ bla blabla
 
 \setlength{\parskip}{-0.1pt}
 
+\begin{itemize}
+\tightlist
+\item
+  Something about ``analysis review'' - Roger thinks it's a better to
+  have a new word for this.
+\item
+  provide a baseline understand - place to start
+\item
+  demonstrate - analytically homogeneous - the table won't look like
+  that
+\end{itemize}
+
 \section{Introduction}\label{introduction}
 
-Something about ``analysis review'' - Roger thinks it's a better to have
-a new word for this.
+Decisions are everywhere in data analysis, from the initial data
+collection, data pre-processing to the modelling choices. These
+decisions will impact the final output of the data analysis, which may
+lead to different conclusions and policy recommendations. When such
+flexibility can be misused---through practices such as p-hacking,
+selective reporting, or unjustified analytical adjustments---it can
+inflate effect sizes or produce misleading results that meet
+conventional thresholds for statistical significance. They have been
+demonstrated through many-analysts experiments, where independent teams
+analyzing the same dataset to answer a pre-defined research question
+often arrive at markedly different conclusions. These practices not only
+compromise the validity of individual studies but also threaten the
+broader credibility of statistical analysis and scientific research as a
+whole.
 
-provide a baseline understand - place to start
+Multiple recommendations have been proposed to improve data analysis
+practices, such as pre-registration and multiverse analysis. Bayesian
+methods also offer a different paradigm to p-value driven inference for
+interpreting statistical evidence. Most empirical studies of data
+analysis practices focus on specially designed and simplified analysis
+scenarios. While informative, these setups may not adequately capture
+the complexity of the data analysis with significant policy
+implications. {[}In practice, studying the data analysis decisions with
+actual applications is challenging.{]} Analysts may no longer be
+available for interviews due to job changes, and even when they are,
+recalling the full set of decisions and thinking process made during the
+analysis is often infeasible. Moreover, only until the last decades,
+analysis scripts and reproducible materials were not commonly required
+by journals for publishing. {[}As a result, it remains challenging to
+study how analytical decisions are made. {]}
 
-demonstrate - analytically homogeneous - the table won't look like that
+In this work, we focus on a specific class of air pollution modelling
+studies that estimate the effect size of particulate matter (PM2.5 or
+PM10) on mortality, typically using Poisson regression or generalized
+additive models (GAMs). While individual modelling choices vary, these
+studies often share a common structure: they adjust for meteorological
+covariates such as temperature and humidity, apply temporal or spatial
+treatments, like including lagged variables and may estimate the effect
+by city or region before combining results. Because these studies
+investigate similar scientific questions using a shared modelling
+framework, they form a natural many-analyst setting. This allows us to
+examine, in a real-world context, the range of analytical decisions made
+by different researchers addressing the same underlying question.
 
-In this work, we design a tabular format to record the choices made by
-analysts during data analysis. Using large language models, we
-automatically extract these choices from a set of research papers
-focused on specific topics, e.g.~air pollution modelling. This allows us
-to analyze these choices as data -- tracking how they've changed over
-time or query the possible methodologies used in similar studies. We
-also introduce a workflow to cluster paper based on decision similarity,
-using both the decisions themselves and the justifications authors
-provide for their choices.
+In this work, we develop a structured tabular format to record the
+analytical decisions made by researchers in the air pollution modelling
+literature. Using large language models (LLMs), we automate the
+extraction of these decisions from published papers. This allows us to
+treat decisions as data -- allowing us to track them over time, compare
+methodology across papers, and query commonly used approaches. We
+further introduce a workflow to cluster studies based on decision
+similarity, revealing three distinct groups of papers that reflect the
+modelling strategies differs in the European and U.S. studies, which
+offers a new way to visualize the field in the air pollution mortality
+modelling.
 
-\section{Background}\label{background}
+The rest of the paper is organized as follows. In
+Section~\ref{sec-background}, we review the background on data analysis
+decisions. Section~\ref{sec-extract-decisions} describes the data
+structure for recording decisions, the use of large language models to
+process research papers, and the validation of LLM outputs. In
+Section~\ref{sec-paper-similarity}, we present the method for
+calculating paper similarity based on decision similarities.
+Section~\ref{sec-result} reports the finding of our analysis, including
+the clustering of papers according to similarity scores and sensitivity
+analyses related to LLM providers, prompt engineering, and LLM
+parameters. Finally, Section~\ref{sec-discussion} discusses the
+implications of our study.
+
+\section{Background}\label{sec-background}
 
 Data analysis as an complicated, iterative process to make sense
 {[}ref{]} of the data collected. The iterative process of formulating
@@ -387,17 +451,21 @@ Study decisions in data analysis:
 \end{itemize}
 
 \section{Extracting decisions from data
-analysis}\label{extracting-decisions-from-data-analysis}
+analysis}\label{sec-extract-decisions}
 
 \subsection{Decisions in data analysis}\label{sec-decisions}
+
+To record these decisions in a data structure, the tidy data principle
+\citet{wickham2014} provides the guidance on how to structure the data
+where each variable should be in a column, each observation in a row. In
+the context of decisions made during data analysis, we adapt this
+principle to mean that each row represents a decision made by the
+authors of a paper and a paper often spans multiple decisions.
 
 \begin{itemize}
 \tightlist
 \item
   what constitute a decision in data analysis
-\item
-  adapt from the tidy data principle - each row is a decision
-  \citet{wickham2014}
 \item
   some decisions are related to how the variable is estimated spatially
   and temporally
@@ -601,8 +669,7 @@ the Download CSV button.}
 \href{https://huizezhang-sherry.github.io/paper-decisions/index.qmd.html}{Article
 Notebook}}
 
-\section{Calculating paper
-similarity}\label{calculating-paper-similarity}
+\section{Calculating paper similarity}\label{sec-paper-similarity}
 
 \begin{itemize}
 \tightlist
@@ -635,7 +702,7 @@ similarity}\label{calculating-paper-similarity}
   \end{itemize}
 \item
   compute paper similarity score for each paper pair by aggregating
-  decision-level compoarisons
+  decision-level comparisons
 
   \begin{itemize}
   \tightlist
@@ -647,9 +714,10 @@ similarity}\label{calculating-paper-similarity}
   their similarity on decision choices
 \end{itemize}
 
-\section{Results}\label{results}
+\section{Results}\label{sec-result}
 
-\subsection{Air pollution mortality modelling}\label{sec-result}
+\subsection{Air pollution mortality
+modelling}\label{air-pollution-mortality-modelling}
 
 Decision quality summary
 
@@ -683,7 +751,7 @@ parameters
   there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 \end{itemize}
 
-\section{Discussion}\label{discussion}
+\section{Discussion}\label{sec-discussion}
 
 \begin{itemize}
 \tightlist

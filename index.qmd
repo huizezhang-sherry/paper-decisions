@@ -68,7 +68,7 @@ acm-metadata:
    \ccsdesc[300]{Applied computing~Document analysis}
    \ccsdesc[500]{Applied computing~Environmental sciences}
    \ccsdesc[500]{Human-centered computing~HCI theory, concepts and models}
-ch
+
   keywords:
     - Large language models
     
@@ -80,19 +80,27 @@ ch
   #   description: teaser description
 ---
 
+* Something about "analysis review" - Roger thinks it's a better to have a new word for this.
+ * provide a baseline understand - place to start
+ * demonstrate - analytically homogeneous - the table won't look like that
+
 # Introduction
 
-Something about "analysis review" - Roger thinks it's a better to have a new word for this.
+Decisions are everywhere in data analysis, from the initial data collection, data pre-processing to the modelling choices. These decisions will impact the final output of the data analysis, which may lead to different conclusions and policy recommendations. When such flexibility can be misused—through practices such as p-hacking, selective reporting, or unjustified analytical adjustments—it can inflate effect sizes or produce misleading results that meet conventional thresholds for statistical significance. They have been demonstrated through many-analysts experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. These practices not only compromise the validity of individual studies but also threaten the broader credibility of statistical analysis and scientific research as a whole.
 
-provide a baseline understand - place to start
+Multiple recommendations have been proposed to improve data analysis practices, such as pre-registration and multiverse analysis. Bayesian methods also offer a different paradigm to p-value driven inference for interpreting statistical evidence. Most empirical studies of data analysis practices focus on specially designed and simplified analysis scenarios. While informative, these setups may not adequately capture the complexity of the data analysis with significant policy implications. [In practice, studying the data analysis decisions with actual applications is challenging.] Analysts may no longer be available for interviews due to job changes, and even when they are, recalling the full set of decisions and thinking process made during the analysis is often infeasible. Moreover, only until the last decades, analysis scripts and reproducible materials were not commonly required by journals for publishing. [As a result, it remains challenging to study how analytical decisions are made. ]
 
-demonstrate - analytically homogeneous - the table won't look like that
+In this work, we focus on a specific class of air pollution modelling studies that estimate the effect size of particulate matter (PM2.5 or PM10) on mortality, typically using Poisson regression or generalized additive models (GAMs). While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question. 
 
-In this work, we design a tabular format to record the choices made by analysts during data analysis. Using large language models, we automatically extract these choices from a set of research papers focused on specific topics, e.g. air pollution modelling. This allows us to analyze these choices as data – tracking how they've changed over time or query the possible methodologies used in similar studies. We also introduce a workflow to cluster paper based on decision similarity, using both the decisions themselves and the justifications authors provide for their choices.
+<!-- This class of studies has significant impact to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants in the U.S.  -->
 
-# Background
+In this work, we develop a structured tabular format to record the analytical decisions  made by researchers in the air pollution modelling literature. Using large language models (LLMs), we automate the extraction of these decisions from published papers. This allows us to treat decisions as data – allowing us to track them over time, compare methodology across papers, and query commonly used approaches. We further introduce a workflow to cluster studies based on decision similarity, revealing three distinct groups of papers that reflect the modelling strategies differs in the European and U.S. studies, which offers a new way to visualize the field in the air pollution mortality modelling.
 
-Data analysis as an complicated, iterative process to make sense \[ref\] of the data collected. The iterative process of formulating hypothesis @jun2022.
+The rest of the paper is organized as follows. In @sec-background, we review the background on data analysis decisions. @sec-extract-decisions describes the data structure for recording decisions, the use of large language models to process research papers, and the  validation of LLM outputs. In @sec-paper-similarity, we present the method for calculating paper similarity based on decision similarities. @sec-result reports the finding of our analysis, including the clustering of papers according to similarity scores and sensitivity analyses related to LLM providers, prompt engineering, and LLM parameters. Finally, @sec-discussion discusses the implications of our study.
+
+# Background {#sec-background}
+
+<!-- Data analysis as an complicated, iterative process to make sense \[ref\] of the data collected. The iterative process of formulating hypothesis @jun2022. -->
 
 Choices are made at nearly every stage of data analysis, ranging from variable pre-processing variables, variable and lag selection in model formulation, to the specification of smoothing parameter during model construction. These possible choices contribute to what @gelman2014 describe as the "garden of forking paths". These choices can introduce substantial variability in results, which has been demonstrated in many-analyst experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. A prominent example is @silberzahn2018 where researchers reported a wide range of point estimates and 95% confidence intervals for the effect of soccer players’ skin tone on the number of red cards awarded by referees (odds ratio from 0.89 to 2.93). Similar findings have emerged in other domains, including structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025].
 
@@ -108,12 +116,13 @@ Study decisions in data analysis:
 -   @liu2020 provides visualization to communicate the decision processes through the Analytic Decision Graphs (ADG)
 -   @simson2025 conducts a participatory AI study to demonstrate the "garden of forking paths" of decisions in data analysis and how it affects ML fairness
 
-# Extracting decisions from data analysis
+# Extracting decisions from data analysis {#sec-extract-decisions}
 
 ## Decisions in data analysis {#sec-decisions}
 
+To record these decisions in a data structure, the tidy data principle @wickham2014 provides the guidance on how to structure the data where each variable should be in a column, each observation in a row. In the context of decisions made during data analysis, we adapt this principle to mean that each row represents a decision made by the authors of a paper and a paper often spans multiple decisions. 
+
 - what constitute a decision in data analysis 
-- adapt from the tidy data principle - each row is a decision @wickham2014
 - some decisions are related to how the variable is estimated spatially and temporally
 - model level decisions on how the model is estimated spatially (for multi-site analyses) and/or temporally (different treatments for years or seasons)
 - extract the exact text from the paper
@@ -176,7 +185,7 @@ The shiny app is designed to provide users a visual interface to review and edit
 knitr::include_graphics("figures/shiny.png")
 ```
 
-# Calculating paper similarity
+# Calculating paper similarity {#sec-paper-similarity}
 
 -   pre-processing
     -   standardize statistical methods its corresponding parameters (LOESS, smoothing spline, etc)
@@ -186,13 +195,13 @@ knitr::include_graphics("figures/shiny.png")
 -   measure similarity between decisions and their justificaiton using NLP
     -   word embedding with attention mechanism, instead of bag of word,
     -   specific NLP models (default to `bert-base-uncased`), aggregation methods from word to text
--   compute paper similarity score for each paper pair by aggregating decision-level compoarisons
+-   compute paper similarity score for each paper pair by aggregating decision-level comparisons
     -   check/ report on the number of decisions compared in each paper pair
 -   similarity score can serve as the distance matrix to cluster papers by their similarity on decision choices
 
-# Results
+# Results {#sec-result}
 
-## Air pollution mortality modelling {#sec-result}
+## Air pollution mortality modelling 
 
 Decision quality summary
 
@@ -211,7 +220,7 @@ sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
 
 -   A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 
-# Discussion
+# Discussion {#sec-discussion}
 
 -   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
