@@ -389,9 +389,15 @@ implications of our study.
 
 \section{Background}\label{sec-background}
 
-Data analysis as an complicated, iterative process to make sense
-{[}ref{]} of the data collected. The iterative process of formulating
-hypothesis \citet{jun2022}.
+\subsection{Decisions in data
+analysis}\label{decisions-in-data-analysis}
+
+\begin{itemize}
+\tightlist
+\item
+  Is ``decision'' going to be confusing with ``data driven
+  decision-making''
+\end{itemize}
 
 Choices are made at nearly every stage of data analysis, ranging from
 variable pre-processing variables, variable and lag selection in model
@@ -450,34 +456,65 @@ Study decisions in data analysis:
   it affects ML fairness
 \end{itemize}
 
+\subsection{Air pollution mortality
+modelling}\label{air-pollution-mortality-modelling}
+
 \section{Extracting decisions from data
 analysis}\label{sec-extract-decisions}
 
 \subsection{Decisions in data analysis}\label{sec-decisions}
 
-To record these decisions in a data structure, the tidy data principle
-\citet{wickham2014} provides the guidance on how to structure the data
-where each variable should be in a column, each observation in a row. In
-the context of decisions made during data analysis, we adapt this
-principle to mean that each row represents a decision made by the
-authors of a paper and a paper often spans multiple decisions.
+Decisions occur throughout the entire data analysis process -- from the
+selection of variables and data source, to pre-processing steps to
+prepare the data for modelling, to the model specification and variable
+inclusion. In this work, we focus specifically on modelling decisions in
+the air pollution mortality modelling literature. These include the
+choice of modelling approach, covariate inclusion and smoothing, and
+specifications of spatial and temporal structure. Consider the following
+excerpt from \citet{ostro2006}:
+
+\begin{quote}
+Based on previous findings reported in the literature (e.g., Samet et
+al.~2000), the basic model included a smoothing spline for time with 7
+degrees of freedom (df) per year of data. This number of degrees of
+freedom controls well for seasonal patterns in mortality and reduces and
+often eliminates autocorrelation.
+\end{quote}
+
+This sentence encode the following components of a decision:
 
 \begin{itemize}
 \tightlist
 \item
-  what constitute a decision in data analysis
+  \textbf{variable}: time
 \item
-  some decisions are related to how the variable is estimated spatially
-  and temporally
+  \textbf{method}: smoothing spline
 \item
-  model level decisions on how the model is estimated spatially (for
-  multi-site analyses) and/or temporally (different treatments for years
-  or seasons)
+  \textbf{parameter}: degree of freedom (df)
 \item
-  extract the exact text from the paper
+  \textbf{reason}: Based on previous findings reported in the literature
+  (e.g., Samet et al.~2000); This number of degrees of freedom controls
+  well for seasonal patterns in mortality and reduces and often
+  eliminates autocorrelation.
+\item
+  \textbf{decision}: 7 degrees of freedom (df) per year of data
 \end{itemize}
 
-An example decisions may look as follows:
+The decision above is regarding a certain parameter in the statistical
+method, we categorize this as a ``parameter'' type decisions. Other
+types of decisions - such as spatial modelling structure or the
+inclusion of temporal lags - may not include an explicit method or
+parameter, but still reference a variable and rationale, which we will
+provide further examples below.
+
+To record these decisions, we follow the tidy data principle
+\citep{wickham2014}, where each variable should be in a column, each
+observation in a row. In our context, each row represents a decision
+made by the authors of a paper and an analysis often include multiple
+decisions. To retain the original context of the decision, we extract
+the original text in the paper, without paraphrase or summarization,
+from the paper. Below we present an example of how to structure the
+decisions made in a paper, using the paper by \citet{ostro2006}:
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
@@ -525,9 +562,10 @@ for variation among cities & separate regression models fit in each
 city \\
 \end{longtable}
 
-However, decisions statements are often implicit, and the justifications
-may not directly align with the decisions themselves. We identify four
-common anomalies:
+Most decisions in the published papers are not explicitly stated, this
+could due to the coherence and conciseness of the writing or authors'
+decision to include only necessary details. Here, we identify a few
+common anomalies where decisions may be combined or omit certain fields:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -610,8 +648,7 @@ statistical software for further analysis. The exact prompt feed to the
 LLM is provided in the Appendix. The \texttt{ellmer} package
 \citep{ellmer} in R is used to connect to the Gemini and Claude API,
 providing the PDF attachment and the prompt in a markdown file as
-inputs. \textbf{?@fig-llm} shows the overall workflow for decision
-extract using LLMs.
+inputs.
 
 \subsection{Review the LLM output}\label{review-the-llm-output}
 
@@ -717,7 +754,7 @@ Notebook}}
 \section{Results}\label{sec-result}
 
 \subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling}
+modelling}\label{air-pollution-mortality-modelling-1}
 
 Decision quality summary
 
