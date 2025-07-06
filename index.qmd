@@ -80,47 +80,35 @@ acm-metadata:
   #   description: teaser description
 ---
 
-* Something about "analysis review" - Roger thinks it's a better to have a new word for this.
- * provide a baseline understand - place to start
- * demonstrate - analytically homogeneous - the table won't look like that
+-   Something about "analysis review" - Roger thinks it's a better to have a new word for this.
+-   provide a baseline understand - place to start
+-   demonstrate - analytically homogeneous - the table won't look like that
 
 # Introduction
 
 Decisions are everywhere in data analysis, from the initial data collection, data pre-processing to the modelling choices. These decisions will impact the final output of the data analysis, which may lead to different conclusions and policy recommendations. When such flexibility can be misused—through practices such as p-hacking, selective reporting, or unjustified analytical adjustments—it can inflate effect sizes or produce misleading results that meet conventional thresholds for statistical significance. They have been demonstrated through many-analysts experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. These practices not only compromise the validity of individual studies but also threaten the broader credibility of statistical analysis and scientific research as a whole.
 
-Multiple recommendations have been proposed to improve data analysis practices, such as pre-registration and multiverse analysis. Bayesian methods also offer a different paradigm to p-value driven inference for interpreting statistical evidence. Most empirical studies of data analysis practices focus on specially designed and simplified analysis scenarios. While informative, these setups may not adequately capture the complexity of the data analysis with significant policy implications. [In practice, studying the data analysis decisions with actual applications is challenging.] Analysts may no longer be available for interviews due to job changes, and even when they are, recalling the full set of decisions and thinking process made during the analysis is often infeasible. Moreover, only until the last decades, analysis scripts and reproducible materials were not commonly required by journals for publishing. [As a result, it remains challenging to study how analytical decisions are made. ]
+Multiple recommendations have been proposed to improve data analysis practices, such as pre-registration and multiverse analysis. Bayesian methods also offer a different paradigm to p-value driven inference for interpreting statistical evidence. Most empirical studies of data analysis practices focus on specially designed and simplified analysis scenarios. While informative, these setups may not adequately capture the complexity of the data analysis with significant policy implications. \[In practice, studying the data analysis decisions with actual applications is challenging.\] Analysts may no longer be available for interviews due to job changes, and even when they are, recalling the full set of decisions and thinking process made during the analysis is often infeasible. Moreover, only until the last decades, analysis scripts and reproducible materials were not commonly required by journals for publishing. \[As a result, it remains challenging to study how analytical decisions are made. \]
 
-In this work, we focus on a specific class of air pollution modelling studies that estimate the effect size of particulate matter (PM2.5 or PM10) on mortality, typically using Poisson regression or generalized additive models (GAMs). While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question. 
+In this work, we focus on a specific class of air pollution modelling studies that estimate the effect size of particulate matter (PM2.5 or PM10) on mortality, typically using Poisson regression or generalized additive models (GAMs). While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question.
 
 <!-- This class of studies has significant impact to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants in the U.S.  -->
 
-In this work, we develop a structured tabular format to record the analytical decisions  made by researchers in the air pollution modelling literature. Using large language models (LLMs), we automate the extraction of these decisions from published papers. This allows us to treat decisions as data – allowing us to track them over time, compare methodology across papers, and query commonly used approaches. We further introduce a workflow to cluster studies based on decision similarity, revealing three distinct groups of papers that reflect the modelling strategies differs in the European and U.S. studies, which offers a new way to visualize the field in the air pollution mortality modelling.
+In this work, we develop a structured tabular format to record the analytical decisions made by researchers in the air pollution modelling literature. Using large language models (LLMs), we automate the extraction of these decisions from published papers. This allows us to treat decisions as data – allowing us to track them over time, compare methodology across papers, and query commonly used approaches. We further introduce a workflow to cluster studies based on decision similarity, revealing three distinct groups of papers that reflect the modelling strategies differs in the European and U.S. studies, which offers a new way to visualize the field in the air pollution mortality modelling.
 
-The rest of the paper is organized as follows. In @sec-background, we review the background on data analysis decisions. @sec-extract-decisions describes the data structure for recording decisions, the use of large language models to process research papers, and the  validation of LLM outputs. In @sec-paper-similarity, we present the method for calculating paper similarity based on decision similarities. @sec-result reports the finding of our analysis, including the clustering of papers according to similarity scores and sensitivity analyses related to LLM providers, prompt engineering, and LLM parameters. Finally, @sec-discussion discusses the implications of our study.
+The rest of the paper is organized as follows. In @sec-background, we review the background on data analysis decisions. @sec-extract-decisions describes the data structure for recording decisions, the use of large language models to process research papers, and the validation of LLM outputs. In @sec-paper-similarity, we present the method for calculating paper similarity based on decision similarities. @sec-result reports the finding of our analysis, including the clustering of papers according to similarity scores and sensitivity analyses related to LLM providers, prompt engineering, and LLM parameters. Finally, @sec-discussion discusses the implications of our study.
 
 # Background {#sec-background}
 
-## Decisions in data analysis 
+## Decisions in data analysis
 
-* Is "decision" going to be confusing with "data driven decision-making"
+**Question** Is "decision" going to be confusing with "decision-making" in decision theory
 
-<!-- Data analysis as an complicated, iterative process to make sense \[ref\] of the data collected. The iterative process of formulating hypothesis @jun2022. -->
+A data analysis is a process of making choices at each step, from the initial data collection to model specification, and post-processing. Each decision represents a branching point where analysts choose a specific path to follow, and the vast number of possible choices analysts can take forms what @gelman2014 describe as the "garden of forking paths". While researchers may hope their inferential results are robust to the specific path taken through the garden, in practice, different choices can lead to substantially different conclusions. This has been empirically demonstrated through "many analyst experiments", where independent research groups analyze the same dataset to the same answer using their chosen analytic approach. A classic example is @silberzahn2018, where researchers reported an odds ratio from 0.89 to 2.93 for the effect of soccer players’ skin tone on the number of red cards awarded by referees. Similar variability has been observed in structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025]. Many studies have been conducted on a relatively smaller scale to interviews of analysts and researchers on data analysis practices [@kale2019; @alspaugh2019; @liu_understanding_2020], visualization of the decision process through the analytic decision graphics (ADG) [@liu2020]. Recently, @simson2025 describes a participatory approach to decisions choices in fairness ML algorithms.
 
-Choices are made at nearly every stage of data analysis, ranging from variable pre-processing variables, variable and lag selection in model formulation, to the specification of smoothing parameter during model construction. These possible choices contribute to what @gelman2014 describe as the "garden of forking paths". These choices can introduce substantial variability in results, which has been demonstrated in many-analyst experiments, where independent teams analyzing the same dataset to answer a pre-defined research question often arrive at markedly different conclusions. A prominent example is @silberzahn2018 where researchers reported a wide range of point estimates and 95% confidence intervals for the effect of soccer players’ skin tone on the number of red cards awarded by referees (odds ratio from 0.89 to 2.93). Similar findings have emerged in other domains, including structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025].
+Software tools have also developed to incorporate potential alternatives in the analysis workflow, including the `DeclareDesign` package [@blair2019] and the `multiverse` package [@multiverse]. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest, which has been applied in the randomized controlled trial study [@bishop2024]. The `multiverse` package [@multiverse] provides a framework for researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.
 
-Another line of work focuses on developing software tools to support analysts in making more informed decisions. For example, the `Tisane` package [@jun2022] integrates conceptual ideas, such as DAGs, and modelling structure (group/ cluster/ hierarchical structure), to assist junior researchers in specifying GLM and GLMM model. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest. This approach has been applied in randomized controlled trial [@bishop2024] .
-
-The `multiverse` package
-
--   facilitates the specification and execution of multiple parallel choices for sensitivity analysis, allowing researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.
-
-Study decisions in data analysis:
-
--   interview analysts and researchers to provide recommendation for data analysis practices [@kale2019; @alspaugh2019; @liu2020].
--   @liu2020 provides visualization to communicate the decision processes through the Analytic Decision Graphs (ADG)
--   @simson2025 conducts a participatory AI study to demonstrate the "garden of forking paths" of decisions in data analysis and how it affects ML fairness
-
-## Air pollution mortality modelling
+**TODO** Something about the context on air pollution mortality modelling \@ Roger
 
 # Extracting decisions from data analysis {#sec-extract-decisions}
 
@@ -130,15 +118,15 @@ Decisions occur throughout the entire data analysis process -- from the selectio
 
 > Based on previous findings reported in the literature (e.g., Samet et al. 2000), the basic model included a smoothing spline for time with 7 degrees of freedom (df) per year of data. This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
 
-This sentence encode the following components of a decision: 
+This sentence encode the following components of a decision:
 
-  * **variable**: time
-  * **method**: smoothing spline
-  * **parameter**: degree of freedom (df)
-  * **reason**: Based on previous findings reported in the literature (e.g., Samet et al. 2000); This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
-  * **decision**: 7 degrees of freedom (df) per year of data
+-   **variable**: time
+-   **method**: smoothing spline
+-   **parameter**: degree of freedom (df)
+-   **reason**: Based on previous findings reported in the literature (e.g., Samet et al. 2000); This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
+-   **decision**: 7 degrees of freedom (df) per year of data
 
-The decision above is regarding a certain parameter in the statistical method, we categorize this as a "parameter" type decisions. Other types of decisions - such as spatial modelling structure or the inclusion of temporal lags - may not include an explicit method or parameter, but still reference a variable and rationale, which we will provide further examples below. 
+The decision above is regarding a certain parameter in the statistical method, we categorize this as a "parameter" type decisions. Other types of decisions - such as spatial modelling structure or the inclusion of temporal lags - may not include an explicit method or parameter, but still reference a variable and rationale, which we will provide further examples below.
 
 To record these decisions, we follow the tidy data principle [@wickham2014], where each variable should be in a column, each observation in a row. In our context, each row represents a decision made by the authors of a paper and an analysis often include multiple decisions. To retain the original context of the decision, we extract the original text in the paper, without paraphrase or summarization, from the paper. Below we present an example of how to structure the decisions made in a paper, using the paper by @ostro2006:
 
@@ -149,44 +137,50 @@ To record these decisions, we follow the tidy data principle [@wickham2014], whe
 | ostro | 3 | Poisson regression | relative humidity | LOESS | smoothing parameter | parameter | to minimize Akaike's Information Criterion | NA |
 | ostro | 4 | Poisson regression | model | NA | NA | spatial | to account for variation among cities | separate regression models fit in each city |
 
-Most decisions in the published papers are not explicitly stated, this could due to the  coherence and conciseness of the writing or authors' decision to include only necessary details. Here, we identify a few common anomalies where decisions may be combined or omit certain fields:
+Most decisions in the published papers are not explicitly stated, this could due to the coherence and conciseness of the writing or authors' decision to include only necessary details. Here, we identify a few common anomalies where decisions may be combined or omit certain fields:
 
-1. **Authors may combine multiple decisions into a single sentence** for coherence and conciseness of the writing. Consider the following excerpt from @ostro2006:
+1.  **Authors may combine multiple decisions into a single sentence** for coherence and conciseness of the writing. Consider the following excerpt from @ostro2006:
 
 > Other covariates, such as day of the week and smoothing splines of 1-day lags of average temperature and humidity (each with 3 df), were also included in the model because they may be associated with daily mortality and are likely to vary over time in concert with air pollution levels.
 
-This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity. These decisions should be structured as separate entries. 
+This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity. These decisions should be structured as separate entries.
 
-2. **The justification does not directly address the decision choice.** In the example above, the stated rationale ("and are likely to vary over time in concert with air pollution levels") supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over alternatives, such as 2-day average of lags 0 and 1 (lag01) and single-day lag of 2 days (lag2). As such, the reason field should be recorded as NA.
+2.  **The justification does not directly address the decision choice.** In the example above, the stated rationale ("and are likely to vary over time in concert with air pollution levels") supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over alternatives, such as 2-day average of lags 0 and 1 (lag01) and single-day lag of 2 days (lag2). As such, the reason field should be recorded as NA.
 
-3. **Some decisions may be omitted because they are data-driven**. For instance, @katsouyanni2001 states:
+3.  **Some decisions may be omitted because they are data-driven**. For instance, @katsouyanni2001 states:
 
 > The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion.
 
 In this case, while the method of selection (minimizing AIC) is specified, the actual degree of freedom used is not. Such data-driven decisions may be recorded with "NA" in the decision field, but the reason field should still be recorded as "by minimizing Akaike’s information criterion"
 
-4. **Information required to interpret the decision may be distributed across multiple sections**. In the previous example, "weather variables" refers to mean temperature and relative humidity, as defined earlier in the text. This requires cross-referencing across sections to identify the correct variables associated with each modeling choice.
-
+4.  **Information required to interpret the decision may be distributed across multiple sections**. In the previous example, "weather variables" refers to mean temperature and relative humidity, as defined earlier in the text. This requires cross-referencing across sections to identify the correct variables associated with each modeling choice.
 
 <!-- | Paper | ID | Model | variable | method | parameter | type | reason | decision | -->
+
 <!-- |-----|--|--------|--------|--------|--------|--------|--------|--------| -->
+
 <!-- | ostro | xx | Poisson regression | temperature | smoothing spline | degree of freedom | parameter | NA | 3 df | -->
+
 <!-- | ostro | xx | Poisson regression | temperature | NA | NA | temporal | NA | 1-day lag | -->
+
 <!-- | ostro | xx | Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | NA | 4 df | -->
+
 <!-- | ostro | xx | Poisson regression | relative humidity | NA | NA | temporal | NA | 1-day lag | -->
+
 <!-- | katsouyanni2001 | xx | generalized additive models (GAM) Poisson regression | mean temperature | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
+
 <!-- | katsouyanni2001 | xx | generalized additive models (GAM)  Poisson regression | relative humidity | smoothing spline | degree of freedom | parameter | by minimizing Akaike’s information criterion | NA | -->
 
 ## Automatic reading of literature with LLMs
 
-While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes. 
+While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.
 
-Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs. 
+Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
 
 ## Review the LLM output
 
-- something about result validation of LLM output
-- The sensitivity of the two models to the prompt and the model parameters, such as temperature and seed, is discussed in @sec-sensitivity. 
+-   something about result validation of LLM output
+-   The sensitivity of the two models to the prompt and the model parameters, such as temperature and seed, is discussed in @sec-sensitivity.
 
 The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) *overwrite* -- modify the content of a particular cell, equivalently `dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`, 2) *delete* -- remove a particular cell, `dplyr::filter(!(CONDITION))`, and 3) *add* -- manually enter a decision, `dplyr::bind_rows()`. @fig-shiny illustrates the *overwrite* action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from "generalized additive Poisson time series regression" to the less verbose "Poisson regression". Upon confirmation, the corresponding `tidyverse` code is generated, and users can download the edited table and incorporate the code into their R script.
 
@@ -214,7 +208,7 @@ knitr::include_graphics("figures/shiny.png")
 
 # Results {#sec-result}
 
-## Air pollution mortality modelling 
+## Air pollution mortality modelling
 
 Decision quality summary
 
@@ -225,6 +219,7 @@ Decision quality summary
 ## Sensitivity analysis {#sec-sensitivity}
 
 <!-- -   Claude is decoder only, Gemini is an encoder–decoder model -->
+
 <!--     -   these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction -->
 
 sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
@@ -239,10 +234,9 @@ sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
 -   Validation of the output:
 
-the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching. 
+the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
 
-
-# References {-}
+# References {.unnumbered}
 
 ::: {#refs}
 :::

@@ -392,72 +392,48 @@ implications of our study.
 \subsection{Decisions in data
 analysis}\label{decisions-in-data-analysis}
 
-\begin{itemize}
-\tightlist
-\item
-  Is ``decision'' going to be confusing with ``data driven
-  decision-making''
-\end{itemize}
+\textbf{Question} Is ``decision'' going to be confusing with
+``decision-making'' in decision theory
 
-Choices are made at nearly every stage of data analysis, ranging from
-variable pre-processing variables, variable and lag selection in model
-formulation, to the specification of smoothing parameter during model
-construction. These possible choices contribute to what
-\citet{gelman2014} describe as the ``garden of forking paths''. These
-choices can introduce substantial variability in results, which has been
-demonstrated in many-analyst experiments, where independent teams
-analyzing the same dataset to answer a pre-defined research question
-often arrive at markedly different conclusions. A prominent example is
-\citet{silberzahn2018} where researchers reported a wide range of point
-estimates and 95\% confidence intervals for the effect of soccer
-players' skin tone on the number of red cards awarded by referees (odds
-ratio from 0.89 to 2.93). Similar findings have emerged in other
-domains, including structural equation modeling \citep{sarstedt2024},
-applied microeconomics \citep{huntington-klein2021}, neuroimaging
+A data analysis is a process of making choices at each step, from the
+initial data collection to model specification, and post-processing.
+Each decision represents a branching point where analysts choose a
+specific path to follow, and the vast number of possible choices
+analysts can take forms what \citet{gelman2014} describe as the ``garden
+of forking paths''. While researchers may hope their inferential results
+are robust to the specific path taken through the garden, in practice,
+different choices can lead to substantially different conclusions. This
+has been empirically demonstrated through ``many analyst experiments'',
+where independent research groups analyze the same dataset to the same
+answer using their chosen analytic approach. A classic example is
+\citet{silberzahn2018}, where researchers reported an odds ratio from
+0.89 to 2.93 for the effect of soccer players' skin tone on the number
+of red cards awarded by referees. Similar variability has been observed
+in structural equation modeling \citep{sarstedt2024}, applied
+microeconomics \citep{huntington-klein2021}, neuroimaging
 \citep{botvinik-nezer2020}, and ecology and evolutionary biology
-\citep{gould2025}.
+\citep{gould2025}. Many studies have been conducted on a relatively
+smaller scale to interviews of analysts and researchers on data analysis
+practices \citep{kale2019, alspaugh2019, liu_understanding_2020},
+visualization of the decision process through the analytic decision
+graphics (ADG) \citep{liu2020}. Recently, \citet{simson2025} describes a
+participatory approach to decisions choices in fairness ML algorithms.
 
-Another line of work focuses on developing software tools to support
-analysts in making more informed decisions. For example, the
-\texttt{Tisane} package \citep{jun2022} integrates conceptual ideas,
-such as DAGs, and modelling structure (group/ cluster/ hierarchical
-structure), to assist junior researchers in specifying GLM and GLMM
-model. The \texttt{DeclareDesign} package \citep{blair2019} introduces
-the MIDA framework for researchers to declare, diagnose, and redesign
-their analyses to produce a distribution of the statistic of interest.
-This approach has been applied in randomized controlled trial
-\citep{bishop2024} .
+Software tools have also developed to incorporate potential alternatives
+in the analysis workflow, including the \texttt{DeclareDesign} package
+\citep{blair2019} and the \texttt{multiverse} package
+\citep{multiverse}. The \texttt{DeclareDesign} package \citep{blair2019}
+introduces the MIDA framework for researchers to declare, diagnose, and
+redesign their analyses to produce a distribution of the statistic of
+interest, which has been applied in the randomized controlled trial
+study \citep{bishop2024}. The \texttt{multiverse} package
+\citep{multiverse} provides a framework for researchers to
+systematically explore how different choices affect results and to
+report the range of plausible outcomes that arise from alternative
+analytic paths.
 
-The \texttt{multiverse} package
-
-\begin{itemize}
-\tightlist
-\item
-  facilitates the specification and execution of multiple parallel
-  choices for sensitivity analysis, allowing researchers to
-  systematically explore how different choices affect results and to
-  report the range of plausible outcomes that arise from alternative
-  analytic paths.
-\end{itemize}
-
-Study decisions in data analysis:
-
-\begin{itemize}
-\tightlist
-\item
-  interview analysts and researchers to provide recommendation for data
-  analysis practices \citep{kale2019, alspaugh2019, liu2020}.
-\item
-  \citet{liu2020} provides visualization to communicate the decision
-  processes through the Analytic Decision Graphs (ADG)
-\item
-  \citet{simson2025} conducts a participatory AI study to demonstrate
-  the ``garden of forking paths'' of decisions in data analysis and how
-  it affects ML fairness
-\end{itemize}
-
-\subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling}
+\textbf{TODO} Something about the context on air pollution mortality
+modelling @ Roger
 
 \section{Extracting decisions from data
 analysis}\label{sec-extract-decisions}
@@ -754,7 +730,7 @@ Notebook}}
 \section{Results}\label{sec-result}
 
 \subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling-1}
+modelling}\label{air-pollution-mortality-modelling}
 
 Decision quality summary
 
