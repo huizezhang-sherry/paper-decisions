@@ -631,11 +631,7 @@ inputs.
 \begin{itemize}
 \tightlist
 \item
-  something about result validation of LLM output
-\item
-  The sensitivity of the two models to the prompt and the model
-  parameters, such as temperature and seed, is discussed in
-  Section~\ref{sec-sensitivity}.
+  \textbf{TODO} something about result validation of LLM output
 \end{itemize}
 
 The shiny app is designed to provide users a visual interface to review
@@ -684,48 +680,103 @@ Notebook}}
 
 \section{Calculating paper similarity}\label{sec-paper-similarity}
 
+Once the decisions have been extracted and validated, this opens up a
+structured data for analyzing these information. For example, we can
+compare whether author's choices at different times changes, or across
+decisions varies at different regions. In this section, we present a
+method to calculate paper similarity based on the decisions shared in
+the paper pairs. The goal is to construct a distance metric based on
+similarity of the decision choice among papers that could be further
+used for clustering paper based on choices made by different authors in
+the literature. An overview of the method is illustrated in
+Figure~\ref{fig-similarity-diag}.
+
+\phantomsection\label{cell-fig-similarity-diag}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/similarity-diag.png}
+
+}
+
+\caption{\label{fig-similarity-diag}Workflow for calculating paper
+similarity based on decision choices: (1) standardize variable names,
+(2) identify most frequent variable-type decisions across all papers,
+(3) identify papers with at least x identified decisions, (4) calculate
+decisions similarity score on the \emph{decision} and \emph{reason}
+fields using transformer language models, e.g.~BERT, (5) calculate paper
+similarity score based on aggregating decision similarity scores.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://huizezhang-sherry.github.io/paper-decisions/index.qmd.html}{Article
+Notebook}}
+
 \begin{itemize}
 \tightlist
 \item
-  pre-processing
-
-  \begin{itemize}
-  \tightlist
-  \item
-    standardize statistical methods its corresponding parameters (LOESS,
-    smoothing spline, etc)
-  \item
-    group variables into broader categories: time, temperature,
-    humidity, PM
-  \end{itemize}
-\item
-  identify the most frequent analysis decisions across papers
-\item
-  retain only papers that report more than x such decisions
-\item
-  measure similarity between decisions and their justificaiton using NLP
-
-  \begin{itemize}
-  \tightlist
-  \item
-    word embedding with attention mechanism, instead of bag of word,
-  \item
-    specific NLP models (default to \texttt{bert-base-uncased}),
-    aggregation methods from word to text
-  \end{itemize}
-\item
-  compute paper similarity score for each paper pair by aggregating
-  decision-level comparisons
-
-  \begin{itemize}
-  \tightlist
-  \item
-    check/ report on the number of decisions compared in each paper pair
-  \end{itemize}
-\item
-  similarity score can serve as the distance matrix to cluster papers by
-  their similarity on decision choices
+  \textbf{TODO} some discussion on what it means by for two papers to be
+  similar based on decisions.
 \end{itemize}
+
+The calculation of paper similarity is based on the similarity of
+decisions shared by each paper pair. A decision comparable in two papers
+are the ones that share the same variable and type, e.g.~temperature and
+parameter (a decisions on the choosing the statistical method
+\emph{parameter} for the \emph{temperature} variable), or humidity and
+temporal (any \emph{temporal} treatment, e.g.~choice of lag value for
+the \emph{humidity} variable). While many decisions share a similar
+variable, different authors may refer to them with slightly different
+names, such as ``mean temperature'' and ``average temperature'', hence
+variable names are first standardized to a common set of variable names.
+For example, ``mean temperature'' and ``average temperature'' are both
+standardized to ``temperature''. Notice that ``dewpoint temperature'' is
+standardized into ``humidity'' since it is a proxy of temperature to
+achieve a relative humidity (RH) of 100\%. For literature with a common
+theme, there is usually a set of variables that shared by most papers
+and additional variables are justified in individual research. For our
+air pollution mortality modelling literature, we standardize the
+following variable names:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{temperature}: ``mean temperature'', ``average temperature'',
+  ``temperature'', ``air temperature'', ``ambient temperature''
+\item
+  \textbf{humidity}: ``dewpoint temperature'' and its hyphenated
+  variants, relative humidity'', ``humidity''
+\item
+  \textbf{PM}: ``pollutant'', ``pollution'', ``particulate matter'',
+  ``particulate'', ``PM10'', ``PM2.5''
+\item
+  \textbf{time}: ``date'', ``time'', ``trends'', ``trend''
+\end{itemize}
+
+Depending on the specific pairs, papers have varied number of decisions
+that can be compared and aggregated. While paper similarities can be
+computed for all paper pairs, using the similarity of one or two pair of
+decisions to represent paper similarity is less ideal. Hence, before
+calculating the text similarity of decisions, we also include two
+optional steps to identify and subset the most frequent decisions across
+papers, and to retain only papers that report more than a certain number
+of frequent decisions. Research questions in different fields may have
+different levels of homogeneity, depending on the maturity of the field
+and for air pollution mortality modelling, it is helpful to focus on
+decisions and papers that share a substantial number of decisions.
+
+To assign numerical value for the similarity of reason, we use a
+transformer language model, such as BERT, to measure the semantic text
+similarity between the decision itself and its justification. The
+decision similarity is calculated by comparing the \emph{decision} and
+\emph{reason} fields of the decisions in each paper pair. To obtain
+paper similarity, we average the decision similarities across all
+decisions in each paper pair and other method can be customized for
+aggregation. The resulting paper similarity score can be used as a
+distance matrix to cluster papers based on their decision choices to
+understand the common practices in the investigated literature.
 
 \section{Results}\label{sec-result}
 
