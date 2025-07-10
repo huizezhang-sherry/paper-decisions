@@ -608,6 +608,11 @@ information criterion''
 \subsection{Automatic reading of literature with
 LLMs}\label{automatic-reading-of-literature-with-llms}
 
+\textbf{TODO}: Prompt engineering: these models may paraphrase or
+hallucinate unless explicitly told not to since it is generative in
+nature based on the predicted probability of the next word from the text
+and the instruction
+
 While decisions can be extracted manually from the literature, this
 process is labor-intensive and time-consuming. Recent advances in Large
 Language Models (LLMs) have demonstrated potential for automating the
@@ -674,10 +679,6 @@ the Download CSV button.}
 
 \end{figure}%
 
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-decisions/index.qmd.html}{Article
-Notebook}}
-
 \section{Calculating paper similarity}\label{sec-paper-similarity}
 
 Once the decisions have been extracted and validated, this opens up a
@@ -709,10 +710,6 @@ fields using transformer language models, e.g.~BERT, (5) calculate paper
 similarity score based on aggregating decision similarity scores.}
 
 \end{figure}%
-
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-decisions/index.qmd.html}{Article
-Notebook}}
 
 \begin{itemize}
 \tightlist
@@ -815,16 +812,7 @@ Decision quality summary
 
 \subsection{Sensitivity analysis}\label{sec-sensitivity}
 
-sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM
-parameters
-
-The tested language models include 1) standard \texttt{BERT}
-\citep{devlin2019}, 2) \texttt{Roberta} \citep{liu}, which is trained on
-a much larger dataset (160GB v.s. BERT's 15GB), 3)
-\texttt{transformer-xl} \citep{dai}, 4) \texttt{xlnet} by Google Brain
-\citep{yang}, and two domain-trained BERT models: 5) \texttt{sciBert}
-\citep{beltagy2019} on scientific literature, and 6)
-\texttt{bioBert}\citep{lee2020}, trained on PubMed and PMC data.
+sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 
 \begin{itemize}
 \tightlist
@@ -832,6 +820,52 @@ a much larger dataset (160GB v.s. BERT's 15GB), 3)
   A section on reproducibility of LLM outputs: prompt experiment (see if
   there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 \end{itemize}
+
+\subsubsection{LLM provider}\label{llm-provider}
+
+Input of PDF, require OCR, which is only supported by Antropic Claude
+and Google Gemini. Comparison of the specification from the their sites
+Claude is decoder only, Gemini is an encoder--decoder model
+
+Identify the proportion of the common decision extracted by Claude and
+Gemini
+
+Compare the clustering by Claude and Gemini
+
+\begin{itemize}
+\item
+  Claude tends to give more robust output while Gemini has a higher
+  accuracy.
+\item
+  Given examples of the failure of LLM models for parsing and examples
+  where authors are unclear about the delivery
+\end{itemize}
+
+\subsubsection{Text model}\label{text-model}
+
+The tested language models include 1) standard \texttt{BERT}
+\citep{devlin2019}, 2) \texttt{Roberta} \citep{liu}, which is trained on
+a much larger dataset (160GB v.s. BERT's 15GB), 3)
+\texttt{transformer-xl} \citep{dai}, 4) \texttt{xlnet} by Google Brain
+\citep{yang}, and two domain-trained BERT models: 5) \texttt{sciBert}
+\citep{beltagy2019}, trained on scientific literature, and 6)
+\texttt{bioBert}\citep{lee2020}, trained on PubMed and PMC data.
+Figure~\ref{fig-text-density} presents the distribution of the decision
+similarity score for each language models and the distribution of paper
+similarity scores.
+
+\phantomsection\label{cell-fig-text-density}
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-density-1.pdf}}
+
+}
+
+\caption{\label{fig-text-density}}
+
+\end{figure}%
 
 \subsubsection{LLM parameters}\label{llm-parameters}
 
@@ -842,25 +876,27 @@ higher temperature value yield more diverse outputs, while a lower value
 produces more conservative ones. For each Gemini extraction, we set the
 temperature to 1 and performed five repetitions run to assess the output
 stability. Among the 62 papers investigated, 31 (50\%) yields a
-consistent number of extracted decisions across all five runs. In 29
-papers, two different counts of decisions are observed. For the
-remaining two papers with three versions, we investigate them
-separately. In the case of \citet{ito2006}, variation arose because
-Gemini sometimes includes a collection of weather models investigated
-for sensitivity analysis. For \citet{huang2009}, differences come from
-how the term ``smoothing function'' was sometimes extracted as the
-method instead of the actual method, ``penalized spline'' for
-temperature and humidity. Depending on the run, Gemini would extract
-``smoothing function'', ``penalized spline'', or both.
+consistent number of extracted decisions across all five runs as in
+Table~\ref{tbl-gemini-1}. In 29 papers, two different counts of
+decisions are observed. For the remaining two papers with three
+versions, we investigate them separately. In the case of
+\citet{ito2006}, variation arose because Gemini sometimes includes a
+collection of weather models investigated for sensitivity analysis. For
+\citet{huang2009}, differences come from how the term ``smoothing
+function'' was sometimes extracted as the method instead of the actual
+method, ``penalized spline'' for temperature and humidity. Depending on
+the run, Gemini would extract ``smoothing function'', ``penalized
+spline'', or both.
 
 We further investigate the text similarity in the ``reason'' and
 ``decision'' fields for the 31 papers with the same number of decisions
-across runs. Fifteen (48.4\%) produce the identical text in both fields
-across all ten cross comparisons (5 runs yield 10 comparisons). Other
-showed differences in up to 11 comparisons. The primary source of
-variation were differing extraction amounts and failure to capture the
-``reason'' field. For example, \citet{kan2007} has the most different
-(11) and the main differences are
+across runs and Table~\ref{tbl-gemini-2} tabulates the number of
+differences found in each pairwise comparison. Fifteen (48.4\%) produce
+the identical text in both fields across all ten cross comparisons (5
+runs yield 10 comparisons). Other showed differences in up to 11
+comparisons. The primary source of variation were differing extraction
+amounts and failure to capture the ``reason'' field. For example,
+\citet{kan2007} has the most different (11) and the main differences are
 
 \begin{quote}
 singleday lag models underestimate the cumulative effect of pollutants
@@ -884,10 +920,56 @@ mortality
 
 vs.~NA
 
+\begin{longtable}[]{@{}rr@{}}
+
+\caption{\label{tbl-gemini-1}Number of decisions extracted from each
+paper by Gemini}
+
+\tabularnewline
+
+\toprule\noalign{}
+Num. of different row number & Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 31 \\
+2 & 29 \\
+3 & 2 \\
+
+\end{longtable}
+
+\begin{longtable}[]{@{}rrr@{}}
+
+\caption{\label{tbl-gemini-2}Number of differences in the reason and
+decision fields across Gemini runs for papers with consistent number of
+decisions across runs}
+
+\tabularnewline
+
+\toprule\noalign{}
+Num. of difference & Count & Proportion (\%) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 15 & 48.39 \\
+1 & 2 & 6.45 \\
+2 & 2 & 6.45 \\
+4 & 4 & 12.90 \\
+5 & 3 & 9.68 \\
+8 & 1 & 3.23 \\
+9 & 1 & 3.23 \\
+10 & 2 & 6.45 \\
+11 & 1 & 3.23 \\
+
+\end{longtable}
+
 \section{Discussion}\label{sec-discussion}
 
 \begin{itemize}
-\tightlist
+\item
+  Address how sensitivity analysis is/ is not relevant
 \item
   Only prompting engineering is used to extract decisions from the
   literature. We expect that fine-tuning the model on statistical or

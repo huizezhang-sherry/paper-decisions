@@ -6,6 +6,7 @@ bibliography: references.bib
 title: The Name of the Title Is Hope
 short-title: Hope
 abstract: bla blabla
+notebook-links: false
 author:
   - name: H. Sherry Zhang
     email: hsherryzhang@utexas.edu
@@ -79,6 +80,17 @@ acm-metadata:
   #   caption: figure caption
   #   description: teaser description
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+                      warning = FALSE, fig.align = "center", fig.height = 3)
+library(tidyverse)
+library(dossier)
+library(ggdendro)
+library(patchwork)
+load(here::here("data/text_sensitivity_decision_df.rda"))
+load(here::here("data/text_sensitivity_df.rda"))
+```
 
 -   Something about "analysis review" - Roger thinks it's a better to have a new word for this.
 -   provide a baseline understand - place to start
@@ -173,6 +185,8 @@ In this case, while the method of selection (minimizing AIC) is specified, the a
 
 ## Automatic reading of literature with LLMs
 
+**TODO**: Prompt engineering: these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction
+
 While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.
 
 Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
@@ -233,21 +247,62 @@ Decision quality summary
 
 ## Sensitivity analysis {#sec-sensitivity}
 
-<!-- -   Claude is decoder only, Gemini is an encoder–decoder model -->
 
-<!--     -   these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction -->
-
-sensitivity of the pipeline: 1) LLM, 2) text model, 3) prompt, 4) LLM parameters
-
-The tested language models include 1) standard `BERT` [@devlin2019], 2) `Roberta` [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `transformer-xl` [@dai], 4) `xlnet` by Google Brain [@yang], and two domain-trained BERT models: 5) `sciBert` [@beltagy2019] on scientific literature, and 6) `bioBert`[@lee2020], trained on PubMed and PMC data.
+sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 
 -   A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 
+### LLM provider
+
+Input of PDF, require OCR, which is only supported by Antropic Claude and Google Gemini. Comparison of the specification from the their sites
+Claude is decoder only, Gemini is an encoder–decoder model
+
+Identify the proportion of the common decision extracted by Claude and Gemini
+
+Compare the clustering by Claude and Gemini
+
+* Claude tends to give more robust output while Gemini has a higher accuracy.
+
+* Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
+
+### Text model
+
+The tested language models include 1) standard `BERT` [@devlin2019], 2) `Roberta` [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `transformer-xl` [@dai], 4) `xlnet` by Google Brain [@yang], and two domain-trained BERT models: 5) `sciBert` [@beltagy2019], trained on scientific literature, and 6) `bioBert`[@lee2020], trained on PubMed and PMC data. @fig-text-density presents the distribution of the decision similarity score for each language models and the distribution of paper similarity scores. 
+
+```{r}
+#| fig.height: 6
+#| fig.width: 10
+#| label: fig-text-density
+models <- c("bert-base-uncased", "roberta-base", "xlnet-base-cased", 
+           "allenai/scibert_scivocab_uncased", "dmis-lab/biobert-large-cased-v1.1-squad")
+p1 <- text_sensitivity_df |> 
+  filter(!str_detect(decision, "method")) |> 
+  ggplot(aes(x = dist, fill = models)) + 
+  geom_density(alpha = 0.1) + 
+  facet_wrap(vars(models), ncol = 1)
+
+text_distance_df <- text_sensitivity_decision_df |> 
+  nest(data = -id) |> 
+  mutate(id = as.numeric(id)) |> 
+  rowwise() |> 
+  mutate(score = list(calc_paper_similarity(data))) |> 
+  unnest(score) |> 
+  left_join(tibble(id = 1:5, models = models))
+
+p2 <- text_distance_df |> 
+  ggplot(aes(x = similarity, fill = models)) + 
+  geom_density(alpha = 0.1)
+
+(p1 | p2) + plot_layout(guides='collect') &
+  theme_bw() + 
+  theme(legend.position='bottom') 
+```
+
 ### LLM parameters
 
-The text generation process of the LLMs produce a sequence of tokens based on the input text and the prompt. Model parameters such as temperature, top-p, and top-k control the randomness of the output. A higher temperature value yield more diverse outputs, while a lower value produces more conservative ones. For each Gemini extraction, we set the temperature to 1 and performed five repetitions run to assess the output stability. Among the 62 papers investigated, 31 (50%) yields a consistent number of extracted decisions across all five runs. In 29 papers, two different counts of decisions are observed. For the remaining two papers with three versions, we investigate them separately. In the case of @ito2006, variation arose because Gemini sometimes includes a collection of weather models investigated for sensitivity analysis. For @huang2009, differences come from how the term "smoothing function" was sometimes extracted as the method instead of the actual method, "penalized spline" for temperature and humidity. Depending on the run, Gemini would extract "smoothing function", "penalized spline", or both.
+The text generation process of the LLMs produce a sequence of tokens based on the input text and the prompt. Model parameters such as temperature, top-p, and top-k control the randomness of the output. A higher temperature value yield more diverse outputs, while a lower value produces more conservative ones. For each Gemini extraction, we set the temperature to 1 and performed five repetitions run to assess the output stability. Among the 62 papers investigated, 31 (50%) yields a consistent number of extracted decisions across all five runs as in @tbl-gemini-1. In 29 papers, two different counts of decisions are observed. For the remaining two papers with three versions, we investigate them separately. In the case of @ito2006, variation arose because Gemini sometimes includes a collection of weather models investigated for sensitivity analysis. For @huang2009, differences come from how the term "smoothing function" was sometimes extracted as the method instead of the actual method, "penalized spline" for temperature and humidity. Depending on the run, Gemini would extract "smoothing function", "penalized spline", or both.
 
-We further investigate the text similarity in the "reason" and "decision" fields for the 31 papers with the same number of decisions across runs. Fifteen (48.4%) produce the identical text in both fields across all ten cross comparisons (5 runs yield 10 comparisons). Other showed differences in up to 11 comparisons. The primary source of variation were differing extraction amounts and failure to capture the "reason" field. For example, @kan2007 has the most different (11) and the main differences are
+We further investigate the text similarity in the "reason" and "decision" fields for the 31 papers with the same number of decisions across runs and @tbl-gemini-2 tabulates the number of differences found in each pairwise comparison. Fifteen (48.4%) produce the identical text in both fields across all ten cross comparisons (5 runs yield 10 comparisons). Other showed differences in up to 11 comparisons. The primary source of variation were differing extraction amounts and failure to capture the "reason" field. For example, @kan2007 has the most different (11) and the main differences are
 
 > singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)
 
@@ -261,7 +316,94 @@ and
 
 vs. NA
 
+```{r}
+#| label: tbl-gemini-1
+#| tbl-cap: "Number of decisions extracted from each paper by Gemini"
+all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
+  purrr::map_dfr( ~ .x |> as_decision_tbl() |> arrange(variable)) |>
+  mutate(id = str_remove(paper, "-gemini-[0-9]+"),
+         reason = ifelse(reason == "NA", NA, reason ),
+         decision = ifelse(decision == "NA", NA, decision ),
+         ) |>
+  mutate(
+    reason = str_replace_all(reason, "/|,|-", ""),
+    decision = str_replace_all(decision, "/|,|-", ""),
+    reason = ifelse(!is.na(reason), 
+                    paste0(tolower(substr(reason, 1, 1)), 
+                           substr(reason, 2, nchar(reason))),
+                    NA)
+  )
+
+paper_id <- all_geminis |> group_split(id) |> map_chr(~.x |> pull(id) |> unique())
+n_vec <- all_geminis |> 
+  group_split(id) |> 
+  map_dbl(~.x |> group_by(paper) |> summarize(n = n()) |> distinct(n) |> nrow())
+
+tibble(paper = paper_id, n = n_vec) |> 
+  count(n) |> 
+  knitr::kable(col.names = c("Num. of different row number", "Count"))
+```
+
+```{r eval = FALSE}
+diff_df_raw <- paper_id |> map_dfr(function(paper_id) {
+  res <- all_geminis |> filter(id == paper_id) |> group_split(paper)
+  expand.grid(seq(1, 5, 1), seq(1, 5, 1)) |>
+    filter(Var1 < Var2) |>
+    rowwise() |>
+    mutate(
+      cmpr_obj = list(waldo::compare(
+        res[[Var1]] |> select(reason, decision),
+        res[[Var2]] |> select(reason, decision))), 
+      ll = length(cmpr_obj),
+      paper = paper_id, 
+      same_n = nrow(res[[Var1]]) == nrow(res[[Var2]]))
+})
+
+llm_temp_df <- diff_df_raw |> 
+  mutate(n_diff = NA) |> 
+  mutate(n_diff = ifelse(ll == 2, 
+                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[2]], "\033\\[32m")/2, 
+                         n_diff),
+         n_diff = ifelse(ll == 3, 
+                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[2]], "\033\\[32m")/2 + 
+                           str_count(cmpr_obj[[3]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[3]], "\033\\[32m")/2, 
+                         n_diff),
+         n_diff = ifelse(ll == 0, 0, n_diff)) |> 
+  ungroup() |> 
+  select(-cmpr_obj)
+#save(llm_temp_df, file = here::here("data/llm_temp_df.rda"))
+```
+
+```{r}
+#| label: tbl-gemini-2
+#| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs"
+load(here::here("data/llm_temp_df.rda"))
+all_same_length_papers <- llm_temp_df |>
+  group_by(paper) |> 
+  reframe(a = unique(same_n)) |> 
+  count(paper) |> 
+  filter(n == 1) |> 
+  pull(paper)
+
+llm_temp_df |> 
+  filter(paper %in% all_same_length_papers) |> 
+  group_by(paper) |> 
+  arrange(-n_diff) |> 
+  filter(row_number() == 1) |> 
+  ungroup() |>  
+  count(n_diff) |> 
+  mutate(`Proportion (%)` = n / sum(n) * 100) |> 
+  rename(`Num. of difference` = n_diff, Count = n) |> 
+  knitr::kable(digits = 2)
+```
+
+
 # Discussion {#sec-discussion}
+
+- Address how sensitivity analysis is/ is not relevant
 
 -   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
