@@ -853,16 +853,29 @@ Compare the clustering by Claude and Gemini
 
 \subsubsection{Text model}\label{text-model}
 
-The tested language models include 1) standard \texttt{BERT}
-\citep{devlin2019}, 2) \texttt{Roberta} \citep{liu}, which is trained on
-a much larger dataset (160GB v.s. BERT's 15GB), 3)
-\texttt{transformer-xl} \citep{dai}, 4) \texttt{xlnet} by Google Brain
-\citep{yang}, and two domain-trained BERT models: 5) \texttt{sciBert}
-\citep{beltagy2019}, trained on scientific literature, and 6)
-\texttt{bioBert}\citep{lee2020}, trained on PubMed and PMC data.
+We have conducted sensitivity analysis on the text model for obtaining
+the decision similarity score from the Gemini outputs. The tested
+language models tested include 1) standard \texttt{BERT}
+(\texttt{google-bert/bert-base-uncased}) \citep{devlin2019}, 2)
+\texttt{Roberta} (\texttt{FacebookAI/roberta-base}) \citep{liu}, which
+is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3)
+\texttt{xlnet} by Google Brain (\texttt{xlnet/xlnet-base-cased})
+\citep{yang}, and two domain-trained BERT models: 4) \texttt{sciBert}
+(\texttt{allenai/scibert\_scivocab\_uncased}) \citep{beltagy2019},
+trained on scientific literature, and 5) \texttt{bioBert}
+(\texttt{dmis-lab/biobert-large-cased-v1.1-squad}) \citep{lee2020},
+trained on PubMed and PMC data.
+
 Figure~\ref{fig-text-density} presents the distribution of the decision
-similarity score for each language models and the distribution of paper
-similarity scores.
+similarity (left) and paper similarity (right) for each text model. At
+decision level, the BERT model produces the widest variation across all
+five models, while the similarity scores from XLNet are all close to 1.
+These scores are not comparable across models since the difference of
+the underlying transformer architecture. However, the paper similarity
+scores from each model are comparable and Figure~\ref{fig-text-mds}
+shows the multi-dimensional scaling (MDS) of the paper similarity scores
+from each text model: all showing a similar clustering pattern of the
+three main smoothing methods.
 
 \phantomsection\label{cell-fig-text-density}
 \begin{figure}[H]
@@ -873,7 +886,30 @@ similarity scores.
 
 }
 
-\caption{\label{fig-text-density}}
+\caption{\label{fig-text-density}Distribution of decision similarity
+(left) and paper similarity (right) scores for five different text
+models (BERT, BioBERT, RoBERTa, SciBERT, and XLNet). The default
+language model, BERT, produces the widest variation across the five
+models, while the similarity scores form XLNet are all close to 1. The
+model BioBERT, RoBERTa, and SciBERT yield decision similar scores mostly
+between 0.7 to 1.}
+
+\end{figure}%
+
+\phantomsection\label{cell-fig-text-mds}
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-mds-1.pdf}}
+
+}
+
+\caption{\label{fig-text-mds}The multi-dimensional scaling (MDS) of the
+paper similarity scores from each text model: all showing a similar
+clustering pattern of the three main smoothing methods. The points are
+colored by the most common method used in the paper, and the hulls are
+drawn around each method group.}
 
 \end{figure}%
 

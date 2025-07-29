@@ -247,7 +247,6 @@ Decision quality summary
 -   Visualize the decision database: apply clustering algorithm and visualize the clusters
 -   a characterization of the field, what are the common variables included, what smoothing methods are used, what are the options for temporal lags often considered, how are models generally estimated spatially.
 
-
 ```{r eval = FALSE}
 root <- "data/gemini/"
 md_files <- list.files(here::here("data/gemini"), pattern = "gemini-1.md")
@@ -402,9 +401,7 @@ p2 + p3 + plot_layout(guides = 'collect') &
 
 ```
 
-
 ## Sensitivity analysis {#sec-sensitivity}
-
 
 sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 
@@ -412,32 +409,40 @@ sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 
 ### LLM provider
 
-Input of PDF, require OCR, which is only supported by Antropic Claude and Google Gemini. Comparison of the specification from the their sites
-Claude is decoder only, Gemini is an encoder–decoder model
+Input of PDF, require OCR, which is only supported by Antropic Claude and Google Gemini. Comparison of the specification from the their sites Claude is decoder only, Gemini is an encoder–decoder model
 
 Identify the proportion of the common decision extracted by Claude and Gemini
 
 Compare the clustering by Claude and Gemini
 
-* Claude tends to give more robust output while Gemini has a higher accuracy.
+-   Claude tends to give more robust output while Gemini has a higher accuracy.
 
-* Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
+-   Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
 
 ### Text model
 
-The tested language models include 1) standard `BERT` [@devlin2019], 2) `Roberta` [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `transformer-xl` [@dai], 4) `xlnet` by Google Brain [@yang], and two domain-trained BERT models: 5) `sciBert` [@beltagy2019], trained on scientific literature, and 6) `bioBert`[@lee2020], trained on PubMed and PMC data. @fig-text-density presents the distribution of the decision similarity score for each language models and the distribution of paper similarity scores. 
+We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include 1) standard `BERT` (`google-bert/bert-base-uncased`) [@devlin2019], 2) `Roberta` (`FacebookAI/roberta-base`) [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `xlnet` by Google Brain (`xlnet/xlnet-base-cased`) [@yang], and two domain-trained BERT models: 4) `sciBert` (`allenai/scibert_scivocab_uncased`) [@beltagy2019], trained on scientific literature, and 5) `bioBert` (`dmis-lab/biobert-large-cased-v1.1-squad`) [@lee2020], trained on PubMed and PMC data.
+
+@fig-text-density presents the distribution of the decision similarity (left) and paper similarity (right) for each text model. At decision level, the BERT model produces the widest variation across all five models, while the similarity scores from XLNet are all close to 1. These scores are not comparable across models since the difference of the underlying transformer architecture. However, the paper similarity scores from each model are comparable and @fig-text-mds shows the multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods.
+
 
 ```{r}
 #| fig.height: 6
 #| fig.width: 10
+#| fig.cap: "Distribution of decision similarity (left) and paper similarity (right) scores for five different text models (BERT, BioBERT, RoBERTa, SciBERT, and XLNet). The default language model, BERT, produces the widest variation across the five models, while the similarity scores form XLNet are all close to 1. The model BioBERT, RoBERTa, and SciBERT yield decision similar scores mostly between 0.7 to 1."
 #| label: fig-text-density
 models <- c("bert-base-uncased", "roberta-base", "xlnet-base-cased", 
            "allenai/scibert_scivocab_uncased", "dmis-lab/biobert-large-cased-v1.1-squad")
+models_df <- tibble(id = 1:5, models = models, name = c("BERT", "RoBERTa", "XLNet", "SciBERT", "BioBERT"))
+
 p1 <- text_sensitivity_df |> 
   filter(!str_detect(decision, "method")) |> 
-  ggplot(aes(x = dist, fill = models)) + 
-  geom_density(alpha = 0.1) + 
-  facet_wrap(vars(models), ncol = 1)
+  left_join(models_df) |>
+  ggplot(aes(x = dist, fill = name)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(vars(name), ncol = 1, scales = "free_y") + 
+  scale_x_continuous(breaks = seq(0.2, 1, 0.1)) + 
+  xlab("Decision similarity scores")
 
 text_distance_df <- text_sensitivity_decision_df |> 
   nest(data = -id) |> 
@@ -445,15 +450,43 @@ text_distance_df <- text_sensitivity_decision_df |>
   rowwise() |> 
   mutate(score = list(calc_paper_similarity(data))) |> 
   unnest(score) |> 
-  left_join(tibble(id = 1:5, models = models))
+  select(-data) |> 
+  left_join(models_df)
 
 p2 <- text_distance_df |> 
-  ggplot(aes(x = similarity, fill = models)) + 
-  geom_density(alpha = 0.1)
+  ggplot(aes(x = similarity, fill = name)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(vars(name), ncol = 1) + 
+  xlab("Paper similarity scores")
 
-(p1 | p2) + plot_layout(guides='collect') &
+(p1 | p2) + plot_layout(guides = 'collect') &
   theme_bw() + 
   theme(legend.position='bottom') 
+```
+
+```{r}
+#| fig.height: 10
+#| fig.width: 10
+#| fig.cap: "The multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods. The points are colored by the most common method used in the paper, and the hulls are drawn around each method group."
+#| label: fig-text-mds
+text_distance_df <- text_distance_df |> 
+  filter(!paper1 %in% bad & !paper2 %in% bad)
+
+mds_df <- text_distance_df |> group_split(id) |> 
+  map_dfr(run_mds, .id = "id") |> 
+  mutate(id = as.numeric(id)) |> 
+  left_join(method_df, by = c("paper" = "paper")) |> 
+  left_join(models_df) 
+
+mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) + 
+  geom_point(aes(color = method)) +
+  # ggrepel::geom_text_repel(aes(label = method, color = method),
+  #                          max.overlaps=Inf) + 
+  ggforce::geom_mark_hull(concavity = 5, aes(color = method), 
+                          expand = unit(2.2, "mm")) + 
+  facet_wrap(vars(name)) + 
+  theme_bw() + 
+  theme(aspect.ratio = 1, legend.position = "bottom")  
 ```
 
 ### LLM parameters
@@ -558,13 +591,14 @@ llm_temp_df |>
   knitr::kable(digits = 2)
 ```
 
-
 # Discussion {#sec-discussion}
 
-- Address how sensitivity analysis is/ is not relevant
+-   Address how sensitivity analysis is/ is not relevant
 
 -   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
+
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
+
 -   Validation of the output:
 
 the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
