@@ -235,6 +235,8 @@ To assign numerical value for the similarity of reason, we use a transformer lan
 
 ## Air pollution mortality modelling
 
+-   Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
+
 The results follows examines \[x\] papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in @sec-sensitivity.
 
 Specify how much of validation and review has been done
@@ -246,6 +248,7 @@ Decision quality summary
 -   look at whether decisions changes across time (cluster diagram with year)
 -   Visualize the decision database: apply clustering algorithm and visualize the clusters
 -   a characterization of the field, what are the common variables included, what smoothing methods are used, what are the options for temporal lags often considered, how are models generally estimated spatially.
+-   For `lee2006association`, it is not clear what specific smoothing method the sentence "smooth function of the day of study" refers to.
 
 ```{r eval = FALSE}
 root <- "data/gemini/"
@@ -401,30 +404,19 @@ p2 + p3 + plot_layout(guides = 'collect') &
 
 ```
 
+\newpage
+
 ## Sensitivity analysis {#sec-sensitivity}
 
 sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 
 -   A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
 
-### LLM provider
-
-Input of PDF, require OCR, which is only supported by Antropic Claude and Google Gemini. Comparison of the specification from the their sites Claude is decoder only, Gemini is an encoder–decoder model
-
-Identify the proportion of the common decision extracted by Claude and Gemini
-
-Compare the clustering by Claude and Gemini
-
--   Claude tends to give more robust output while Gemini has a higher accuracy.
-
--   Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
-
 ### Text model
 
 We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include 1) standard `BERT` (`google-bert/bert-base-uncased`) [@devlin2019], 2) `Roberta` (`FacebookAI/roberta-base`) [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `xlnet` by Google Brain (`xlnet/xlnet-base-cased`) [@yang], and two domain-trained BERT models: 4) `sciBert` (`allenai/scibert_scivocab_uncased`) [@beltagy2019], trained on scientific literature, and 5) `bioBert` (`dmis-lab/biobert-large-cased-v1.1-squad`) [@lee2020], trained on PubMed and PMC data.
 
 @fig-text-density presents the distribution of the decision similarity (left) and paper similarity (right) for each text model. At decision level, the BERT model produces the widest variation across all five models, while the similarity scores from XLNet are all close to 1. These scores are not comparable across models since the difference of the underlying transformer architecture. However, the paper similarity scores from each model are comparable and @fig-text-mds shows the multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods.
-
 
 ```{r}
 #| fig.height: 6
@@ -465,7 +457,7 @@ p2 <- text_distance_df |>
 ```
 
 ```{r}
-#| fig.height: 10
+#| fig.height: 6
 #| fig.width: 10
 #| fig.cap: "The multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods. The points are colored by the most common method used in the paper, and the hulls are drawn around each method group."
 #| label: fig-text-mds
@@ -590,6 +582,14 @@ llm_temp_df |>
   rename(`Num. of difference` = n_diff, Count = n) |> 
   knitr::kable(digits = 2)
 ```
+
+### LLM provider
+
+Reading text from PDF document requires Optical Character Recognition (OCR) to convert scanned images into machine-readable text. This capability is currently supported by Antropic Claude and Google Gemini. We perform the text extraction task of decisions from the literature with both models.
+
+[I'm not sure if we should say this...] Our experience shows that Claude tends to produce more verbose output, which may include more decisions during data pre-processing and secondary data analysis steps, while the output from Gemini is more relevant for the modelling choices.
+
+For example, in @dockery1992, the term "weather variables" is used to include both temperature and dew point temperature — a measure for humidity. Gemini lumps both decisions under "weather variable" and fails to reference back to the actual variables the choices are made on. On the other hand, Claude treats the variable definition for cold day, hot day indicator etc as decision choices and include them in the output. In @huang2009, Claude blends some pre-processing steps of variables used in the secondary analysis (use of 24 hr average on varaible NO2, O3, SO2), while Gemini does not. While in @mar2000, Gemini includes the temporal treatment (lag days of 0 to 4 days) for air pollution exposure variables studied in the secondary analysis.
 
 # Discussion {#sec-discussion}
 

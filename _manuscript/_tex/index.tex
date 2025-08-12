@@ -780,6 +780,13 @@ understand the common practices in the investigated literature.
 \subsection{Air pollution mortality
 modelling}\label{air-pollution-mortality-modelling}
 
+\begin{itemize}
+\tightlist
+\item
+  Given examples of the failure of LLM models for parsing and examples
+  where authors are unclear about the delivery
+\end{itemize}
+
 The results follows examines {[}x{]} papers for modelling the effect of
 particulate matters on mortality based on Gemini for parsing the
 decision choices. The results from Anthropic Claude is reported in
@@ -808,6 +815,10 @@ Decision quality summary
   included, what smoothing methods are used, what are the options for
   temporal lags often considered, how are models generally estimated
   spatially.
+\item
+  For \texttt{lee2006association}, it is not clear what specific
+  smoothing method the sentence ``smooth function of the day of study''
+  refers to.
 \end{itemize}
 
 \begin{figure}[H]
@@ -820,6 +831,8 @@ Decision quality summary
 
 \end{figure}%
 
+\newpage
+
 \subsection{Sensitivity analysis}\label{sec-sensitivity}
 
 sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
@@ -829,26 +842,6 @@ sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
 \item
   A section on reproducibility of LLM outputs: prompt experiment (see if
   there are papers discussing this: https://arxiv.org/pdf/2406.06608)
-\end{itemize}
-
-\subsubsection{LLM provider}\label{llm-provider}
-
-Input of PDF, require OCR, which is only supported by Antropic Claude
-and Google Gemini. Comparison of the specification from the their sites
-Claude is decoder only, Gemini is an encoder--decoder model
-
-Identify the proportion of the common decision extracted by Claude and
-Gemini
-
-Compare the clustering by Claude and Gemini
-
-\begin{itemize}
-\item
-  Claude tends to give more robust output while Gemini has a higher
-  accuracy.
-\item
-  Given examples of the failure of LLM models for parsing and examples
-  where authors are unclear about the delivery
 \end{itemize}
 
 \subsubsection{Text model}\label{text-model}
@@ -1010,6 +1003,31 @@ Num. of difference & Count & Proportion (\%) \\
 11 & 1 & 3.23 \\
 
 \end{longtable}
+
+\subsubsection{LLM provider}\label{llm-provider}
+
+Reading text from PDF document requires Optical Character Recognition
+(OCR) to convert scanned images into machine-readable text. This
+capability is currently supported by Antropic Claude and Google Gemini.
+We perform the text extraction task of decisions from the literature
+with both models.
+
+{[}I'm not sure if we should say this\ldots{]} Our experience shows that
+Claude tends to produce more verbose output, which may include more
+decisions during data pre-processing and secondary data analysis steps,
+while the output from Gemini is more relevant for the modelling choices.
+
+For example, in \citet{dockery1992}, the term ``weather variables'' is
+used to include both temperature and dew point temperature --- a measure
+for humidity. Gemini lumps both decisions under ``weather variable'' and
+fails to reference back to the actual variables the choices are made on.
+On the other hand, Claude treats the variable definition for cold day,
+hot day indicator etc as decision choices and include them in the
+output. In \citet{huang2009}, Claude blends some pre-processing steps of
+variables used in the secondary analysis (use of 24 hr average on
+varaible NO2, O3, SO2), while Gemini does not. While in \citet{mar2000},
+Gemini includes the temporal treatment (lag days of 0 to 4 days) for air
+pollution exposure variables studied in the secondary analysis.
 
 \section{Discussion}\label{sec-discussion}
 
