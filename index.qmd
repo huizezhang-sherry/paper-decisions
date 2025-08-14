@@ -91,7 +91,10 @@ library(patchwork)
 library(text)
 load(here::here("data/text_sensitivity_decision_df.rda"))
 load(here::here("data/text_sensitivity_df.rda"))
+load(here::here("data/llm_temp_df.rda"))
+load(here::here("data/all_geminis.rda"))
 gemini_df <- read_csv(here::here("data/gemini_df.csv")) |> as_decision_tbl()
+claude_df <- read_csv(here::here("data/claude_df.csv")) |> as_decision_tbl()
 ```
 
 -   Something about "analysis review" - Roger thinks it's a better to have a new word for this.
@@ -189,8 +192,7 @@ In this case, while the method of selection (minimizing AIC) is specified, the a
 
 **TODO**: Prompt engineering: these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction
 
-**TODO**: The Prompt Report: A Systematic Survey of Prompt Engineering
-Techniques <https://arxiv.org/pdf/2406.06608>
+**TODO**: The Prompt Report: A Systematic Survey of Prompt Engineering Techniques <https://arxiv.org/pdf/2406.06608>
 
 While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.
 
@@ -252,6 +254,8 @@ Decision quality summary
 -   Visualize the decision database: apply clustering algorithm and visualize the clusters
 -   a characterization of the field, what are the common variables included, what smoothing methods are used, what are the options for temporal lags often considered, how are models generally estimated spatially.
 -   For `lee2006association`, it is not clear what specific smoothing method the sentence "smooth function of the day of study" refers to.
+
+<!-- In @ito2006, a set of weather models is used for sensitivity analysis, while Gemini generates variations in the extent to which these decisions are incorporated. In @huang2009, the term "smoothing function" appears prior to the use of the actual penalized spline to describe the smoothing method. Gemini may capture one or both of these in its extraction. -->
 
 ```{r eval = FALSE}
 root <- "data/gemini/"
@@ -330,7 +334,6 @@ gemini_df <- gemini_df |>
                       paste(unique(na.omit(decision)), collapse = " , ")),
     .groups = "drop"
   )  |> 
-   filter(!paper %in% c("anderson2001particulate", "burnett1998association", "braga")) |> 
   ungroup() 
 
 #write_csv(gemini_df, file = here::here("data/gemini_df.csv"))
@@ -409,15 +412,11 @@ p2 + p3 + plot_layout(guides = 'collect') &
 
 ## Sensitivity analysis {#sec-sensitivity}
 
-In this section, we examine the reproducibility for using LLMs for text extraction tasks (@sec-llm-parameters), discrepancies between different LLM providers: Claude and Gemini (@sec-llm-providers), and the sensitivity of our paper similarity calculation pipeline to the choice of text model used for computing decision similarity scores (@sec-text-model).
+In this section, we examine the reproducibility for using LLMs for text extraction tasks in @sec-llm-reproducibility, discrepancies between different LLM models: Gemini (`gemini-2.0-flash`) and Claude (`claude-3-7-sonnet-latest`) in @sec-llm-models, and the sensitivity of our paper similarity calculation pipeline to the choice of text model used for computing decision similarity scores in @sec-text-model.
 
-### LLM parameters {#sec-llm-parameters}
+### LLM reproducibility {#sec-llm-reproducibility}
 
-Model parameters such as temperature, top-p, and top-k control the randomness of the output in LLMs. For our text extraction task, we find setting a temperature of 1 generally generate stable outputs. For each paper, we repeat the text extraction 5 times, with temperature = 1, to assess the reproducibility of Gemini. From @tbl-gemini-1, among the 62 papers investigated, 31 (50%) yields the same number of decisions extracted across all five runs. For two papers, three versions are produced. In @ito2006, a set of weather models is used for sensitivity analysis, while Gemini generates variations in the extent to which these decisions are incorporated. In @huang2009, the term "smoothing function" appears prior to the use of the actual penalized spline to describe the smoothing method. Gemini may capture one or both of these in its extraction.
-
-```{r}
-#| label: tbl-gemini-1
-#| tbl-cap: "Number of different decisions from Gemini"
+```{r eval = FALSE}
 all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
   purrr::map_dfr( ~ .x |> as_decision_tbl() |> arrange(variable)) |>
   mutate(id = str_remove(paper, "-gemini-[0-9]+"),
@@ -433,17 +432,6 @@ all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
                     NA)
   )
 
-paper_id <- all_geminis |> group_split(id) |> map_chr(~.x |> pull(id) |> unique())
-n_vec <- all_geminis |> 
-  group_split(id) |> 
-  map_dbl(~.x |> group_by(paper) |> summarize(n = n()) |> distinct(n) |> nrow())
-
-tibble(paper = paper_id, n = n_vec) |> 
-  count(n) |> 
-  knitr::kable(col.names = c("Number", "Count"))
-```
-
-```{r eval = FALSE}
 diff_df_raw <- paper_id |> map_dfr(function(paper_id) {
   res <- all_geminis |> filter(id == paper_id) |> group_split(paper)
   expand.grid(seq(1, 5, 1), seq(1, 5, 1)) |>
@@ -473,13 +461,11 @@ llm_temp_df <- diff_df_raw |>
          n_diff = ifelse(ll == 0, 0, n_diff)) |> 
   ungroup() |> 
   select(-cmpr_obj)
+#save(all_geminis, file = here::here("data/all_geminis.rda"))
 #save(llm_temp_df, file = here::here("data/llm_temp_df.rda"))
 ```
 
 ```{r}
-#| label: tbl-gemini-2
-#| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs"
-load(here::here("data/llm_temp_df.rda"))
 all_same_length_papers <- llm_temp_df |>
   group_by(paper) |> 
   reframe(a = unique(same_n)) |> 
@@ -488,30 +474,94 @@ all_same_length_papers <- llm_temp_df |>
   pull(paper)
 
 tbl <- llm_temp_df |> 
-  filter(paper %in% all_same_length_papers) |> 
+  filter(same_n) |> 
   count(n_diff) |> 
   mutate(prop = n / sum(n) * 100) 
+```
 
-tibble(n_diff = 1:11) |> 
+For our text extraction task, we test the reproducibility of Gemini (`gemini-2.0-flash`) by repeating the text extraction task 5 times for each of the 62 papers. For each of the 31 papers, five runs yield $5 \times 4 /2 = 10$ pairwise comparisons per field and including both the “reason” and “decision” fields results in a total of $31 \times 10 \times 2 = 620$ pairs. We exclude the pairs that have different number of decisions since it would require manually align the decision to compare and this left us with `r nrow(llm_temp_df |> filter(!is.na(n_diff)))` out of `r nrow(llm_temp_df)` (`r scales::label_percent()(nrow(llm_temp_df |> filter(!is.na(n_diff)))/nrow(llm_temp_df))`) pairwise comparisons. @tbl-gemini-1 shows an example of such comparison in @andersen2008, where all the four reasons are identical among the two runs, hence a zero number of difference.
+
+```{r}
+#| label: tbl-gemini-1
+#| tbl-cap: "An example of comparing the text extraction in decisions in Andersen 2008."
+res <-  all_geminis |> 
+    filter(str_detect(paper, "andersen2008size")) |>
+    group_split(paper)
+
+tibble(Variable = res[[2]]$variable, 
+       Run1 = res[[2]]$decision, 
+       Run2 = res[[3]]$decision) |> 
+  filter(!row_number() %in% c(1, 2)) |> 
+  knitr::kable()
+```
+
+@tbl-gemini-2 summarizes the number of differences observed in each pairwise comparison. Among all comparisons, `r scales::label_percent()(tbl$prop[[1]] / 100)` produce the identical text in reason and decision. The discrepancies come from the following reasons:
+
+-   Gemini extracted different length for the same decision, e.g. in @kan2007, some runs may extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)", while others extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average (lag=01)". Similarity, for decisions, some runs may yield "10 df for total mortality", while other runs yield "10 df". Similar extraction appears in @breitner2009.
+-   Gemini fails to extract reasons in some runs but not others, e.g. in @burnett1998, the first run generates NAs in the reasons, but the remaining four runs are identical. In @ueda2009 and @castillejos2000 , runs 1 and 5 fail to extract the reasons and produce the same incomplete version, whereas runs 2, 3, and 4 produce accurate versions with reasons populated.
+
+```{r}
+#| label: tbl-gemini-2
+#| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs."
+load(here::here("data/llm_temp_df.rda"))
+tibble(n_diff = 0:11) |> 
   left_join(tbl) |> 
   replace_na(list(n = 0, prop = 0)) |> 
   rename(`Num. of  difference` = n_diff, Count = n, `Proportion (%)` = prop) |> 
+  janitor::adorn_totals() |> 
   knitr::kable(digits = 2)
 ```
 
-We further examine text similarity in the “reason” and “decision” fields for the 31 papers that have the same number of decisions across runs. @tbl-gemini-2 summarizes the number of differences observed in each pairwise comparison (5 \* 4 / 2 = 10 comparisons for each of the 31 paper for two fields yields 620 pairwise comparison). Among all comparisons, `r scales::label_percent()(tbl$prop[[1]] / 100)` produce the identical text in reason and decision. The discrepancies come from the following reasons:
+### LLM models {#sec-llm-models}
 
--   Gemini extracted different length for the same decision, e.g. in @kan2007, some runs may extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)", while others extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average (lag=01)". Similarity, for decisions, some runs may yield "10 df for total mortality", while other runs yield "10 df". Similar extraction appears in @breitner2009.
--   In @burnett1998, Gemini fails to extract reasons in the first run, while the remaining four runs are identical. Similarly, in @ueda2009 and @castillejos2000 , runs 1 and 5 fail to extract the reasons and produce the same incomplete version, whereas runs 2, 3, and 4 produce accurate versions with reasons populated.
+Reading text from PDF document requires Optical Character Recognition (OCR) to convert images into machine-readable text, which currently is only supported by Antropic Claude (`claude-3-7-sonnet-latest`) and Google Gemini (`gemini-2.0-flash`). 
 
-### LLM providers {#sec-llm-providers}
+We compare the number of decisions extracted by Claude and Gemini across all 62 papers in @fig-claude-gemini. Each point represents a paper, with the x- and y-axes showing the number of decisions extracted by Claude and Gemini, respectively. The dashed 1:1 line marks where both models extract the same number of decisions. Most points fall below this line, indicating that Claude extracts more decisions -- often from data pre-processing or secondary data analysis steps requiring more manual validation -- whereas Gemini focuses more on modelling choices relevant to our analysis. Some of these decisions captured by Claude are 
 
-Reading text from PDF document requires Optical Character Recognition (OCR) to convert scanned images into machine-readable text. This capability is currently supported by Antropic Claude and Google Gemini. We perform the text extraction task of decisions from the literature with both models.
+  * the definition of "cold day" and "hot day" indicators in @dockery1992 ("defined at the 5th/ 95th percentile"), 
+  * the choice to summarize $\text{NO}_2$, $\text{O}_3$, and $\text{SO}_2$ using a "24 hr average on variable" in @huang2009, and 
+  * the definition of black smoke and in @katsouyanni2001 for secondary analysis ("restrict to days with BS concentrations below 150 $\mu g/m^2$"). 
+  
+Gemini sometimes also include irrelevant decisions, such as in @mar2000, where secondary analysis choices like "0-4 lag days" for air pollution exposure variables (CO, EC, $\text{K}_S$, $\text{NO}_2$, $\text{O}_3$, OC, Pb, S, $\text{SO}_2$, TC, Zn) are captured. However, these cases are less frequent, resulting in outputs with less noise overall.
 
-\[I'm not sure if we should say this...\] Our experience shows that Claude tends to produce more verbose output, which may include more decisions during data pre-processing and secondary data analysis steps, while the output from Gemini is more relevant for the modelling choices.
+For both Claude and Gemini, we find they fail to link the general term "weather variables" to the specific weather variables. For example Gemini misses this link in @dockery1992 and @burnett2004, while Claude does so in @dockery1992 and @katsouyanni2001. Although our prompt specified that some decisions may require linking information across sentences and paragraphs to identify the correct variable, this instruction doesn't appear to be applied consistently.
 
-For example, in @dockery1992, the term "weather variables" is used to include both temperature and dew point temperature — a measure for humidity. Gemini lumps both decisions under "weather variable" and fails to reference back to the actual variables the choices are made on. On the other hand, Claude treats the variable definition for cold day, hot day indicator etc as decision choices and include them in the output. In @huang2009, Claude blends some pre-processing steps of variables used in the secondary analysis (use of 24 hr average on varaible NO2, O3, SO2), while Gemini does not. While in @mar2000, Gemini includes the temporal treatment (lag days of 0 to 4 days) for air pollution exposure variables studied in the secondary analysis.
+```{r}
+#| label: fig-claude-gemini
+#| fig.height: 6
+#| fig.width: 6
+#| fig-cap: "Comparison of decisions extracted by Claude and Gemini. Each point represents a paper, with the x- and y-axes showing the number of decisions extracted by Claude and Gemini, respectively. The dashed 1:1 line marks where both models extract the same number of decisions. Most points fall below this line, suggesting Claude extracts more decisions -- often including noise from data pre-processing or secondary data analysis steps -- which requires additional manual validation."
+claude_gemini <- claude_df |> 
+  mutate(paper = str_remove(paper, "-claude-1")) |>
+  group_by(paper) |> 
+  count(paper) |> 
+  left_join(gemini_df |> 
+           mutate(paper = str_remove(paper, "-gemini-1")) |>
+             group_by(paper) |> 
+             count(paper), by = "paper") |> 
+  rename(claude = n.x, gemini = n.y)
 
+claude_gemini |> 
+  ggplot(aes(x = claude, y = gemini)) + 
+  geom_label(data = claude_gemini |> 
+               mutate(diff = abs(claude - gemini)) |> filter(diff >= 5),
+            aes(label = paper), nudge_y = -0.7, nudge_x = 2) + 
+   geom_point(data = claude_gemini |> 
+               mutate(diff = abs(claude - gemini)) |> filter(diff >= 5)) + 
+  geom_jitter(data = claude_gemini |> 
+               mutate(diff = abs(claude - gemini)) |> filter(diff < 5),
+              width = 0.2, height = 0.2) + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  #geom_abline(slope = 1, intercept = -4, color = 'purple') +
+  #geom_abline(slope = 1, intercept = 4, color = "purple") +
+  theme_bw() + 
+  theme(aspect.ratio = 1, panel.grid.minor = element_blank()) + 
+  xlab("Num. of decisions extracted by Claude") + 
+  ylab("Num. of decisions extracted by Gemini") + 
+  xlim(0, 20) + 
+  ylim(0, 20)
+
+```
 
 ### Text model {#sec-text-model}
 
@@ -590,7 +640,6 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
   theme_bw() + 
   theme(aspect.ratio = 1, legend.position = "bottom")  
 ```
-
 
 # Discussion {#sec-discussion}
 

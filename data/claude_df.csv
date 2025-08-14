@@ -1,0 +1,361 @@
+paper,variable,type,model,method,parameter,reason,decision
+andersen2008size,PM,temporal,generalised additive Poisson time series regression model,NA,NA,to include days with the strongest lag effects for NCtot,"lag 0-5 , 4-day pollutant average (lag 0-3) , 5-day average (lag 0-4) , 6-day average (lag 0-5)"
+andersen2008size,humidity,parameter,generalised additive Poisson time series regression model,smoothing spline,smoothing parameter,NA,4 or 5 
+andersen2008size,temperature,parameter,generalised additive Poisson time series regression model,smoothing spline,smoothing parameter,NA,4 or 5 
+andersen2008size,time,parameter,generalised additive Poisson time series regression model,smoothing spline,smoothing parameter,to control for long-term trend and seasonality,"3, 4 or 5 /year"
+anderson2001particulate,PM,parameter,generalised additive model,NA,NA,standard approach in time-series analysis,linear terms
+anderson2001particulate,PM,temporal,generalised additive model,NA,NA,"initial hypothesis based on published work , comprehensive examination of lag effects","mean of lags 0+1 , individual lags from day 0 to day 3 , cumulative lags, mean 0+1+2 and mean 0+1+2+3"
+anderson2001particulate,humidity,parameter,generalised additive model,NA,NA,to minimize Akaike's information criterion,non-parametric functional form
+anderson2001particulate,temperature,parameter,generalised additive model,NA,NA,to minimize Akaike's information criterion,non-parametric functional form
+anderson2001particulate,time,temporal,generalised additive model,NA,NA,to control for seasonal patterns,warm (April-September) and cool (October-March) seasons
+atkinson2010urban,3-hour_carbon_data,temporal,Poisson log-linear time-series model,NA,NA,in accordance with UK Local Air Quality Management guidance,averaged to obtain daily 24-hour averages subject to the availability of 6 or more values in each day
+atkinson2010urban,PM,temporal,Poisson log-linear time-series model,NA,NA,NA,concurrent exposure (lag 0) and lagged exposure up to 6 days
+atkinson2010urban,humidity,temporal,Poisson log-linear time-series model,NA,NA,NA,same day and 3 previous days
+atkinson2010urban,standard_errors,parameter,Poisson log-linear time-series model,NA,NA,to account for overdispersion,scaled by the overdispersion parameter estimated from the model
+atkinson2010urban,temperature,temporal,Poisson log-linear time-series model,NA,NA,NA,same day and 3 previous days
+atkinson2010urban,time,parameter,Poisson log-linear time-series model,smoothing spline,smoothing parameter,NA,NA
+bell2007effect,PM,temporal,time-series analysis,NA,NA,"to explore pollution effects , to reflect multiple days of exposure","single-day lags of 0, 1, 2 and 3 days , average of the same day and previous three days (L03)"
+bell2007effect,temperature,parameter,time-series analysis,natural spline,knots,adjustment by weather,6 
+bell2007effect,time,parameter,time-series analysis,natural spline,knots,to control for long-term trends and seasonality,7  per year
+bell2008seasonal,PM,temporal,generalized additive model,NA,NA,"to investigate short-term effects of PM2.5 on cardiovascular or respiratory hospitalizations , to allow the PM2.5 effect to vary smoothly throughout the year","lag 0, 1, and 2 days"
+bell2008seasonal,humidity,parameter,generalized additive model,natural spline,knots,to control for weather variables,3 
+bell2008seasonal,humidity,temporal,generalized additive model,NA,NA,to control for previous days' conditions,3-day averaged
+bell2008seasonal,temperature,parameter,generalized additive model,natural spline,knots,to control for weather variables,6 
+bell2008seasonal,temperature,temporal,generalized additive model,NA,NA,to control for previous days' conditions,3-day averaged
+bell2008seasonal,time,parameter,generalized additive model,natural spline,knots,"to account for temporal trends , to model differential temporal trends by age category","8  per year , 1  per year"
+braga,PM,parameter,generalized additive Poisson regression,NA,NA,to facilitate the combination of coefficients across cities and the examination of lag structure,linear association with deaths
+braga,PM,temporal,generalized additive Poisson regression,NA,NA,to see if traditional approaches resulted in a downward bias in the estimated effects of PM10,1-day or 2-day moving average
+braga,humidity,parameter,generalized additive Poisson regression,LOESS,smoothing window,to allow for city-specific differences,chosen separately in each location to minimize Akaike's Information Criteria
+braga,time,parameter,generalized additive Poisson regression,LOESS,smoothing window,to eliminate seasonal patterns in the residuals and to reduce the residuals of the regression to white noise,chosen separately in each city
+breitner2009short,PM,parameter,generalized semiparametric Poisson regression models,polynomial distributed lag,degree of polynomial,to investigate cumulative associations between air pollutants and daily mortality,3rd-degree polynomial
+breitner2009short,PM,temporal,generalized semiparametric Poisson regression models,NA,NA,"to investigate cumulative associations between air pollutants and daily mortality counts , to estimate time-varying associations of the pollutants","lags up to 14 days , means of lags 0-5 and 0-14"
+breitner2009short,confounding_variables,parameter,generalized semiparametric Poisson regression models,smoothing spline,smoothing parameter,to allow for nonlinear confounding effects,NA
+breitner2009short,meteorologic_variables,temporal,generalized semiparametric Poisson regression models,NA,NA,NA,"means of lags 0-1, 0-2, and 0-5"
+breitner2009short,time,parameter,generalized semiparametric Poisson regression models,natural spline,knots,to allow for nonlinear confounding effects,NA
+brook2007further,PM,temporal,generalized additive model,NA,NA,NA,lag 1 day
+brook2007further,city-specific_estimates,spatial,generalized additive model,NA,NA,to account for true variation in risk among cities and sampling error,two-stage process combining city-specific estimates
+brook2007further,day_of_study,parameter,generalized additive model,natural spline,knots,NA,6  per year
+brook2007further,temperature,parameter,generalized additive model,natural spline,knots,NA,3 
+burnett1998association,PM,temporal,generalized additive model,NA,NA,based on Akaike's Information Criteria (AIC),selected lag structure that best predicted daily mortality
+burnett1998association,climate_variables,parameter,generalized additive model,LOESS,smoothing window,to model any relatively smooth nonlinearities in the association between climate and mortality,50% of the data
+burnett1998association,daily_deaths,parameter,generalized additive model,LOESS,smoothing window,to remove temporal cycles like long-term trends and seasonal cycles that could confound the relationship between air pollution and mortality,31 days
+burnett1998association,humidity,temporal,generalized additive model,NA,NA,based on Akaike's Information Criteria (AIC),selected lag with lowest AIC
+burnett1998association,temperature,temporal,generalized additive model,NA,NA,based on Akaike's Information Criteria (AIC),selected lag with lowest AIC
+burnett2001association,day_of_study,parameter,generalized additive model,LOESS,smoothing window,to minimize autocorrelation in the residuals,70-day span
+burnett2001association,humidity,parameter,generalized additive model,LOESS,smoothing window,NA,50 percent
+burnett2001association,humidity,temporal,generalized additive model,NA,NA,"to identify weather variables required to predict admissions , sufficient to explain day-to-day variations in admission rates for respiratory problems based on forward inclusion, stepwise regression analysis using Akaike Information Criterion","recorded on the date of admission and 1 and 2 days prior to admission , with no time lag"
+burnett2001association,ozone,temporal,generalized additive model,NA,NA,"to examine association with hospital admissions , ozone was positively associated with increased hospital admissions for several days after the date of exposure","recorded on the day of admission and up to 5 days prior to admission , 5-day moving average of the daily 1-hour maximum ozone concentration"
+burnett2001association,temperature,parameter,generalized additive model,LOESS,smoothing window,NA,50 percent
+burnett2001association,temperature,temporal,generalized additive model,NA,NA,to identify weather variables required to predict admissions,recorded on the date of admission and 1 and 2 days prior to admission
+burnett2004associations,CO,temporal,random-effects regression model,NA,NA,strongest association with mortality,1 day prior to death
+burnett2004associations,CoH,temporal,random-effects regression model,NA,NA,strongest association with mortality,1 day prior to death
+burnett2004associations,NO2,temporal,random-effects regression model,NA,NA,strongest association with mortality,3-day moving average
+burnett2004associations,O3,temporal,random-effects regression model,NA,NA,strongest association with mortality,2-day moving average
+burnett2004associations,PM,temporal,random-effects regression model,NA,NA,strongest association with mortality,1 day prior to death
+burnett2004associations,SO2,temporal,random-effects regression model,NA,NA,strongest association with mortality,1 day prior to death
+burnett2004associations,SO4,temporal,random-effects regression model,NA,NA,strongest association with mortality,1 day prior to death
+burnett2004associations,humidex,parameter,random-effects regression model,natural spline,knots,"to account for potential nonlinear associations with mortality , model selection criterion","up to 4 knots , model that minimized the AIC was selected as the optimal weather model"
+burnett2004associations,time,parameter,random-effects regression model,natural spline,knots,"to provide unbiased estimates of the air pollution effect and its uncertainty, and perform better than the nonparametric modeling approaches used in previous studies , model selection criterion","1 knot for each of 15, 30, 60, 90, 120, 180, and 365 days of observation , number of knots that either minimized the Akaike Information Criteria (AIC) or maximized the evidence that the model residuals did not display any type of structure"
+castillejos2016airborne,PM,temporal,Poisson regression,NA,NA,showed a stronger and more precise association,5-day average exposure (previous 5 days)
+castillejos2016airborne,mortality,parameter,Poisson regression,LOESS,smoothing window,to allow for both linear and nonlinear relationships between mortality and predictor variables,NA
+castillejos2016airborne,overdispersion,parameter,Poisson regression,NA,NA,to account for the potential effects of serial correlations among observations,multiply the estimated variance of the regression coefficients by the square root of the overdispersion parameter
+castillejos2016airborne,temperature,temporal,Poisson regression,NA,NA,to provide the best compromise between fit and number of parameters,mean temperature during the 3 days before death
+castillejos2016airborne,time,parameter,Poisson regression,smoothed function,degrees of freedom,to provide the best compromise between fit and number of parameters,7.7 
+chen2008influence,COH,temporal,general linear models with parametric natural cubic splines,NA,NA,NA,"day of admission, as well as 1, 2, 3, 4, 5, 6, and 7 days prior to the date of admission, and multiday average for the first 3 days prior to the date of admission"
+chen2008influence,PM,temporal,general linear models with parametric natural cubic splines,NA,NA,NA,"day of admission, as well as 1, 2, 3, 4, 5, 6, and 7 days prior to the date of admission, and multiday average for the first 3 days prior to the date of admission"
+chen2008influence,humidity,temporal,general linear models with parametric natural cubic splines,NA,NA,NA,"day of admission, as well as 1, 2, 3, 4, 5, 6, and 7 days prior to the date of admission, and multiday average for the first 3 days prior to the date of admission"
+chen2008influence,temperature,temporal,general linear models with parametric natural cubic splines,NA,NA,NA,"day of admission, as well as 1, 2, 3, 4, 5, 6, and 7 days prior to the date of admission, and multiday average for the first 3 days prior to the date of admission"
+chen2008influence,time,parameter,general linear models with parametric natural cubic splines,natural spline,knots,"so that the autocorrelation in the residuals is minimized , to remove temporal trends and seasonal and subseasonal cycles in COPD hospitalizations","knots every 30 days (knots = study length/30) , 10^-8"
+chock2000study,PM,temporal,Poisson regression,NA,NA,"to test the hypothesis of causal relation between daily mortality and ambient pollutant concentrations , based on auto- and cross-correlation functions of air pollutants decaying rapidly from peak of zero lag","time lags of 2 days , zero lag and lag of 2 days"
+chock2000study,day_of_the_week,temporal,Poisson regression,NA,NA,to filter out the day-of-the-week effect,included as variable
+chock2000study,temperature,parameter,Poisson regression,LOESS,smoothing window,"to determine minimum temperature value for V-shape function , to model the anticipated nonlinear relation of daily mortality with temperature","25 C as minimum , V-shape function with minimum at 25 C"
+chock2000study,time,parameter,Poisson regression,cubic B-spline,degrees of freedom,"to assure that seasonal trends are removed , to determine how the degree of filtering influences the regression results","15  , ranging from 15 (one quarter) to >39 (less than one month)"
+cifuentes2011effect,PM,temporal,generalized additive model,NA,NA,NA,separate variables for summer months (October-March) and winter months (April-September)
+cifuentes2011effect,daily_deaths,temporal,generalized additive model,NA,NA,to test pollution effects across time periods,"same day and up to 5 previous days (lags 1-5), and the average of the previous days, from 1 to 5"
+cifuentes2011effect,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,to control for weather effects,8 
+cifuentes2011effect,humidity,temporal,generalized additive model,NA,NA,to control for weather effects,same-day relative humidity and the average of 1-5 previous days
+cifuentes2011effect,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,to control for weather effects,8 
+cifuentes2011effect,temperature,temporal,generalized additive model,NA,NA,to control for weather effects,"same day and the average of up to the 5 days before the date of death , same-day temperature and the average of 1-5 previous days"
+cifuentes2011effect,time,parameter,generalized additive model,LOESS,smoothing window,to minimize the autocorrelation of the residuals,window length determined by minimizing autocorrelation
+cifuentes2011effect,time,temporal,generalized additive model,NA,NA,to control for seasonal confounding,"linear and quadratic terms for day of the study and binary variables for each year, quarter, day of the week, and all holidays"
+dockery1992air,PM,parameter,Poisson regression,NA,NA,to evaluate the additional effect of each air pollutant in predicting daily mortality,evaluated separately
+dockery1992air,cold_days,parameter,Poisson regression,indicator variables,threshold,NA,defined at the 5th percentile
+dockery1992air,hot_days,parameter,Poisson regression,indicator variables,threshold,NA,defined at the 95th percentile
+dockery1992air,humid_days,parameter,Poisson regression,indicator variables,threshold,NA,defined at the 95th percentile
+dockery1992air,humidity,parameter,Poisson regression,linear and quadratic effects,functional form,to conservatively estimate the pollution association by first obtaining the best fit possible with weather terms,linear and quadratic effects of 24-hr mean dew-point temperature
+dockery1992air,mortality,parameter,Poisson regression,autoregressive structure,covariance structure,to incorporate the serial correlation often found in long time series,autoregressive structure
+dockery1992air,mortality,spatial,Poisson regression,NA,NA,to fit the mortality data,separately in each of the study areas
+dockery1992air,temperature,parameter,Poisson regression,linear and quadratic effects,functional form,to conservatively estimate the pollution association by first obtaining the best fit possible with weather terms,linear and quadratic effects of 24-hr mean temperature
+dockery1992air,weather,temporal,Poisson regression,NA,NA,NA,same and previous day
+fairley1999daily,carbon_monoxide,temporal,Poisson regression with generalized additive models,NA,NA,based on health-based national standards,maximum 8-hr average
+fairley1999daily,day_of_year,parameter,Poisson regression with generalized additive models,NA,NA,optimizing Akaike's information criterion (AIC),increasing the  until there is no improvement in AIC
+fairley1999daily,nitrogen_dioxide,temporal,Poisson regression with generalized additive models,NA,NA,based on health-based national standards,24-hr average
+fairley1999daily,ozone,temporal,Poisson regression with generalized additive models,NA,NA,based on health-based national standards,maximum 8-hr average
+fairley1999daily,temperature,parameter,Poisson regression with generalized additive models,NA,NA,optimizing Akaike's information criterion (AIC),adding terms until there is no improvement in AIC
+fairley1999daily,time,parameter,Poisson regression with generalized additive models,NA,NA,optimizing Akaike's information criterion (AIC),increasing the  until there is no improvement in AIC
+fairley1999daily,time,temporal,Poisson regression with generalized additive models,NA,NA,following the modeling strategy of Samet,fitting terms for season and trend before other variables
+franklin2008role,PM,temporal,Poisson regression,NA,NA,"Effects of PM are weaker with concurrent rather than lagged exposures, and the associations at different lags differ by cause of death",single- and multiple-day exposure lags (PM2.5 averaged over the day before and the day of death)
+franklin2008role,humidity,temporal,Poisson regression,NA,NA,To control for confounding effects of dew point temperature,3-day running mean
+franklin2008role,temperature,parameter,Poisson regression,quadratic function,NA,To capture inverted U-shape phenomenon of ventilation rate and indoor/outdoor ratio of PM,quadratic function of temperature
+franklin2008role,temperature,temporal,Poisson regression,NA,NA,To control for confounding effects of temperature,3-day running mean
+franklin2008role,time,parameter,Poisson regression,natural spline,knots,NA,1.5  for each season and year
+goldberg2001association,PM,parameter,generalized additive models,LOESS,smoothing window,NA,50%
+goldberg2001association,PM,temporal,generalized additive models,NA,NA,NA,"lag 1 day , average of lags 0 to 2 days (3-day mean)"
+goldberg2001association,day-of-study,parameter,generalized additive models,LOESS,smoothing window,to provide an adjustment for seasonal and subseasonal variations (temporal filter),91 or 131 days of 3653 days of observations
+goldberg2001association,temporal_filter,parameter,generalized additive models,NA,NA,consistent with a white noise process,selected using Bartlett's statistic
+goldberg2001association,weather_variables,parameter,generalized additive models,LOESS,smoothing window,to adjust for the potential confounding effects of relevant weather variables,NA
+goldberg2001association,weather_variables,temporal,generalized additive models,NA,NA,NA,lags 0 to 5 days
+huang2009visibility,NO2,temporal,generalized additive model,NA,NA,NA,24-hour average
+huang2009visibility,O3,temporal,generalized additive model,NA,NA,NA,8-hour (from 10 AM to 6 PM) average concentration
+huang2009visibility,PM,temporal,generalized additive model,NA,NA,NA,24-hour average
+huang2009visibility,SO2,temporal,generalized additive model,NA,NA,NA,24-hour average
+huang2009visibility,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,could control well for meteorologic effects on mortality,3  (whole period of study)
+huang2009visibility,humidity,temporal,generalized additive model,NA,NA,NA,current-day
+huang2009visibility,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,could control well for meteorologic effects on mortality,3  (whole period of study)
+huang2009visibility,temperature,temporal,generalized additive model,NA,NA,NA,current-day
+huang2009visibility,time,parameter,generalized additive model,smoothing spline,smoothing parameter,selected until the absolute values of sum of PACF of residuals for lags up to 30 reach minimal,NA
+huang2009visibility,visibility,parameter,generalized additive model,smoothing spline,smoothing parameter,the underlying assumption of linear relationship between death risk and visibility may not hold,NA
+huang2009visibility,visibility,temporal,generalized additive model,NA,NA,NA,current-day
+ito2006pm,PM,temporal,sensitivity analysis,NA,NA,NA,lags between 0 and 4 days
+ito2006pm,humidity,parameter,sensitivity analysis,natural spline,knots,to determine if weather models affected the lag structure of associations,"3  , 2  , 4 "
+ito2006pm,humidity,temporal,sensitivity analysis,NA,NA,to determine if weather models affected the lag structure of associations,"average of lag 1-3 day , lag 0 , lag 2"
+ito2006pm,same-day_dewpoint,parameter,sensitivity analysis,natural spline,knots,to determine if weather models affected the lag structure of associations,3 
+ito2006pm,temperature,parameter,sensitivity analysis,natural spline,knots,"to fit immediate temperature effects , to fit delayed temperature effects , to determine if weather models affected the lag structure of associations","4  , 6  , 3  , 5 "
+ito2006pm,temperature,temporal,sensitivity analysis,NA,NA,"to fit delayed temperature effects , to determine if weather models affected the lag structure of associations","average of lag 1-3 days , average of lag 1-3 day , 1-day lag , lag 0 , lag 2"
+ito2006pm,time,parameter,sensitivity analysis,natural spline,knots,"based on the inspection of the fitted mortality series (to see if it captured broad peak influenza epidemics that vary from year to year) and based on the extent of autocorrelation of the residuals , to examine the sensitivity of estimated PM2.5 mortality risks","38  (approximately 4 degrees of freedom per year) , 2, 8, and 16  per year"
+jalaludin2009association,PM,temporal,generalised additive model,NA,NA,to determine acute effects,"lag0, lag1, lag2, lag3 days , 2-day cumulative lag (L01 = average of lag0 and lag1)"
+jalaludin2009association,autocorrelation,parameter,generalised additive model,NA,NA,to remove any remaining serial correlation,first order autoregressive term
+jalaludin2009association,humidity,temporal,generalised additive model,NA,NA,model fit improvement,"same day , additional lags included only if model fit was improved"
+jalaludin2009association,meteorologic_variables,parameter,generalised additive model,natural spline,knots,NA,knots at quartiles
+jalaludin2009association,temperature,temporal,generalised additive model,NA,NA,model fit improvement,"same day , additional lags included only if model fit was improved"
+jalaludin2009association,time,parameter,generalised additive model,LOESS,smoothing window,"to control for seasonality and long-term trends , to control for long-term or seasonal trends","nonparametric smoother , 4  for cardiac disease and IHD, 9 df for CVD and 12 df for stroke"
+jayaraman2008air,CO,temporal,generalized additive model,NA,NA,different pollutants may affect mortality with variable time lags,lag days from 0 to 3
+jayaraman2008air,NO2,temporal,generalized additive model,NA,NA,different pollutants may affect mortality with variable time lags,lag days from 0 to 3
+jayaraman2008air,O3,temporal,generalized additive model,NA,NA,different pollutants may affect mortality with variable time lags,lag days from 0 (same day) to 5 (5 days before)
+jayaraman2008air,PM,temporal,generalized additive model,NA,NA,"different pollutants may affect mortality with variable time lags , to find best fitting lag period","lag days from 0 to 3 , selected lag period that gave smallest Akaike's information criterion (AIC)"
+jayaraman2008air,SO2,temporal,generalized additive model,NA,NA,different pollutants may affect mortality with variable time lags,lag days from 0 to 3
+jayaraman2008air,humidity,temporal,generalized additive model,NA,NA,to control short term effect on morbidity,LOWESS smoothing applied
+jayaraman2008air,seasonal_variations,temporal,generalized additive model,NA,NA,to control short term effect on morbidity,LOWESS smoothing applied
+jayaraman2008air,temperature,temporal,generalized additive model,NA,NA,to control short term effect on morbidity,LOWESS smoothing applied
+jayaraman2008air,time,temporal,generalized additive model,NA,NA,to control temporal trends,LOWESS smoothing applied
+jimenez2009short,PM,parameter,ARIMA,penalised spline regression,degrees of freedom,to yield an efficient multiple smoothing parameter estimation,"left to the algorithm 'mgcv' package for R software, which minimised the generalised cross-validation criterion"
+jimenez2009short,environmental_variables_and_all-cause_mortality,parameter,ARIMA,smoothing spline,smoothing parameter,to establish the functional relationship between environmental variables and all-cause mortality among persons aged over 75 years,NA
+jimenez2009short,time,parameter,ARIMA,Box-Jenkins technique,model order,to establish non-spurious relationships between mortality and PM2.5 levels,"identified on the basis of visual inspection of the simple autocorrelation (ACF) and partial autocorrelation functions (PACF), and minimisation of the Akaike Information Criterion (AIC)"
+jimenez2010role,PM,parameter,generalised linear model with Poisson regression,scatter-plot diagrams,functional form,"to determine the relationship between particulate matter and mortality , to observe relationships graphically","linear relationship , LOWESS-type smoothing"
+jimenez2010role,PM,temporal,generalised linear model with Poisson regression,NA,NA,to establish non-spurious relationships and delimit the time interval,lag 0 and subsequent lags
+jimenez2010role,mortality_series,parameter,generalised linear model with Poisson regression,Box-Jenkins technique,model type,to prewhiten the mortality series,ARIMA models
+jimenez2010role,ozone,parameter,generalised linear model with Poisson regression,threshold transformation,threshold value,functional relationships between mortality and ozone are quadratic,55 g/m3
+jimenez2010role,temperature,parameter,generalised linear model with Poisson regression,threshold transformation,threshold value,functional relationships between mortality and temperature are quadratic,30C
+kan20007differentiating,O3,temporal,generalized additive model,NA,NA,NA,8-hour (from 10 AM to 6 PM) average concentration
+kan20007differentiating,PM,temporal,generalized additive model,NA,NA,NA,24-hour average concentrations
+kan20007differentiating,day_of_the_week,parameter,generalized additive model,dummy variable,NA,to account for fluctuations in daily mortality,included as dummy variable
+kan20007differentiating,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,based on the previous literature,3 
+kan20007differentiating,particles,temporal,generalized additive model,NA,NA,single-day lag models underestimate the cumulative effect of pollutants on mortality,two-day moving average of current and previous day concentrations (lag = 01)
+kan20007differentiating,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,based on the previous literature,3 
+kan20007differentiating,time,parameter,generalized additive model,smoothing spline,smoothing parameter,to minimize the absolute values of sum of PACF of the residuals for lags up to 30,"10  for total mortality, 9 df for cardiovascular mortality, and 9 df for respiratory mortality"
+katsouyanni,PM,parameter,generalized additive models,NA,NA,to facilitate the second-stage analysis,restrict to days with PM10 concentrations below 150 g/m
+katsouyanni,PM,temporal,generalized additive models,NA,NA,based on previous studies having shown those lags to be the most relevant,average of lags 0 and 1
+katsouyanni,black_smoke,parameter,generalized additive models,NA,NA,to facilitate the second-stage analysis,restrict to days with BS concentrations below 150 g/m
+katsouyanni,black_smoke,temporal,generalized additive models,NA,NA,based on previous studies having shown those lags to be the most relevant,average of lags 0 and 1
+katsouyanni,city-specific_effect_estimates,parameter,generalized additive models,random-effects regression models,between-cities variance,to address substantial heterogeneity among city results beyond the variation associated with the effect modifiers,estimated from the data using maximum likelihood method
+katsouyanni,humidity,parameter,generalized additive models,smoothed functions,lag structure,to control for potential confounding effects of meteorologic variables,same day and lags up to 2 days or averaged over 0 to 2 days
+katsouyanni,humidity,temporal,generalized additive models,NA,NA,to control for potential confounding effects of meteorologic variables,same-day values always included
+katsouyanni,temperature,parameter,generalized additive models,smoothed functions,lag structure,to control for potential confounding effects of meteorologic variables,same day and lags up to 2 days or averaged over 0 to 2 days
+katsouyanni,temperature,temporal,generalized additive models,NA,NA,to control for potential confounding effects of meteorologic variables,same-day values always included
+katsouyanni,time,parameter,generalized additive models,LOESS,smoothing window,"to control for seasonal patterns and long-term trends, allowing for overdispersion",smoothing window not below 2 months
+katsouyanni,weather_variables,parameter,generalized additive models,NA,NA,to minimize Akaike's information criterion,parameters chosen by minimizing AIC
+kettunen2007associations,O3_and_CO,temporal,Poisson regression with generalized additive models,NA,NA,NA,8-hour moving averages
+kettunen2007associations,PM,temporal,Poisson regression with generalized additive models,NA,NA,NA,"24-hour average concentrations , lag 0-5 days , 5-day mean of lags 0 to 4"
+kettunen2007associations,humidity,temporal,Poisson regression with generalized additive models,NA,NA,"to control for confounding effects of meteorological variables , to represent slower effects of meteorology","current day (lag 0) , previous 3 days mean"
+kettunen2007associations,seasonal_data,temporal,Poisson regression with generalized additive models,NA,NA,based on the variation in temperature and ultrafine particle concentration,stratification into warm (May to September) and cold (October to April) season
+kettunen2007associations,time,parameter,Poisson regression with generalized additive models,smoothing spline,smoothing parameter,to take into account possible nonlinear confounders,NA
+kettunen2007associations,ultrafine_particles,temporal,Poisson regression with generalized additive models,NA,NA,NA,24-hour median concentration
+klemm2000aerosol,air_quality_variable,parameter,Poisson regression in a GAM framework,NA,NA,"analogous to the model from an October 1996 paper by Schwartz, Dockery, and Neas, and is consistent with models used in other mortalityair quality research",linear form
+klemm2000aerosol,day_of_the_week,parameter,Poisson regression in a GAM framework,NA,NA,NA,factor variable with seven levels
+klemm2000aerosol,humidity,parameter,Poisson regression in a GAM framework,natural spline,knots,NA,three knots based on the quartiles
+klemm2000aerosol,temperature,parameter,Poisson regression in a GAM framework,natural spline,knots,NA,three knots based on the quartiles
+klemm2000aerosol,time,parameter,Poisson regression in a GAM framework,natural spline,knots,"Natural splines offer several advantages over loess, including piecewise polynomial properties, more direct control over the tradeoff between local and global features of the smoothing operation, and exact theory for statistical inference and diagnostics",time-based knots at monthly midpoints
+ko2007effects,NO2,temporal,generalized additive model,NA,NA,NA,"concentrations for the same day (lag 0) up to 5 lag days (lag 5) and cumulative lags by 2 (lag 0 and 1), 3 (lag 0-2) to 6 days (lag 0-5) were tested"
+ko2007effects,O3,temporal,generalized additive model,NA,NA,formation of O3 is dependent on sunlight,daytime (09:00-17:00 hours) mean concentration
+ko2007effects,PM,temporal,generalized additive model,NA,NA,to find the strongest effect,"concentrations for the same day (lag 0) up to 5 lag days (lag 5) and cumulative lags by 2 (lag 0 and 1), 3 (lag 0-2) to 6 days (lag 0-5) were tested , lag day (best lag) with the air pollutant concentration that yielded the largest  value, obtained from the change in deviances"
+ko2007effects,SO2,temporal,generalized additive model,NA,NA,NA,"concentrations for the same day (lag 0) up to 5 lag days (lag 5) and cumulative lags by 2 (lag 0 and 1), 3 (lag 0-2) to 6 days (lag 0-5) were tested"
+ko2007effects,seasonal_effect,temporal,generalized additive model,NA,NA,temperature differences,December to March considered as the cold season with a mean daily temperature below 20C
+ko2007effects,time,parameter,generalized additive model,smoothing spline,smoothing parameter,to control for the long-term seasonal patterns of asthma visits,chosen based on minimum Akaike's Information Criterion (AIC) value
+lee2006association,NO2,temporal,semi-parametric Poisson's regression with generalized additive models,NA,NA,to account for potential delays in disease incidence after important exposures,lag 3
+lee2006association,O3,temporal,semi-parametric Poisson's regression with generalized additive models,NA,NA,"to account for potential delays in disease incidence after important exposures , when O3 concentrations were highest","lag 2 , 8-hourly (9:00-17:00 hours)"
+lee2006association,PM,temporal,semi-parametric Poisson's regression with generalized additive models,NA,NA,to account for potential delays in disease incidence after important exposures,lag 4
+lee2006association,day_of_study,parameter,semi-parametric Poisson's regression with generalized additive models,smooth function,NA,to account for over-dispersion for the variable and possible population changes during the study period,NA
+lee2006association,humidity,parameter,semi-parametric Poisson's regression with generalized additive models,spline smooth function,NA,best-combined fit based on minimization of Akaike's Information Criteria (AIC) and lack of over- or under-fitting in the residual correction for autocorrelation,relative humidity on day of admission (at lag 0)
+lee2006association,temperature,parameter,semi-parametric Poisson's regression with generalized additive models,spline smooth function,NA,best-combined fit based on minimization of Akaike's Information Criteria (AIC) and lack of over- or under-fitting in the residual correction for autocorrelation,mean daily temperature on day of admission (at lag 0)
+linares2010short,PM,parameter,Poisson autoregressive model,LOWESS,NA,to establish functional relationships among variables,NA
+linares2010short,PM,temporal,Poisson autoregressive model,NA,NA,to ascertain the lags at which association occurred,prewhitening of the series and computing cross-correlation functions
+linares2010short,model_selection,parameter,Poisson autoregressive model,stepwise procedure,NA,to select variables based on statistical significance and minimize information criterion,variables that minimized the Akaike Information Criterion
+linares2010short,ozone,parameter,Poisson autoregressive model,NA,NA,quadratic relationship with minimum admissions at 65 g/m3,split into two branches (O3a for >65 g/m3 and O3b for <65 g/m3)
+linares2010short,seasonality,temporal,Poisson autoregressive model,NA,NA,to control for periodicities,"annual seasonality (sine365, cosine365), biannual seasonality (sine180, cosine180), 3-month seasonality (sine90, cosine90)"
+linares2010short,temperature,parameter,Poisson autoregressive model,NA,NA,temperature exhibited non-linear relationship with hospital admissions,split into hot branch (Thot) and cold branch (Tcold) with threshold at 30C
+linares2010short,time,temporal,Poisson autoregressive model,NA,NA,to adjust seasonality,"sine and cosine functions of different periodicities (90, 120, 180 and 365 days)"
+linares2010short,weekly_variation,temporal,Poisson autoregressive model,NA,NA,to control for weekly variation,dummy variables for weekdays
+lisabeth2008ambient,PM,temporal,Poisson regression,NA,NA,as the effects of PM2.5 on stroke/TIA may be delayed,lag 0 to 5 days
+lisabeth2008ambient,season,temporal,Poisson regression,NA,NA,given evidence that air pollution and temperature may have synergistic effects on health outcomes,summer (June through September) versus nonsummer (all other months)
+lisabeth2008ambient,temperature,parameter,Poisson regression,natural spline,knots,to account for the potential confounding effects of temperature,3 
+lisabeth2008ambient,time,parameter,Poisson regression,natural spline,knots,because strong seasonal trends in the number of events were not found,3 
+lopez2010air,PM,temporal,Poisson regression models,NA,NA,a 2-day moving average of air pollutants has been described as fitting better than any single day's results,"exposure on the current day (lag 0) and lags up to 5 days , concurrent and previous day average (lag01)"
+lopez2010air,barometric_pressure,temporal,Poisson regression models,NA,NA,to control for the potentially confounding effects of weather because their relationship with the outcome is expected to be nonlinear,lags 0 to 1 and lags 2 to 4 averages
+lopez2010air,humidity,temporal,Poisson regression models,NA,NA,to control for the potentially confounding effects of weather because their relationship with the outcome is expected to be nonlinear,lags 0 to 1 and lags 2 to 4 averages
+lopez2010air,influenza,temporal,Poisson regression models,NA,NA,to control for the potentially confounding effects of influenza because their relationship with the outcome is expected to be nonlinear,lags 0 to 6 average
+lopez2010air,non-linear_terms,parameter,Poisson regression models,smoothing spline,smoothing parameter,in line with APHEA2 methodology,10
+lopez2010air,remaining_smoothers,parameter,Poisson regression models,smoothing spline,smoothing parameter,NA,chosen automatically by means of generalized cross-validation
+lopez2010air,temperature,temporal,Poisson regression models,NA,NA,to control for the potentially confounding effects of weather because their relationship with the outcome is expected to be nonlinear,lags 0 to 1 and lags 2 to 4 averages
+lopez2010air,time,parameter,Poisson regression models,smooth function,degrees of freedom,"to remove potential confounding effects of long term trends and seasonality , in line with APHEA2 methodology","9  for total mortality, 8 df for heart disease mortality, 12 df for respiratory disease mortality in Las Palmas de Gran Canaria; 5 df for all three mortality outcomes in Santa Cruz de Tenerife , 10 per year (i.e. 50 total) , chosen by minimizing the absolute value of the sum of partial autocorrelation (PAC) of the residuals; however, a minimum of 1 degree of freedom per year was required"
+mar2000associations,PM,temporal,Poisson regression,NA,NA,NA,lag days ranging from 0 to 4
+mar2000associations,humidity,parameter,Poisson regression,smoothing spline,smoothing parameter,to minimize the AIC,"2  , 2  for cardiovascular mortality"
+mar2000associations,humidity,temporal,Poisson regression,NA,NA,to minimize the AIC,"0 days lag , 0 days lag for cardiovascular mortality"
+mar2000associations,temperature,parameter,Poisson regression,smoothing spline,smoothing parameter,to minimize the AIC,"2  , 2  for cardiovascular mortality"
+mar2000associations,temperature,temporal,Poisson regression,NA,NA,to minimize the AIC,"2 days lag , 1 day lag for cardiovascular mortality"
+mar2000associations,time,parameter,Poisson regression,smoothing spline,smoothing parameter,minimizing autocorrelation as well as the Akaike information criterion (AIC),10 
+mate2010short,all_variables,parameter,ARIMA,NA,NA,to assess multivariate relationships,Poisson regression with backward stepwise variable selection
+mate2010short,time,parameter,ARIMA,Box-Jenkins,NA,to prewhiten the time series,based on visual inspection of ACF and PACF and minimisation of AIC
+moolgavkar2000air,PM,temporal,generalized additive model,NA,NA,to explore association with admissions,lags of between 0 and 5 days
+moolgavkar2000air,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2000air,humidity,temporal,generalized additive model,NA,NA,minimized the deviance,"lag 0 to 5 days, optimal lag selected"
+moolgavkar2000air,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2000air,temperature,temporal,generalized additive model,NA,NA,minimized the deviance,"lag 0 to 5 days, optimal lag selected"
+moolgavkar2000air,time,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,30 
+moolgavkar2000air-2,PM,temporal,generalized additive model,NA,NA,NA,lags of between 0 and 5 days
+moolgavkar2000air-2,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2000air-2,humidity,temporal,generalized additive model,NA,NA,minimized the deviance,optimal lag between 0 to 5 days
+moolgavkar2000air-2,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2000air-2,temperature,temporal,generalized additive model,NA,NA,minimized the deviance,optimal lag between 0 to 5 days
+moolgavkar2000air-2,time,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,30 
+moolgavkar2003air,PM,parameter,generalized additive model,smoothing spline,smoothing parameter,to explore exposure-response relationships,6 
+moolgavkar2003air,PM,temporal,generalized additive model,NA,NA,NA,lags between 0 and 5 days
+moolgavkar2003air,humidity,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2003air,humidity,temporal,generalized additive model,NA,NA,to minimize the deviance,"lags from 0 to 5 days, optimal lag kept fixed"
+moolgavkar2003air,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,6 
+moolgavkar2003air,temperature,temporal,generalized additive model,NA,NA,to minimize the deviance,"lags from 0 to 5 days, optimal lag kept fixed"
+moolgavkar2003air,time,parameter,generalized additive model,smoothing spline,smoothing parameter,correspond roughly to 1 degree of freedom for each month,100  for full-year analyses and 30 df for each seasonal analysis
+neuberger2007extended,humidity,temporal,generalized additive model,NA,NA,NA,"days 0, 1 and 2"
+neuberger2007extended,pressure,temporal,generalized additive model,NA,NA,NA,"days 0, 1 and 2"
+neuberger2007extended,seasonal_and_meteorological_factors,parameter,generalized additive model,spline functions,NA,minimizing sum of partial autocorrelation function,NA
+neuberger2007extended,temperature,temporal,generalized additive model,NA,NA,NA,"days 0, 1 and 2"
+neuberger2007extended,time,parameter,generalized additive model,spline functions,degrees of freedom,based on the minimum sum of 30 lags of partial autocorrelation function,3 to 8  per year
+neuberger2007extended,weather_indicators,parameter,generalized additive model,smoothing spline,smoothing parameter,based on the Akaike information criterion,NA
+ostro,PM,temporal,Poisson regression,NA,NA,Previous studies have reported stronger associations of mortality with PM lagged 1 or 2 days or with cumulative exposures over several days,"2-day average of lag 0 and 1 (lag 01) , single-day lag of 2 days (lag 2)"
+ostro,humidity,parameter,Poisson regression,smoothing spline,smoothing parameter,may be associated with daily mortality and are likely to vary over time in concert with air pollution levels,3 
+ostro,humidity,temporal,Poisson regression,NA,NA,NA,1-day lag
+ostro,temperature,parameter,Poisson regression,smoothing spline,smoothing parameter,may be associated with daily mortality and are likely to vary over time in concert with air pollution levels,3 
+ostro,temperature,temporal,Poisson regression,NA,NA,NA,1-day lag
+ostro,time,parameter,Poisson regression,smoothing spline,smoothing parameter,"Based on previous findings reported in the literature , to account for mortality spike in southern and central California","7  per year of data , 3 knots for 3-week period starting 17 December 1999"
+ostro2001effects,PM,temporal,Poisson regression,NA,NA,NA,single-day lags of 0-3 days
+ostro2001effects,humidity,parameter,Poisson regression,natural spline,knots,effectiveness in controlling for weather variables and promoting best model fits,3 
+ostro2001effects,humidity,temporal,Poisson regression,NA,NA,NA,unlagged
+ostro2001effects,temperature,parameter,Poisson regression,natural spline,knots,effectiveness in controlling for weather variables and promoting best model fits,3 
+ostro2001effects,temperature,temporal,Poisson regression,NA,NA,NA,unlagged
+ostro2001effects,time,parameter,Poisson regression,natural spline,knots,to control for the effects of seasonality and other factors that are time dependent,4  per calendar year
+ostro2006effects,PM,temporal,Poisson regression,NA,NA,NA,single-day lags of 0-3 days
+ostro2006effects,humidity,parameter,Poisson regression,smoothing spline,smoothing parameter,NA,3 
+ostro2006effects,humidity,temporal,Poisson regression,NA,NA,NA,1-day lag
+ostro2006effects,temperature,parameter,Poisson regression,smoothing spline,smoothing parameter,NA,3 
+ostro2006effects,temperature,temporal,Poisson regression,NA,NA,NA,1-day lag
+ostro2006effects,time,parameter,Poisson regression,natural spline,knots,this number has been found to control well for seasonal and secular patterns,4  per year of data
+peel,PM,temporal,Poisson generalized estimating equations,NA,NA,NA,"3-day moving average of pollution levels lagged 0, 1, and 2 days"
+peel,humidity,parameter,Poisson generalized estimating equations,natural spline,knots,to control for meteorological conditions,knots at the 25th and 75th percentiles
+peel,temperature,parameter,Poisson generalized estimating equations,natural spline,knots,to control for meteorological conditions,knots at the 25th and 75th percentiles
+peel,time,parameter,Poisson generalized estimating equations,natural spline,knots,to account for long-term temporal trends,"monthly knots , 10^-14 convergence criterion"
+peel,NA,parameter,Poisson generalized estimating equations,NA,NA,to account for possible autocorrelation in the outcome data,stationary 4-dependent correlation structure
+peng2008coarse,PM,temporal,overdispersed Poisson models,NA,NA,NA,"lags 0, 1, and 2 days"
+peng2008coarse,humidity,parameter,overdispersed Poisson models,natural spline,knots,NA,3 
+peng2008coarse,humidity,temporal,overdispersed Poisson models,NA,NA,NA,current day's dew-point temperature and the mean of the previous 3 days' dew-point temperatures
+peng2008coarse,temperature,parameter,overdispersed Poisson models,natural spline,knots,to give the model sufficient flexibility to account for potential nonlinearity in the relationship between temperature and health outcomes,6 
+peng2008coarse,temperature,temporal,overdispersed Poisson models,NA,NA,NA,current day's temperature and the mean of the previous 3 days' temperatures
+peng2008coarse,time,parameter,overdispersed Poisson models,natural spline,knots,so that little information at time scales longer than 2 months would be retained in estimating the risks,"8  per calendar year , 1  per year"
+peng2009emergency,PM,spatial,log-linear Poisson regression with overdispersion,NA,NA,to estimate county-specific and national average associations,two-level normal independent sampling estimation
+peng2009emergency,PM,temporal,log-linear Poisson regression with overdispersion,NA,NA,previous work with PM2.5 total mass and hospital admissions showed little evidence of a strong association with admissions at a lag of  3 days,"0-, 1-, and 2-day lag concentrations"
+peng2009emergency,organic_carbon,parameter,log-linear Poisson regression with overdispersion,NA,NA,to account for non-carbon organic matter,k value of 1.4
+peng2009emergency,temperature,parameter,log-linear Poisson regression with overdispersion,natural spline,knots,NA,"6  , 3 "
+peng2009emergency,time,parameter,log-linear Poisson regression with overdispersion,natural spline,knots,to control for seasonality and long-term trends,8  per calendar year
+perez2008coarse,PM,temporal,conditional logistic regression,NA,NA,to examine effects of exposure,lag 0 to lag 4
+perez2008coarse,humidity,temporal,conditional logistic regression,NA,NA,to adjust for weather variables,4-day average (day of exposure and 3 days before exposure)
+perez2008coarse,temperature,temporal,conditional logistic regression,NA,NA,to adjust for weather variables,4-day average (day of exposure and 3 days before exposure)
+peters2000associations,PM,parameter,generalized additive model,locally weighted least squares,NA,to check for linearity,NA
+peters2000associations,humidity,parameter,generalized additive model,natural spline,knots,NA,4 
+peters2000associations,seasonal_function,parameter,generalized additive model,natural spline,knots,to fit a semiparametric seasonal function,3  for each study year
+peters2000associations,seasonal_variation,parameter,generalized additive model,sine and cosine functions,periods,to assess seasonal variation,periods between 1 year and one-sixth of a year
+peters2000associations,temperature,parameter,generalized additive model,quadratic function,NA,NA,"modeled cold and warm temperatures separately , 4 "
+peters2000associations,temperature,temporal,generalized additive model,NA,NA,NA,same day and as a 3-day mean of the current day and the previous 2 days
+peters2000associations,time,parameter,generalized additive model,cubic function,NA,to assess overall trend,cubic function
+schreuder2006ambient,day_of_week,parameter,generalized additive model,NA,NA,NA,indicator variables
+schreuder2006ambient,humidity,parameter,generalized additive model,NA,NA,NA,linear term
+schreuder2006ambient,source_markers,temporal,generalized additive model,NA,NA,NA,1-day lag
+schreuder2006ambient,temperature,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,2 
+schreuder2006ambient,time,parameter,generalized additive model,smoothing spline,smoothing parameter,NA,42  (6 df * 7 year)
+schwartz,PM,temporal,generalized additive model,NA,NA,based on previous observations,mean of the non-missing particle concentrations on the same and on the previous day
+schwartz,humidity,parameter,generalized additive model,LOESS,smoothing window,expected the dose-response relationship between those variables and mortality to be much smoother,50% of the data
+schwartz,hydrogen_ion,parameter,generalized additive model,LOESS,smoothing window,to give a neighborhood with about the same number of days as the other analyses,parameter chosen to give a neighborhood with about 100 days
+schwartz,mortality,parameter,generalized additive model,LOESS,smoothing window,to ensure removal of all long wavelength patterns from the data,5% of the data in each neighborhood
+schwartz,temperature,parameter,generalized additive model,LOESS,smoothing window,expected the dose-response relationship between those variables and mortality to be much smoother,50% of the data
+schwartz2002concentration,PM,parameter,generalized additive model,smooth function,smoothing window,NA,"50% of the data, corresponding to between 4 and 5 "
+schwartz2002concentration,PM,temporal,generalized additive model,NA,NA,NA,mean of the day of death and the previous day
+schwartz2002concentration,humidity,parameter,generalized additive model,LOESS,smoothing window,NA,0.80
+schwartz2002concentration,particles_from_other_sources,parameter,generalized additive model,linear terms,NA,exposure ranges for the exposures to coal particles did not overlap sufficiently,NA
+schwartz2002concentration,temperature,parameter,generalized additive model,LOESS,smoothing window,NA,0.80
+schwartz2002concentration,time,parameter,generalized additive model,LOESS,smoothing window,to control for trend and season,0.05
+schwartz2002concentration,traffic_particles,parameter,generalized additive model,smooth function,degrees of freedom,only the particles from traffic showed a strong linear association,NA
+sheppard1999effects,PM,temporal,semiparametric Poisson regression models,NA,NA,"on the basis of clinical considerations, we believed the 1- to 3-day lags of pollutants would be most highly associated with asthma , the 3-day lag appeared important","lag selected for each pollutant demonstrating the strongest statistical association with the asthma outcome , same-day effects and longer lags, particularly the 3-day lag"
+sheppard1999effects,temperature,parameter,semiparametric Poisson regression models,smoothing spline,smoothing parameter,NA,4 
+sheppard1999effects,time,parameter,semiparametric Poisson regression models,smoothing spline,smoothing parameter,"based on the criteria of conceptual simplicity, small Akaike Information Criteria (AIC), and little evidence of over- or underfitting in the residual autocorrelation function",64 
+silverman2010age,PM,parameter,Poisson Generalized Linear Model,smooth function,degrees of freedom,to examine whether the concentration-response relationship was in fact linear,3 to 5 
+silverman2010age,PM,temporal,Poisson Generalized Linear Model,NA,NA,"a priori exposure window , for sensitivity analysis","average of 0-day and 1-day lagged levels , individual lag days 0 through 3"
+silverman2010age,age_categories,parameter,Poisson Generalized Linear Model,smoothed curve,degrees of freedom,NA,7 
+silverman2010age,study_days,parameter,Poisson Generalized Linear Model,natural spline,knots,based on minimization of autocorrelation in the residuals,3  per season per year
+silverman2010age,temperature,parameter,Poisson Generalized Linear Model,natural spline,knots,NA,3 
+simpson2005short,PM,temporal,Poisson regression,NA,NA,NA,"lags 0, 1, 2, 3 and average of days 0-1"
+simpson2005short,all_variables,parameter,Poisson regression,natural spline,knots,"eliminates the problem of S+ GAM functions underestimating the variances of the model parameters under certain conditions , avoids the back-fitting problems associated with non-parametric smoothers as well as some of objectivity in using natural spline smoothers","same number of  as the GAM S+ model , same number of  as in the GAM and GLM models"
+simpson2005short,bsp_(nephelometer_measurements),parameter,Poisson regression,NA,NA,to ensure a few major events did not bias the results,exclude days with nephelometer readings above the daily average value of 3x10-4m-1
+simpson2005short,humidity,temporal,Poisson regression,NA,NA,to control for the confounding effects of meteorological variables,"same-day average relative humidity, lags of up to 3 days, the average of lags 1-3"
+simpson2005short,pressure,temporal,Poisson regression,NA,NA,to control for the confounding effects of meteorological variables,same-day average pressure
+simpson2005short,temperature,temporal,Poisson regression,NA,NA,to control for the confounding effects of meteorological variables,"same-day average temperature, lags of up to 3 days, the average of lags 1-3"
+simpson2005short,time,parameter,Poisson regression,LOESS,smoothing window,to correct for time (both seasonality and long-term trends),single smoother
+simpson2005short,weather_variables,parameter,Poisson regression,natural spline,knots,to avoid bias in the back-fitting algorithm,NA
+slaughter2005association,CO,temporal,log-linear Poisson model,NA,NA,NA,pollution lags ranging from 0 to 3 days
+slaughter2005association,PM,temporal,log-linear Poisson model,NA,NA,NA,pollution lags ranging from 0 to 3 days
+slaughter2005association,temperature,parameter,log-linear Poisson model,natural spline,knots,to control for the potentially confounding effects,2 
+slaughter2005association,time,parameter,log-linear Poisson model,natural spline,knots,to control for the potentially confounding effects of longer-term trends including seasonality,"8  per year for morbidity models, 6 df per year for mortality models"
+stolzel2008daily,PM,temporal,Generalized Additive Models,NA,NA,to investigate cumulative effects,lags of up to 5 days
+stolzel2008daily,doctor's_practice_index_(influenza_epidemics),parameter,Generalized Additive Models,smoothing spline,smoothing parameter,to improve model fit in terms of smaller AIC,approximately 3 
+stolzel2008daily,humidity,temporal,Generalized Additive Models,NA,NA,to minimize the AIC,lagged 2 days
+stolzel2008daily,temperature,temporal,Generalized Additive Models,NA,NA,to minimize the AIC,lags 0 and 1
+stolzel2008daily,time,parameter,Generalized Additive Models,smoothing spline,smoothing parameter,to minimize the autocorrelation of the residuals,8  for total mortality and 7 for cardio-respiratory mortality
+ueda2009effects,PM,temporal,generalized linear model with Poisson regression,NA,NA,to examine the lagged effect,"same day (lag 0), 1 day prior (lag 1), 2 days prior (lag 2) , 2-day moving average (average of same day and 1 day prior to death) (lag m01) , 3-day moving average (average of same day, 1 day and 2 days prior to death) (lag m02)"
+ueda2009effects,area-specific_results,spatial,generalized linear model with Poisson regression,NA,NA,takes into account heterogeneity between areas because the effects of PM2.5 would vary by area,meta-analysis combining area-specific results
+ueda2009effects,day_of_the_week,temporal,generalized linear model with Poisson regression,NA,NA,NA,indicator variables
+ueda2009effects,humidity,parameter,generalized linear model with Poisson regression,natural spline,knots,based on previous literature,3 
+ueda2009effects,seasonality,temporal,generalized linear model with Poisson regression,NA,NA,to control for seasonal variation in cardiac disease mortality,indicator variables for every 2 months of the calendar year
+ueda2009effects,temperature,parameter,generalized linear model with Poisson regression,natural spline,knots,based on previous literature,6 
+ueda2009estimating,control_days,temporal,case-crossover analysis,NA,NA,"to adjust for effects of long-term trend, seasonality, and day of week by design",same day of the week in the same month of the same year as the case day
+ueda2009estimating,humidity,parameter,case-crossover analysis,smoothing spline,smoothing parameter,based on previous reports,3 
+ueda2009estimating,temperature,parameter,case-crossover analysis,smoothing spline,smoothing parameter,based on previous reports,6 
+ueda2009estimating,time,parameter,case-crossover analysis,smoothing spline,smoothing parameter,"based on previous literature , to adjust for seasonality","7  per year , every 2 months"
+venners2003particulate,PM,temporal,robust Poisson regression,NA,NA,to test effects on deaths occurring at different lags,same day and at lags up to 5 days
+venners2003particulate,SO2,temporal,robust Poisson regression,NA,NA,to test effects on deaths occurring at different lags,same day and at lags up to 5 days
+venners2003particulate,humidity,parameter,robust Poisson regression,smoothing spline,smoothing parameter,using cross-validation,NA
+venners2003particulate,humidity,temporal,robust Poisson regression,NA,NA,testing fit of values on different days,same day and at lags up to 3 days previous
+venners2003particulate,temperature,parameter,robust Poisson regression,smoothing spline,smoothing parameter,using cross-validation,NA
+venners2003particulate,temperature,temporal,robust Poisson regression,NA,NA,testing fit of values on different days,same day and at lags up to 3 days previous
+venners2003particulate,time,parameter,robust Poisson regression,smoothing spline,smoothing parameter,using cross-validation and analysis of residuals,cubic smoothing spline
+zanobetti,humidity,temporal,generalized additive regression models,NA,NA,to control for weather variables,same day
+zanobetti,temperature,temporal,generalized additive regression models,NA,NA,to control for weather variables,same day
+zanobetti,time,parameter,generalized additive regression models,smooth function,smoothing parameter,to remove seasonal and long-term fluctuations while minimizing the sum of the autocorrelation of the residuals,NA
+zanobetti,weather,temporal,generalized additive regression models,NA,NA,to control for weather variables,previous day or up to 3 previous days or the average of a few days
+zanobetti2009effect,PM,temporal,Poisson regression,NA,NA,"to investigate association between PM2.5 concentrations and mortality , to test the hypothesis that coarse particles may affect mortality with a longer lag","average of day of death and day before death (mean of lags 0 and 1) , distributed lag model for 4 days (same day and up to 3 days earlier)"
+zanobetti2009effect,city-specific_effect_estimates,spatial,Poisson regression,NA,NA,to combine city-specific results,incorporate random effects whether or not there was a significant heterogeneity
+zanobetti2009effect,temperature,parameter,Poisson regression,natural spline,knots,to control for weather,3 
+zanobetti2009effect,time,parameter,Poisson regression,natural spline,knots,to control for long-term trend and seasonality,1.5  for each season for each year
+zanobetti2009fine,PM,parameter,Poisson regression,meta-regression,NA,to quantify to what extent the association between PM2.5 mass and admissions was modified by particle composition,regressing the community and season-specific Poisson estimates against the community and season-specific mean concentration ratios
+zanobetti2009fine,PM,temporal,Poisson regression,NA,NA,NA,averaged over the day before and the day of admission
+zanobetti2009fine,day_of_the_week,parameter,Poisson regression,indicator variables,NA,NA,indicator variables
+zanobetti2009fine,humidity,parameter,Poisson regression,natural spline,knots,NA,3 
+zanobetti2009fine,humidity,temporal,Poisson regression,NA,NA,NA,three-day averaged
+zanobetti2009fine,temperature,parameter,Poisson regression,natural spline,knots,"to control for mean temperature, following findings that the association between PM2.5 mass and mortality was modified by seasonal average temperature","3  , include linear and quadratic term"
+zanobetti2009fine,temperature,temporal,Poisson regression,NA,NA,NA,three-day averaged
+zanobetti2009fine,time,parameter,Poisson regression,natural spline,knots,to control for season and long term trend,1.5  for each season and year (corresponding to 6 df per year)

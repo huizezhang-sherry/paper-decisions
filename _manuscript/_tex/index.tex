@@ -837,81 +837,51 @@ Decision quality summary
 \subsection{Sensitivity analysis}\label{sec-sensitivity}
 
 In this section, we examine the reproducibility for using LLMs for text
-extraction tasks (Section~\ref{sec-llm-parameters}), discrepancies
-between different LLM providers: Claude and Gemini
-(Section~\ref{sec-llm-providers}), and the sensitivity of our paper
+extraction tasks in Section~\ref{sec-llm-reproducibility}, discrepancies
+between different LLM models: Gemini (\texttt{gemini-2.0-flash}) and
+Claude (\texttt{claude-3-7-sonnet-latest}) in
+Section~\ref{sec-llm-models}, and the sensitivity of our paper
 similarity calculation pipeline to the choice of text model used for
-computing decision similarity scores (Section~\ref{sec-text-model}).
+computing decision similarity scores in Section~\ref{sec-text-model}.
 
-\subsubsection{LLM parameters}\label{sec-llm-parameters}
+\subsubsection{LLM reproducibility}\label{sec-llm-reproducibility}
 
-Model parameters such as temperature, top-p, and top-k control the
-randomness of the output in LLMs. For our text extraction task, we find
-setting a temperature of 1 generally generate stable outputs. For each
-paper, we repeat the text extraction 5 times, with temperature = 1, to
-assess the reproducibility of Gemini. From Table~\ref{tbl-gemini-1},
-among the 62 papers investigated, 31 (50\%) yields the same number of
-decisions extracted across all five runs. For two papers, three versions
-are produced. In \citet{ito2006}, a set of weather models is used for
-sensitivity analysis, while Gemini generates variations in the extent to
-which these decisions are incorporated. In \citet{huang2009}, the term
-``smoothing function'' appears prior to the use of the actual penalized
-spline to describe the smoothing method. Gemini may capture one or both
-of these in its extraction.
+For our text extraction task, we test the reproducibility of Gemini
+(\texttt{gemini-2.0-flash}) by repeating the text extraction task 5
+times for each of the 62 papers. For each of the 31 papers, five runs
+yield \(5 \times 4 /2 = 10\) pairwise comparisons per field and
+including both the ``reason'' and ``decision'' fields results in a total
+of \(31 \times 10 \times 2 = 620\) pairs. We exclude the pairs that have
+different number of decisions since it would require manually align the
+decision to compare and this left us with 449 out of 620 (72\%) pairwise
+comparisons. Table~\ref{tbl-gemini-1} shows an example of such
+comparison in \citet{andersen2008}, where all the four reasons are
+identical among the two runs, hence a zero number of difference.
 
-\begin{longtable}[]{@{}rr@{}}
+\begin{longtable}[]{@{}lll@{}}
 
-\caption{\label{tbl-gemini-1}Number of different decisions from Gemini}
-
-\tabularnewline
-
-\toprule\noalign{}
-Number & Count \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & 31 \\
-2 & 29 \\
-3 & 2 \\
-
-\end{longtable}
-
-\begin{longtable}[]{@{}rrr@{}}
-
-\caption{\label{tbl-gemini-2}Number of differences in the reason and
-decision fields across Gemini runs for papers with consistent number of
-decisions across runs}
+\caption{\label{tbl-gemini-1}An example of comparing the text extraction
+in decisions in Andersen 2008.}
 
 \tabularnewline
 
 \toprule\noalign{}
-Num. of difference & Count & Proportion (\%) \\
+Variable & Run1 & Run2 \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-1 & 12 & 3.87 \\
-2 & 8 & 2.58 \\
-3 & 0 & 0.00 \\
-4 & 24 & 7.74 \\
-5 & 12 & 3.87 \\
-6 & 0 & 0.00 \\
-7 & 0 & 0.00 \\
-8 & 6 & 1.94 \\
-9 & 6 & 1.94 \\
-10 & 10 & 3.23 \\
-11 & 6 & 1.94 \\
+NCtot & 6day average (lag 05) & 6day average (lag 05) \\
+calendar time & 3 4 or 5 dfyear & 3 4 or 5 dfyear \\
+dew-point temperature & 4 or 5 df & 4 or 5 df \\
+temperature & 4 or 5 df & 4 or 5 df \\
 
 \end{longtable}
 
-We further examine text similarity in the ``reason'' and ``decision''
-fields for the 31 papers that have the same number of decisions across
-runs. Table~\ref{tbl-gemini-2} summarizes the number of differences
-observed in each pairwise comparison (5 * 4 / 2 = 10 comparisons for
-each of the 31 paper for two fields yields 620 pairwise comparison).
-Among all comparisons, 73\% produce the identical text in reason and
-decision. The discrepancies come from the following reasons:
+Table~\ref{tbl-gemini-2} summarizes the number of differences observed
+in each pairwise comparison. Among all comparisons, 80\% produce the
+identical text in reason and decision. The discrepancies come from the
+following reasons:
 
 \begin{itemize}
 \tightlist
@@ -926,37 +896,110 @@ decision. The discrepancies come from the following reasons:
   total mortality'', while other runs yield ``10 df''. Similar
   extraction appears in \citet{breitner2009}.
 \item
-  In \citet{burnett1998}, Gemini fails to extract reasons in the first
-  run, while the remaining four runs are identical. Similarly, in
-  \citet{ueda2009} and \citet{castillejos2000} , runs 1 and 5 fail to
-  extract the reasons and produce the same incomplete version, whereas
-  runs 2, 3, and 4 produce accurate versions with reasons populated.
+  Gemini fails to extract reasons in some runs but not others, e.g.~in
+  \citet{burnett1998}, the first run generates NAs in the reasons, but
+  the remaining four runs are identical. In \citet{ueda2009} and
+  \citet{castillejos2000} , runs 1 and 5 fail to extract the reasons and
+  produce the same incomplete version, whereas runs 2, 3, and 4 produce
+  accurate versions with reasons populated.
 \end{itemize}
 
-\subsubsection{LLM providers}\label{sec-llm-providers}
+\begin{longtable}[]{@{}lrr@{}}
+
+\caption{\label{tbl-gemini-2}Number of differences in the reason and
+decision fields across Gemini runs for papers with consistent number of
+decisions across runs.}
+
+\tabularnewline
+
+\toprule\noalign{}
+Num. of difference & Count & Proportion (\%) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 358 & 79.73 \\
+1 & 12 & 2.67 \\
+2 & 8 & 1.78 \\
+3 & 0 & 0.00 \\
+4 & 24 & 5.35 \\
+5 & 12 & 2.67 \\
+6 & 3 & 0.67 \\
+7 & 0 & 0.00 \\
+8 & 10 & 2.23 \\
+9 & 6 & 1.34 \\
+10 & 10 & 2.23 \\
+11 & 6 & 1.34 \\
+Total & 449 & 100.00 \\
+
+\end{longtable}
+
+\subsubsection{LLM models}\label{sec-llm-models}
 
 Reading text from PDF document requires Optical Character Recognition
-(OCR) to convert scanned images into machine-readable text. This
-capability is currently supported by Antropic Claude and Google Gemini.
-We perform the text extraction task of decisions from the literature
-with both models.
+(OCR) to convert images into machine-readable text, which currently is
+only supported by Antropic Claude (\texttt{claude-3-7-sonnet-latest})
+and Google Gemini (\texttt{gemini-2.0-flash}).
 
-{[}I'm not sure if we should say this\ldots{]} Our experience shows that
-Claude tends to produce more verbose output, which may include more
-decisions during data pre-processing and secondary data analysis steps,
-while the output from Gemini is more relevant for the modelling choices.
+We compare the number of decisions extracted by Claude and Gemini across
+all 62 papers in Figure~\ref{fig-claude-gemini}. Each point represents a
+paper, with the x- and y-axes showing the number of decisions extracted
+by Claude and Gemini, respectively. The dashed 1:1 line marks where both
+models extract the same number of decisions. Most points fall below this
+line, indicating that Claude extracts more decisions -- often from data
+pre-processing or secondary data analysis steps requiring more manual
+validation -- whereas Gemini focuses more on modelling choices relevant
+to our analysis. Some of these decisions captured by Claude are
 
-For example, in \citet{dockery1992}, the term ``weather variables'' is
-used to include both temperature and dew point temperature --- a measure
-for humidity. Gemini lumps both decisions under ``weather variable'' and
-fails to reference back to the actual variables the choices are made on.
-On the other hand, Claude treats the variable definition for cold day,
-hot day indicator etc as decision choices and include them in the
-output. In \citet{huang2009}, Claude blends some pre-processing steps of
-variables used in the secondary analysis (use of 24 hr average on
-varaible NO2, O3, SO2), while Gemini does not. While in \citet{mar2000},
-Gemini includes the temporal treatment (lag days of 0 to 4 days) for air
-pollution exposure variables studied in the secondary analysis.
+\begin{itemize}
+\tightlist
+\item
+  the definition of ``cold day'' and ``hot day'' indicators in
+  \citet{dockery1992} (``defined at the 5th/ 95th percentile''),
+\item
+  the choice to summarize \(\text{NO}_2\), \(\text{O}_3\), and
+  \(\text{SO}_2\) using a ``24 hr average on variable'' in
+  \citet{huang2009}, and
+\item
+  the definition of black smoke and in \citet{katsouyanni2001} for
+  secondary analysis (``restrict to days with BS concentrations below
+  150 \(\mu g/m^2\)'').
+\end{itemize}
+
+Gemini sometimes also include irrelevant decisions, such as in
+\citet{mar2000}, where secondary analysis choices like ``0-4 lag days''
+for air pollution exposure variables (CO, EC, \(\text{K}_S\),
+\(\text{NO}_2\), \(\text{O}_3\), OC, Pb, S, \(\text{SO}_2\), TC, Zn) are
+captured. However, these cases are less frequent, resulting in outputs
+with less noise overall.
+
+For both Claude and Gemini, we find they fail to link the general term
+``weather variables'' to the specific weather variables. For example
+Gemini misses this link in \citet{dockery1992} and \citet{burnett2004},
+while Claude does so in \citet{dockery1992} and \citet{katsouyanni2001}.
+Although our prompt specified that some decisions may require linking
+information across sentences and paragraphs to identify the correct
+variable, this instruction doesn't appear to be applied consistently.
+
+\phantomsection\label{cell-fig-claude-gemini}
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-claude-gemini-1.pdf}}
+
+}
+
+\caption{\label{fig-claude-gemini}Comparison of decisions extracted by
+Claude and Gemini. Each point represents a paper, with the x- and y-axes
+showing the number of decisions extracted by Claude and Gemini,
+respectively. The dashed 1:1 line marks where both models extract the
+same number of decisions. Most points fall below this line, suggesting
+Claude extracts more decisions -- often including noise from data
+pre-processing or secondary data analysis steps -- which requires
+additional manual validation.}
+
+\end{figure}%
 
 \subsubsection{Text model}\label{sec-text-model}
 
