@@ -189,6 +189,9 @@ In this case, while the method of selection (minimizing AIC) is specified, the a
 
 **TODO**: Prompt engineering: these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction
 
+**TODO**: The Prompt Report: A Systematic Survey of Prompt Engineering
+Techniques <https://arxiv.org/pdf/2406.06608>
+
 While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.
 
 Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
@@ -404,17 +407,124 @@ p2 + p3 + plot_layout(guides = 'collect') &
 
 ```
 
-\newpage
-
 ## Sensitivity analysis {#sec-sensitivity}
 
-sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
+In this section, we examine the reproducibility for using LLMs for text extraction tasks (@sec-llm-parameters), discrepancies between different LLM providers: Claude and Gemini (@sec-llm-providers), and the sensitivity of our paper similarity calculation pipeline to the choice of text model used for computing decision similarity scores (@sec-text-model).
 
--   A section on reproducibility of LLM outputs: prompt experiment (see if there are papers discussing this: https://arxiv.org/pdf/2406.06608)
+### LLM parameters {#sec-llm-parameters}
 
-### Text model
+Model parameters such as temperature, top-p, and top-k control the randomness of the output in LLMs. For our text extraction task, we find setting a temperature of 1 generally generate stable outputs. For each paper, we repeat the text extraction 5 times, with temperature = 1, to assess the reproducibility of Gemini. From @tbl-gemini-1, among the 62 papers investigated, 31 (50%) yields the same number of decisions extracted across all five runs. For two papers, three versions are produced. In @ito2006, a set of weather models is used for sensitivity analysis, while Gemini generates variations in the extent to which these decisions are incorporated. In @huang2009, the term "smoothing function" appears prior to the use of the actual penalized spline to describe the smoothing method. Gemini may capture one or both of these in its extraction.
 
-We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include 1) standard `BERT` (`google-bert/bert-base-uncased`) [@devlin2019], 2) `Roberta` (`FacebookAI/roberta-base`) [@liu], which is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3) `xlnet` by Google Brain (`xlnet/xlnet-base-cased`) [@yang], and two domain-trained BERT models: 4) `sciBert` (`allenai/scibert_scivocab_uncased`) [@beltagy2019], trained on scientific literature, and 5) `bioBert` (`dmis-lab/biobert-large-cased-v1.1-squad`) [@lee2020], trained on PubMed and PMC data.
+```{r}
+#| label: tbl-gemini-1
+#| tbl-cap: "Number of different decisions from Gemini"
+all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
+  purrr::map_dfr( ~ .x |> as_decision_tbl() |> arrange(variable)) |>
+  mutate(id = str_remove(paper, "-gemini-[0-9]+"),
+         reason = ifelse(reason == "NA", NA, reason ),
+         decision = ifelse(decision == "NA", NA, decision ),
+         ) |>
+  mutate(
+    reason = str_replace_all(reason, "/|,|-", ""),
+    decision = str_replace_all(decision, "/|,|-", ""),
+    reason = ifelse(!is.na(reason), 
+                    paste0(tolower(substr(reason, 1, 1)), 
+                           substr(reason, 2, nchar(reason))),
+                    NA)
+  )
+
+paper_id <- all_geminis |> group_split(id) |> map_chr(~.x |> pull(id) |> unique())
+n_vec <- all_geminis |> 
+  group_split(id) |> 
+  map_dbl(~.x |> group_by(paper) |> summarize(n = n()) |> distinct(n) |> nrow())
+
+tibble(paper = paper_id, n = n_vec) |> 
+  count(n) |> 
+  knitr::kable(col.names = c("Number", "Count"))
+```
+
+```{r eval = FALSE}
+diff_df_raw <- paper_id |> map_dfr(function(paper_id) {
+  res <- all_geminis |> filter(id == paper_id) |> group_split(paper)
+  expand.grid(seq(1, 5, 1), seq(1, 5, 1)) |>
+    filter(Var1 < Var2) |>
+    rowwise() |>
+    mutate(
+      cmpr_obj = list(waldo::compare(
+        res[[Var1]] |> select(reason, decision),
+        res[[Var2]] |> select(reason, decision))), 
+      ll = length(cmpr_obj),
+      paper = paper_id, 
+      same_n = nrow(res[[Var1]]) == nrow(res[[Var2]]))
+})
+
+llm_temp_df <- diff_df_raw |> 
+  mutate(n_diff = NA) |> 
+  mutate(n_diff = ifelse(ll == 2, 
+                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[2]], "\033\\[32m")/2, 
+                         n_diff),
+         n_diff = ifelse(ll == 3, 
+                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[2]], "\033\\[32m")/2 + 
+                           str_count(cmpr_obj[[3]], "\033\\[33m") + 
+                           str_count(cmpr_obj[[3]], "\033\\[32m")/2, 
+                         n_diff),
+         n_diff = ifelse(ll == 0, 0, n_diff)) |> 
+  ungroup() |> 
+  select(-cmpr_obj)
+#save(llm_temp_df, file = here::here("data/llm_temp_df.rda"))
+```
+
+```{r}
+#| label: tbl-gemini-2
+#| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs"
+load(here::here("data/llm_temp_df.rda"))
+all_same_length_papers <- llm_temp_df |>
+  group_by(paper) |> 
+  reframe(a = unique(same_n)) |> 
+  count(paper) |> 
+  filter(n == 1) |> 
+  pull(paper)
+
+tbl <- llm_temp_df |> 
+  filter(paper %in% all_same_length_papers) |> 
+  count(n_diff) |> 
+  mutate(prop = n / sum(n) * 100) 
+
+tibble(n_diff = 1:11) |> 
+  left_join(tbl) |> 
+  replace_na(list(n = 0, prop = 0)) |> 
+  rename(`Num. of  difference` = n_diff, Count = n, `Proportion (%)` = prop) |> 
+  knitr::kable(digits = 2)
+```
+
+We further examine text similarity in the “reason” and “decision” fields for the 31 papers that have the same number of decisions across runs. @tbl-gemini-2 summarizes the number of differences observed in each pairwise comparison (5 \* 4 / 2 = 10 comparisons for each of the 31 paper for two fields yields 620 pairwise comparison). Among all comparisons, `r scales::label_percent()(tbl$prop[[1]] / 100)` produce the identical text in reason and decision. The discrepancies come from the following reasons:
+
+-   Gemini extracted different length for the same decision, e.g. in @kan2007, some runs may extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)", while others extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average (lag=01)". Similarity, for decisions, some runs may yield "10 df for total mortality", while other runs yield "10 df". Similar extraction appears in @breitner2009.
+-   In @burnett1998, Gemini fails to extract reasons in the first run, while the remaining four runs are identical. Similarly, in @ueda2009 and @castillejos2000 , runs 1 and 5 fail to extract the reasons and produce the same incomplete version, whereas runs 2, 3, and 4 produce accurate versions with reasons populated.
+
+### LLM providers {#sec-llm-providers}
+
+Reading text from PDF document requires Optical Character Recognition (OCR) to convert scanned images into machine-readable text. This capability is currently supported by Antropic Claude and Google Gemini. We perform the text extraction task of decisions from the literature with both models.
+
+\[I'm not sure if we should say this...\] Our experience shows that Claude tends to produce more verbose output, which may include more decisions during data pre-processing and secondary data analysis steps, while the output from Gemini is more relevant for the modelling choices.
+
+For example, in @dockery1992, the term "weather variables" is used to include both temperature and dew point temperature — a measure for humidity. Gemini lumps both decisions under "weather variable" and fails to reference back to the actual variables the choices are made on. On the other hand, Claude treats the variable definition for cold day, hot day indicator etc as decision choices and include them in the output. In @huang2009, Claude blends some pre-processing steps of variables used in the secondary analysis (use of 24 hr average on varaible NO2, O3, SO2), while Gemini does not. While in @mar2000, Gemini includes the temporal treatment (lag days of 0 to 4 days) for air pollution exposure variables studied in the secondary analysis.
+
+
+### Text model {#sec-text-model}
+
+We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include
+
+1)  BERT by Google [@devlin2019],
+2)  RoBERTa by Facebook AI [@liu], trained on a larger dataset (160GB v.s. BERT's 15GB),
+3)  XLNnet by Google Brain [@yang], and
+
+two domain-trained BERT models:
+
+4)  sciBERT [@beltagy2019], trained on scientific literature, and
+5)  bioBERT [@lee2020], trained on PubMed and PMC data.
 
 @fig-text-density presents the distribution of the decision similarity (left) and paper similarity (right) for each text model. At decision level, the BERT model produces the widest variation across all five models, while the similarity scores from XLNet are all close to 1. These scores are not comparable across models since the difference of the underlying transformer architecture. However, the paper similarity scores from each model are comparable and @fig-text-mds shows the multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods.
 
@@ -481,115 +591,6 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
   theme(aspect.ratio = 1, legend.position = "bottom")  
 ```
 
-### LLM parameters
-
-The text generation process of the LLMs produce a sequence of tokens based on the input text and the prompt. Model parameters such as temperature, top-p, and top-k control the randomness of the output. A higher temperature value yield more diverse outputs, while a lower value produces more conservative ones. For each Gemini extraction, we set the temperature to 1 and performed five repetitions run to assess the output stability. Among the 62 papers investigated, 31 (50%) yields a consistent number of extracted decisions across all five runs as in @tbl-gemini-1. In 29 papers, two different counts of decisions are observed. For the remaining two papers with three versions, we investigate them separately. In the case of @ito2006, variation arose because Gemini sometimes includes a collection of weather models investigated for sensitivity analysis. For @huang2009, differences come from how the term "smoothing function" was sometimes extracted as the method instead of the actual method, "penalized spline" for temperature and humidity. Depending on the run, Gemini would extract "smoothing function", "penalized spline", or both.
-
-We further investigate the text similarity in the "reason" and "decision" fields for the 31 papers with the same number of decisions across runs and @tbl-gemini-2 tabulates the number of differences found in each pairwise comparison. Fifteen (48.4%) produce the identical text in both fields across all ten cross comparisons (5 runs yield 10 comparisons). Other showed differences in up to 11 comparisons. The primary source of variation were differing extraction amounts and failure to capture the "reason" field. For example, @kan2007 has the most different (11) and the main differences are
-
-> singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)
-
-vs.
-
-> singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average (lag=01)
-
-and
-
-> a minimum of 1 df per year was required 9 df for cardiovascular mortality
-
-vs. NA
-
-```{r}
-#| label: tbl-gemini-1
-#| tbl-cap: "Number of decisions extracted from each paper by Gemini"
-all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
-  purrr::map_dfr( ~ .x |> as_decision_tbl() |> arrange(variable)) |>
-  mutate(id = str_remove(paper, "-gemini-[0-9]+"),
-         reason = ifelse(reason == "NA", NA, reason ),
-         decision = ifelse(decision == "NA", NA, decision ),
-         ) |>
-  mutate(
-    reason = str_replace_all(reason, "/|,|-", ""),
-    decision = str_replace_all(decision, "/|,|-", ""),
-    reason = ifelse(!is.na(reason), 
-                    paste0(tolower(substr(reason, 1, 1)), 
-                           substr(reason, 2, nchar(reason))),
-                    NA)
-  )
-
-paper_id <- all_geminis |> group_split(id) |> map_chr(~.x |> pull(id) |> unique())
-n_vec <- all_geminis |> 
-  group_split(id) |> 
-  map_dbl(~.x |> group_by(paper) |> summarize(n = n()) |> distinct(n) |> nrow())
-
-tibble(paper = paper_id, n = n_vec) |> 
-  count(n) |> 
-  knitr::kable(col.names = c("Num. of different row number", "Count"))
-```
-
-```{r eval = FALSE}
-diff_df_raw <- paper_id |> map_dfr(function(paper_id) {
-  res <- all_geminis |> filter(id == paper_id) |> group_split(paper)
-  expand.grid(seq(1, 5, 1), seq(1, 5, 1)) |>
-    filter(Var1 < Var2) |>
-    rowwise() |>
-    mutate(
-      cmpr_obj = list(waldo::compare(
-        res[[Var1]] |> select(reason, decision),
-        res[[Var2]] |> select(reason, decision))), 
-      ll = length(cmpr_obj),
-      paper = paper_id, 
-      same_n = nrow(res[[Var1]]) == nrow(res[[Var2]]))
-})
-
-llm_temp_df <- diff_df_raw |> 
-  mutate(n_diff = NA) |> 
-  mutate(n_diff = ifelse(ll == 2, 
-                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
-                           str_count(cmpr_obj[[2]], "\033\\[32m")/2, 
-                         n_diff),
-         n_diff = ifelse(ll == 3, 
-                         str_count(cmpr_obj[[2]], "\033\\[33m") + 
-                           str_count(cmpr_obj[[2]], "\033\\[32m")/2 + 
-                           str_count(cmpr_obj[[3]], "\033\\[33m") + 
-                           str_count(cmpr_obj[[3]], "\033\\[32m")/2, 
-                         n_diff),
-         n_diff = ifelse(ll == 0, 0, n_diff)) |> 
-  ungroup() |> 
-  select(-cmpr_obj)
-#save(llm_temp_df, file = here::here("data/llm_temp_df.rda"))
-```
-
-```{r}
-#| label: tbl-gemini-2
-#| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs"
-load(here::here("data/llm_temp_df.rda"))
-all_same_length_papers <- llm_temp_df |>
-  group_by(paper) |> 
-  reframe(a = unique(same_n)) |> 
-  count(paper) |> 
-  filter(n == 1) |> 
-  pull(paper)
-
-llm_temp_df |> 
-  filter(paper %in% all_same_length_papers) |> 
-  group_by(paper) |> 
-  arrange(-n_diff) |> 
-  filter(row_number() == 1) |> 
-  ungroup() |>  
-  count(n_diff) |> 
-  mutate(`Proportion (%)` = n / sum(n) * 100) |> 
-  rename(`Num. of difference` = n_diff, Count = n) |> 
-  knitr::kable(digits = 2)
-```
-
-### LLM provider
-
-Reading text from PDF document requires Optical Character Recognition (OCR) to convert scanned images into machine-readable text. This capability is currently supported by Antropic Claude and Google Gemini. We perform the text extraction task of decisions from the literature with both models.
-
-[I'm not sure if we should say this...] Our experience shows that Claude tends to produce more verbose output, which may include more decisions during data pre-processing and secondary data analysis steps, while the output from Gemini is more relevant for the modelling choices.
-
-For example, in @dockery1992, the term "weather variables" is used to include both temperature and dew point temperature — a measure for humidity. Gemini lumps both decisions under "weather variable" and fails to reference back to the actual variables the choices are made on. On the other hand, Claude treats the variable definition for cold day, hot day indicator etc as decision choices and include them in the output. In @huang2009, Claude blends some pre-processing steps of variables used in the secondary analysis (use of 24 hr average on varaible NO2, O3, SO2), while Gemini does not. While in @mar2000, Gemini includes the temporal treatment (lag days of 0 to 4 days) for air pollution exposure variables studied in the secondary analysis.
 
 # Discussion {#sec-discussion}
 

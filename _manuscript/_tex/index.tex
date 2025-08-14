@@ -613,6 +613,9 @@ hallucinate unless explicitly told not to since it is generative in
 nature based on the predicted probability of the next word from the text
 and the instruction
 
+\textbf{TODO}: The Prompt Report: A Systematic Survey of Prompt
+Engineering Techniques \url{https://arxiv.org/pdf/2406.06608}
+
 While decisions can be extracted manually from the literature, this
 process is labor-intensive and time-consuming. Recent advances in Large
 Language Models (LLMs) have demonstrated potential for automating the
@@ -831,33 +834,159 @@ Decision quality summary
 
 \end{figure}%
 
-\newpage
-
 \subsection{Sensitivity analysis}\label{sec-sensitivity}
 
-sensitivity of the pipeline: 1) LLM, 2) text model, 3) LLM parameters
+In this section, we examine the reproducibility for using LLMs for text
+extraction tasks (Section~\ref{sec-llm-parameters}), discrepancies
+between different LLM providers: Claude and Gemini
+(Section~\ref{sec-llm-providers}), and the sensitivity of our paper
+similarity calculation pipeline to the choice of text model used for
+computing decision similarity scores (Section~\ref{sec-text-model}).
+
+\subsubsection{LLM parameters}\label{sec-llm-parameters}
+
+Model parameters such as temperature, top-p, and top-k control the
+randomness of the output in LLMs. For our text extraction task, we find
+setting a temperature of 1 generally generate stable outputs. For each
+paper, we repeat the text extraction 5 times, with temperature = 1, to
+assess the reproducibility of Gemini. From Table~\ref{tbl-gemini-1},
+among the 62 papers investigated, 31 (50\%) yields the same number of
+decisions extracted across all five runs. For two papers, three versions
+are produced. In \citet{ito2006}, a set of weather models is used for
+sensitivity analysis, while Gemini generates variations in the extent to
+which these decisions are incorporated. In \citet{huang2009}, the term
+``smoothing function'' appears prior to the use of the actual penalized
+spline to describe the smoothing method. Gemini may capture one or both
+of these in its extraction.
+
+\begin{longtable}[]{@{}rr@{}}
+
+\caption{\label{tbl-gemini-1}Number of different decisions from Gemini}
+
+\tabularnewline
+
+\toprule\noalign{}
+Number & Count \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 31 \\
+2 & 29 \\
+3 & 2 \\
+
+\end{longtable}
+
+\begin{longtable}[]{@{}rrr@{}}
+
+\caption{\label{tbl-gemini-2}Number of differences in the reason and
+decision fields across Gemini runs for papers with consistent number of
+decisions across runs}
+
+\tabularnewline
+
+\toprule\noalign{}
+Num. of difference & Count & Proportion (\%) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 12 & 3.87 \\
+2 & 8 & 2.58 \\
+3 & 0 & 0.00 \\
+4 & 24 & 7.74 \\
+5 & 12 & 3.87 \\
+6 & 0 & 0.00 \\
+7 & 0 & 0.00 \\
+8 & 6 & 1.94 \\
+9 & 6 & 1.94 \\
+10 & 10 & 3.23 \\
+11 & 6 & 1.94 \\
+
+\end{longtable}
+
+We further examine text similarity in the ``reason'' and ``decision''
+fields for the 31 papers that have the same number of decisions across
+runs. Table~\ref{tbl-gemini-2} summarizes the number of differences
+observed in each pairwise comparison (5 * 4 / 2 = 10 comparisons for
+each of the 31 paper for two fields yields 620 pairwise comparison).
+Among all comparisons, 73\% produce the identical text in reason and
+decision. The discrepancies come from the following reasons:
 
 \begin{itemize}
 \tightlist
 \item
-  A section on reproducibility of LLM outputs: prompt experiment (see if
-  there are papers discussing this: https://arxiv.org/pdf/2406.06608)
+  Gemini extracted different length for the same decision, e.g.~in
+  \citet{kan2007}, some runs may extract ``singleday lag models
+  underestimate the cumulative effect of pollutants on mortality 2day
+  moving average \textbf{of current and previous day concentrations}
+  (lag=01)'', while others extract ``singleday lag models underestimate
+  the cumulative effect of pollutants on mortality 2day moving average
+  (lag=01)''. Similarity, for decisions, some runs may yield ``10 df for
+  total mortality'', while other runs yield ``10 df''. Similar
+  extraction appears in \citet{breitner2009}.
+\item
+  In \citet{burnett1998}, Gemini fails to extract reasons in the first
+  run, while the remaining four runs are identical. Similarly, in
+  \citet{ueda2009} and \citet{castillejos2000} , runs 1 and 5 fail to
+  extract the reasons and produce the same incomplete version, whereas
+  runs 2, 3, and 4 produce accurate versions with reasons populated.
 \end{itemize}
 
-\subsubsection{Text model}\label{text-model}
+\subsubsection{LLM providers}\label{sec-llm-providers}
+
+Reading text from PDF document requires Optical Character Recognition
+(OCR) to convert scanned images into machine-readable text. This
+capability is currently supported by Antropic Claude and Google Gemini.
+We perform the text extraction task of decisions from the literature
+with both models.
+
+{[}I'm not sure if we should say this\ldots{]} Our experience shows that
+Claude tends to produce more verbose output, which may include more
+decisions during data pre-processing and secondary data analysis steps,
+while the output from Gemini is more relevant for the modelling choices.
+
+For example, in \citet{dockery1992}, the term ``weather variables'' is
+used to include both temperature and dew point temperature --- a measure
+for humidity. Gemini lumps both decisions under ``weather variable'' and
+fails to reference back to the actual variables the choices are made on.
+On the other hand, Claude treats the variable definition for cold day,
+hot day indicator etc as decision choices and include them in the
+output. In \citet{huang2009}, Claude blends some pre-processing steps of
+variables used in the secondary analysis (use of 24 hr average on
+varaible NO2, O3, SO2), while Gemini does not. While in \citet{mar2000},
+Gemini includes the temporal treatment (lag days of 0 to 4 days) for air
+pollution exposure variables studied in the secondary analysis.
+
+\subsubsection{Text model}\label{sec-text-model}
 
 We have conducted sensitivity analysis on the text model for obtaining
 the decision similarity score from the Gemini outputs. The tested
-language models tested include 1) standard \texttt{BERT}
-(\texttt{google-bert/bert-base-uncased}) \citep{devlin2019}, 2)
-\texttt{Roberta} (\texttt{FacebookAI/roberta-base}) \citep{liu}, which
-is trained on a much larger dataset (160GB v.s. BERT's 15GB), 3)
-\texttt{xlnet} by Google Brain (\texttt{xlnet/xlnet-base-cased})
-\citep{yang}, and two domain-trained BERT models: 4) \texttt{sciBert}
-(\texttt{allenai/scibert\_scivocab\_uncased}) \citep{beltagy2019},
-trained on scientific literature, and 5) \texttt{bioBert}
-(\texttt{dmis-lab/biobert-large-cased-v1.1-squad}) \citep{lee2020},
-trained on PubMed and PMC data.
+language models tested include
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\tightlist
+\item
+  BERT by Google \citep{devlin2019},
+\item
+  RoBERTa by Facebook AI \citep{liu}, trained on a larger dataset (160GB
+  v.s. BERT's 15GB),
+\item
+  XLNnet by Google Brain \citep{yang}, and
+\end{enumerate}
+
+two domain-trained BERT models:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  sciBERT \citep{beltagy2019}, trained on scientific literature, and
+\item
+  bioBERT \citep{lee2020}, trained on PubMed and PMC data.
+\end{enumerate}
 
 Figure~\ref{fig-text-density} presents the distribution of the decision
 similarity (left) and paper similarity (right) for each text model. At
@@ -905,129 +1034,6 @@ colored by the most common method used in the paper, and the hulls are
 drawn around each method group.}
 
 \end{figure}%
-
-\subsubsection{LLM parameters}\label{llm-parameters}
-
-The text generation process of the LLMs produce a sequence of tokens
-based on the input text and the prompt. Model parameters such as
-temperature, top-p, and top-k control the randomness of the output. A
-higher temperature value yield more diverse outputs, while a lower value
-produces more conservative ones. For each Gemini extraction, we set the
-temperature to 1 and performed five repetitions run to assess the output
-stability. Among the 62 papers investigated, 31 (50\%) yields a
-consistent number of extracted decisions across all five runs as in
-Table~\ref{tbl-gemini-1}. In 29 papers, two different counts of
-decisions are observed. For the remaining two papers with three
-versions, we investigate them separately. In the case of
-\citet{ito2006}, variation arose because Gemini sometimes includes a
-collection of weather models investigated for sensitivity analysis. For
-\citet{huang2009}, differences come from how the term ``smoothing
-function'' was sometimes extracted as the method instead of the actual
-method, ``penalized spline'' for temperature and humidity. Depending on
-the run, Gemini would extract ``smoothing function'', ``penalized
-spline'', or both.
-
-We further investigate the text similarity in the ``reason'' and
-``decision'' fields for the 31 papers with the same number of decisions
-across runs and Table~\ref{tbl-gemini-2} tabulates the number of
-differences found in each pairwise comparison. Fifteen (48.4\%) produce
-the identical text in both fields across all ten cross comparisons (5
-runs yield 10 comparisons). Other showed differences in up to 11
-comparisons. The primary source of variation were differing extraction
-amounts and failure to capture the ``reason'' field. For example,
-\citet{kan2007} has the most different (11) and the main differences are
-
-\begin{quote}
-singleday lag models underestimate the cumulative effect of pollutants
-on mortality 2day moving average \textbf{of current and previous day
-concentrations} (lag=01)
-\end{quote}
-
-vs.
-
-\begin{quote}
-singleday lag models underestimate the cumulative effect of pollutants
-on mortality 2day moving average (lag=01)
-\end{quote}
-
-and
-
-\begin{quote}
-a minimum of 1 df per year was required 9 df for cardiovascular
-mortality
-\end{quote}
-
-vs.~NA
-
-\begin{longtable}[]{@{}rr@{}}
-
-\caption{\label{tbl-gemini-1}Number of decisions extracted from each
-paper by Gemini}
-
-\tabularnewline
-
-\toprule\noalign{}
-Num. of different row number & Count \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & 31 \\
-2 & 29 \\
-3 & 2 \\
-
-\end{longtable}
-
-\begin{longtable}[]{@{}rrr@{}}
-
-\caption{\label{tbl-gemini-2}Number of differences in the reason and
-decision fields across Gemini runs for papers with consistent number of
-decisions across runs}
-
-\tabularnewline
-
-\toprule\noalign{}
-Num. of difference & Count & Proportion (\%) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0 & 15 & 48.39 \\
-1 & 2 & 6.45 \\
-2 & 2 & 6.45 \\
-4 & 4 & 12.90 \\
-5 & 3 & 9.68 \\
-8 & 1 & 3.23 \\
-9 & 1 & 3.23 \\
-10 & 2 & 6.45 \\
-11 & 1 & 3.23 \\
-
-\end{longtable}
-
-\subsubsection{LLM provider}\label{llm-provider}
-
-Reading text from PDF document requires Optical Character Recognition
-(OCR) to convert scanned images into machine-readable text. This
-capability is currently supported by Antropic Claude and Google Gemini.
-We perform the text extraction task of decisions from the literature
-with both models.
-
-{[}I'm not sure if we should say this\ldots{]} Our experience shows that
-Claude tends to produce more verbose output, which may include more
-decisions during data pre-processing and secondary data analysis steps,
-while the output from Gemini is more relevant for the modelling choices.
-
-For example, in \citet{dockery1992}, the term ``weather variables'' is
-used to include both temperature and dew point temperature --- a measure
-for humidity. Gemini lumps both decisions under ``weather variable'' and
-fails to reference back to the actual variables the choices are made on.
-On the other hand, Claude treats the variable definition for cold day,
-hot day indicator etc as decision choices and include them in the
-output. In \citet{huang2009}, Claude blends some pre-processing steps of
-variables used in the secondary analysis (use of 24 hr average on
-varaible NO2, O3, SO2), while Gemini does not. While in \citet{mar2000},
-Gemini includes the temporal treatment (lag days of 0 to 4 days) for air
-pollution exposure variables studied in the secondary analysis.
 
 \section{Discussion}\label{sec-discussion}
 
