@@ -432,8 +432,37 @@ systematically explore how different choices affect results and to
 report the range of plausible outcomes that arise from alternative
 analytic paths.
 
-\textbf{TODO} Something about the context on air pollution mortality
-modelling @ Roger
+\subsection{Visualization on scientific
+literature}\label{visualization-on-scientific-literature}
+
+Much of the work on IEEE visualizing scientific literature focuses on
+helping researchers stay aware of relevant publications, given the
+rapidly growing volume of scientific output and the difficulty of
+navigating it. Systems have been developed to support the discovery of
+relevant papers, where relevance is typically determined by keywords
+\citep{isenberg2017}, citation information (e.g.~citation list,
+co-citation) \citep{chen2006}, or combinations with other relevant paper
+metadata (e.g.~author, title)
+\citep{bethard2010, chou2011, dörk2012, heimerl2016}. More recent
+approaches incorporate text-based information from the abstract or
+sections of the paper to {[}obtain a better similar metric{]}. This
+includes using topic modelling \citep{alexander2014},
+argumentation-based information retrieval \citep{tbahriti2006}, and text
+embedding \citep{narechania2022}. While these metadata information and
+high level text-based information are valuable for discovering relevant
+papers, for data analysis, researchers need tools that help them
+\emph{make sense} of the literature rather than simply \emph{finding}
+it. Capturing the decisions and reasoning expressed during analyses
+within a similar theme can reveal common practices in the field and
+guide decisions choices in new applications. With recent advances in
+Large Language Models (LLMs), it has become possible to automatically
+extract structured information from unstructured text through prompting.
+This allows scientific literature to be clustered and visualized using
+information about the underlying decisions and reasoning made during
+analysis, providing a basis for studying analysts' decision choices.
+
+\subsection{Air pollution mortality
+modelling}\label{air-pollution-mortality-modelling}
 
 \section{Extracting decisions from data
 analysis}\label{sec-extract-decisions}
@@ -781,7 +810,7 @@ understand the common practices in the investigated literature.
 \section{Results}\label{sec-result}
 
 \subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling}
+modelling}\label{air-pollution-mortality-modelling-1}
 
 \begin{itemize}
 \tightlist
