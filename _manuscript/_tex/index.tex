@@ -155,7 +155,7 @@
 \setlength{\parskip}{0pt}
 
 \hypersetup{
-  pdftitle={The Name of the Title Is Hope},
+  pdftitle={Dossier: visualizing/ understanding decision choices in data analysis via decision similarity},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
   colorlinks=true,
   linkcolor={blue},
@@ -224,7 +224,8 @@ Systems}{Apr 13--17, 2026}{Barcelona, Spain}
 %%
 %% The "title" command has an optional parameter,
 %% allowing the author to define a "short title" to be used in page headers.
-\title[Hope]{The Name of the Title Is Hope}
+\title{Dossier: visualizing/ understanding decision choices in data
+analysis via decision similarity}
 
 %%
 %% The "author" command and its associated commands are used to define
@@ -260,7 +261,23 @@ Systems}{Apr 13--17, 2026}{Barcelona, Spain}
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-bla blabla    
+In data analysis, analysts are expected to clearly communicate the
+decisions they make, as these choices inform how results are interpreted
+and compared across studies. Such decisions -- for example, selecting
+the degree of freedom for a smoothing spline -- are often not
+systematically studied, since onece an analysis is published, it is done
+seldom revisited or replicated with alternative choices. In this work,
+we focus on a body of data analysis studies on the effect of particulate
+matter on mortality, conducted by researchers worldwide, which naturally
+provide alteranative analyes of the same question. We automatically
+extract analytic decisions from the published literature into structured
+data using Large Language Models (Claude and Gemini). We then proposed a
+pipeline to calculate paper similarity based on the semantic similarity
+of these extracted decisions and their reasons, and visualize the
+results through clustering algorithms. This approach offers an efficient
+way to study decision-making practices than traditional interviews. We
+also provide insights into the use of LLMs for text extraction tasks and
+the communication of analytic choices in data analysis practice.    
 \end{abstract}
 
 %%
@@ -274,11 +291,6 @@ bla blabla
     <concept_desc>Applied computing~Document analysis</concept_desc>
     <concept_significance>300</concept_significance>
     </concept>
-  <concept>
-    <concept_id>10010405.10010432.10010437.10010438</concept_id>
-    <concept_desc>Applied computing~Environmental sciences</concept_desc>
-    <concept_significance>500</concept_significance>
-    </concept>
    <concept>
     <concept_id>10003120.10003121.10003126</concept_id>
     <concept_desc>Human-centered computing~HCI theory, concepts and models</concept_desc>
@@ -288,7 +300,6 @@ bla blabla
 \end{CCSXML}
 
 \ccsdesc[300]{Applied computing~Document analysis}
-\ccsdesc[500]{Applied computing~Environmental sciences}
 \ccsdesc[500]{Human-centered computing~HCI theory, concepts and models}
 
 %%
@@ -374,6 +385,23 @@ modelling strategies differs in the European and U.S. studies, which
 offers a new way to visualize the field in the air pollution mortality
 modelling.
 
+The contribution of this work includes:
+
+\begin{itemize}
+\item
+  A new approach to study data analysis decision choices through
+  automatic extraction of decisions from scientific literature using
+  LLMs,
+\item
+  A dataset compiled from 62 papers to study decision-making in air
+  pollution mortality modelling,
+\item
+  A pipeline to construct similarities between papers based on decision
+  similarities, and
+\item
+  Issues we found from existing data analysis reporting
+\end{itemize}
+
 The rest of the paper is organized as follows. In
 Section~\ref{sec-background}, we review the background on data analysis
 decisions. Section~\ref{sec-extract-decisions} describes the data
@@ -387,13 +415,10 @@ analyses related to LLM providers, prompt engineering, and LLM
 parameters. Finally, Section~\ref{sec-discussion} discusses the
 implications of our study.
 
-\section{Background}\label{sec-background}
+\section{Related work}\label{sec-background}
 
-\subsection{Decisions in data
-analysis}\label{decisions-in-data-analysis}
-
-\textbf{Question} Is ``decision'' going to be confusing with
-``decision-making'' in decision theory
+\subsection{Decision-making in data
+analysis}\label{decision-making-in-data-analysis}
 
 A data analysis is a process of making choices at each step, from the
 initial data collection to model specification, and post-processing.
@@ -412,15 +437,18 @@ of red cards awarded by referees. Similar variability has been observed
 in structural equation modeling \citep{sarstedt2024}, applied
 microeconomics \citep{huntington-klein2021}, neuroimaging
 \citep{botvinik-nezer2020}, and ecology and evolutionary biology
-\citep{gould2025}. Many studies have been conducted on a relatively
-smaller scale to interviews of analysts and researchers on data analysis
-practices \citep{kale2019, alspaugh2019, liu_understanding_2020},
-visualization of the decision process through the analytic decision
-graphics (ADG) \citep{liu2020}. Recently, \citet{simson2025} describes a
-participatory approach to decisions choices in fairness ML algorithms.
+\citep{gould2025}.
 
-Software tools have also developed to incorporate potential alternatives
-in the analysis workflow, including the \texttt{DeclareDesign} package
+Examples above have rendered decision-making in data analysis as a
+subject to study in data science. To collect data on how analysts making
+decisions during data analysis, researchers have conducted interviews
+with analysts and researchers on data analysis practices
+\citep{kale2019, alspaugh2019, liu_understanding_2020}, visualization of
+the decision process through the analytic decision graphics (ADG)
+\citep{liu2020}. Recently, \citet{simson2025} describes a participatory
+approach to decisions choices in fairness ML algorithms. Software tools
+have also developed to incorporate potential alternatives in the
+analysis workflow, including the \texttt{DeclareDesign} package
 \citep{blair2019} and the \texttt{multiverse} package
 \citep{multiverse}. The \texttt{DeclareDesign} package \citep{blair2019}
 introduces the MIDA framework for researchers to declare, diagnose, and
@@ -430,7 +458,8 @@ study \citep{bishop2024}. The \texttt{multiverse} package
 \citep{multiverse} provides a framework for researchers to
 systematically explore how different choices affect results and to
 report the range of plausible outcomes that arise from alternative
-analytic paths.
+analytic paths. Other systems have been developed to visualize
+\texttt{multiverse} analysis \citep{liu2021}.
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
@@ -1133,9 +1162,6 @@ authors, and its justification/ rationale, rather than purely
 summarizing the text through pattern-matching.
 
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{references.bib}
-
-\renewcommand{\bibsection}{}
 \bibliography{references.bib}
 
 %% begin pandoc before-bib

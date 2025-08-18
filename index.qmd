@@ -3,9 +3,8 @@ format: acm-pdf
 keep-tex: true
 pdf-engine: pdflatex
 bibliography: references.bib
-title: The Name of the Title Is Hope
-short-title: Hope
-abstract: bla blabla
+title: "Dossier: visualizing/ understanding decision choices in data analysis via decision similarity"
+abstract: "In data analysis, analysts are expected to clearly communicate the decisions they make, as these choices inform how results are interpreted and compared across studies. Such decisions -- for example, selecting the degree of freedom for a smoothing spline -- are often not systematically studied, since onece an analysis is published, it is done seldom revisited or replicated with alternative choices. In this work, we focus on a body of data analysis studies on the effect of particulate matter on mortality, conducted by researchers worldwide, which naturally provide alteranative analyes of the same question. We automatically extract analytic decisions from the published literature into structured data using Large Language Models (Claude and Gemini). We then proposed a pipeline to calculate paper similarity based on the semantic similarity of these extracted decisions and their reasons, and visualize the results through clustering algorithms. This approach offers an efficient way to study decision-making  practices than traditional interviews. We also provide insights into the use of LLMs for text extraction tasks and the communication of analytic choices in data analysis practice."
 notebook-links: false
 author:
   - name: H. Sherry Zhang
@@ -53,11 +52,6 @@ acm-metadata:
        <concept_desc>Applied computing~Document analysis</concept_desc>
        <concept_significance>300</concept_significance>
        </concept>
-     <concept>
-       <concept_id>10010405.10010432.10010437.10010438</concept_id>
-       <concept_desc>Applied computing~Environmental sciences</concept_desc>
-       <concept_significance>500</concept_significance>
-       </concept>
       <concept>
        <concept_id>10003120.10003121.10003126</concept_id>
        <concept_desc>Human-centered computing~HCI theory, concepts and models</concept_desc>
@@ -67,7 +61,6 @@ acm-metadata:
    \end{CCSXML}
 
    \ccsdesc[300]{Applied computing~Document analysis}
-   \ccsdesc[500]{Applied computing~Environmental sciences}
    \ccsdesc[500]{Human-centered computing~HCI theory, concepts and models}
 
   keywords:
@@ -98,7 +91,6 @@ claude_df <- read_csv(here::here("data/claude_df.csv")) |> as_decision_tbl()
 ```
 
 -   Something about "analysis review" - Roger thinks it's a better to have a new word for this.
--   provide a baseline understand - place to start
 -   demonstrate - analytically homogeneous - the table won't look like that
 
 # Introduction
@@ -113,24 +105,31 @@ In this work, we focus on a specific class of air pollution modelling studies th
 
 In this work, we develop a structured tabular format to record the analytical decisions made by researchers in the air pollution modelling literature. Using large language models (LLMs), we automate the extraction of these decisions from published papers. This allows us to treat decisions as data – allowing us to track them over time, compare methodology across papers, and query commonly used approaches. We further introduce a workflow to cluster studies based on decision similarity, revealing three distinct groups of papers that reflect the modelling strategies differs in the European and U.S. studies, which offers a new way to visualize the field in the air pollution mortality modelling.
 
+The contribution of this work includes:
+
+-   A new approach to study data analysis decision choices through automatic extraction of decisions from scientific literature using LLMs,
+
+-   A dataset compiled from 62 papers to study decision-making in air pollution mortality modelling,
+
+-   A pipeline to construct similarities between papers based on decision similarities, and
+
+-   Issues we found from existing data analysis reporting
+
 The rest of the paper is organized as follows. In @sec-background, we review the background on data analysis decisions. @sec-extract-decisions describes the data structure for recording decisions, the use of large language models to process research papers, and the validation of LLM outputs. In @sec-paper-similarity, we present the method for calculating paper similarity based on decision similarities. @sec-result reports the finding of our analysis, including the clustering of papers according to similarity scores and sensitivity analyses related to LLM providers, prompt engineering, and LLM parameters. Finally, @sec-discussion discusses the implications of our study.
 
-# Background {#sec-background}
+# Related work {#sec-background}
 
-## Decisions in data analysis
+## Decision-making in data analysis
 
-**Question** Is "decision" going to be confusing with "decision-making" in decision theory
+A data analysis is a process of making choices at each step, from the initial data collection to model specification, and post-processing. Each decision represents a branching point where analysts choose a specific path to follow, and the vast number of possible choices analysts can take forms what @gelman2014 describe as the "garden of forking paths". While researchers may hope their inferential results are robust to the specific path taken through the garden, in practice, different choices can lead to substantially different conclusions. This has been empirically demonstrated through "many analyst experiments", where independent research groups analyze the same dataset to the same answer using their chosen analytic approach. A classic example is @silberzahn2018, where researchers reported an odds ratio from 0.89 to 2.93 for the effect of soccer players’ skin tone on the number of red cards awarded by referees. Similar variability has been observed in structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025].
 
-A data analysis is a process of making choices at each step, from the initial data collection to model specification, and post-processing. Each decision represents a branching point where analysts choose a specific path to follow, and the vast number of possible choices analysts can take forms what @gelman2014 describe as the "garden of forking paths". While researchers may hope their inferential results are robust to the specific path taken through the garden, in practice, different choices can lead to substantially different conclusions. This has been empirically demonstrated through "many analyst experiments", where independent research groups analyze the same dataset to the same answer using their chosen analytic approach. A classic example is @silberzahn2018, where researchers reported an odds ratio from 0.89 to 2.93 for the effect of soccer players’ skin tone on the number of red cards awarded by referees. Similar variability has been observed in structural equation modeling [@sarstedt2024], applied microeconomics [@huntington-klein2021], neuroimaging [@botvinik-nezer2020], and ecology and evolutionary biology [@gould2025]. Many studies have been conducted on a relatively smaller scale to interviews of analysts and researchers on data analysis practices [@kale2019; @alspaugh2019; @liu_understanding_2020], visualization of the decision process through the analytic decision graphics (ADG) [@liu2020]. Recently, @simson2025 describes a participatory approach to decisions choices in fairness ML algorithms.
-
-Software tools have also developed to incorporate potential alternatives in the analysis workflow, including the `DeclareDesign` package [@blair2019] and the `multiverse` package [@multiverse]. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest, which has been applied in the randomized controlled trial study [@bishop2024]. The `multiverse` package [@multiverse] provides a framework for researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.
+Examples above have rendered decision-making in data analysis as a subject to study in data science. To collect data on how analysts making decisions during data analysis, researchers have conducted interviews with analysts and researchers on data analysis practices [@kale2019; @alspaugh2019; @liu_understanding_2020], visualization of the decision process through the analytic decision graphics (ADG) [@liu2020]. Recently, @simson2025 describes a participatory approach to decisions choices in fairness ML algorithms. Software tools have also developed to incorporate potential alternatives in the analysis workflow, including the `DeclareDesign` package [@blair2019] and the `multiverse` package [@multiverse]. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest, which has been applied in the randomized controlled trial study [@bishop2024]. The `multiverse` package [@multiverse] provides a framework for researchers to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths. Other systems have been developed to visualize `multiverse` analysis [@liu2021].
 
 ## Visualization on scientific literature
 
-Much of the work on IEEE visualizing scientific literature focuses on helping researchers stay aware of relevant publications, given the rapidly growing volume of scientific output and the difficulty of navigating it. Systems have been developed to support the discovery of relevant papers, where relevance is typically determined by keywords [@isenberg2017], citation information (e.g. citation list, co-citation) [@chen2006], or combinations with other relevant paper metadata (e.g. author, title) [@bethard2010; @chou2011; @dörk2012; @heimerl2016]. More recent approaches incorporate text-based information from the abstract or sections of the paper to [obtain a better similar metric]. This includes using topic modelling [@alexander2014], argumentation-based information retrieval [@tbahriti2006], and text embedding [@narechania2022]. While these metadata information and high level text-based information are valuable for discovering relevant papers, for data analysis, researchers need tools that help them  *make sense* of the literature rather than simply *finding* it. Capturing the decisions and reasoning expressed during analyses within a similar theme can reveal common practices in the field and guide decisions choices in new applications. With recent advances in Large Language Models (LLMs), it has become possible to automatically extract structured information from unstructured text through prompting. This allows scientific literature to be clustered and visualized using information about the underlying decisions and reasoning made during analysis, providing a basis for studying analysts' decision choices. 
+Much of the work on IEEE visualizing scientific literature focuses on helping researchers stay aware of relevant publications, given the rapidly growing volume of scientific output and the difficulty of navigating it. Systems have been developed to support the discovery of relevant papers, where relevance is typically determined by keywords [@isenberg2017], citation information (e.g. citation list, co-citation) [@chen2006], or combinations with other relevant paper metadata (e.g. author, title) [@bethard2010; @chou2011; @dörk2012; @heimerl2016]. More recent approaches incorporate text-based information from the abstract or sections of the paper to \[obtain a better similar metric\]. This includes using topic modelling [@alexander2014], argumentation-based information retrieval [@tbahriti2006], and text embedding [@narechania2022]. While these metadata information and high level text-based information are valuable for discovering relevant papers, for data analysis, researchers need tools that help them *make sense* of the literature rather than simply *finding* it. Capturing the decisions and reasoning expressed during analyses within a similar theme can reveal common practices in the field and guide decisions choices in new applications. With recent advances in Large Language Models (LLMs), it has become possible to automatically extract structured information from unstructured text through prompting. This allows scientific literature to be clustered and visualized using information about the underlying decisions and reasoning made during analysis, providing a basis for studying analysts' decision choices.
 
-## Air pollution mortality modelling 
-
+## Air pollution mortality modelling
 
 # Extracting decisions from data analysis {#sec-extract-decisions}
 
@@ -659,6 +658,3 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
 
 # References {.unnumbered}
-
-::: {#refs}
-:::
