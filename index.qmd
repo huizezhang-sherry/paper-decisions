@@ -244,22 +244,86 @@ To assign numerical value for the similarity of reason, we use a transformer lan
 
 ## Air pollution mortality modelling
 
--   Given examples of the failure of LLM models for parsing and examples where authors are unclear about the delivery
-
-The results follows examines \[x\] papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in @sec-sensitivity.
-
-Specify how much of validation and review has been done
-
-Decision quality summary
-
--   missingness of the reason and decisions for the paper - how often papers report decisions
--   look at for one type of decision (time) - what are the choices made by different papers
--   look at whether decisions changes across time (cluster diagram with year)
--   Visualize the decision database: apply clustering algorithm and visualize the clusters
 -   a characterization of the field, what are the common variables included, what smoothing methods are used, what are the options for temporal lags often considered, how are models generally estimated spatially.
 -   For `lee2006association`, it is not clear what specific smoothing method the sentence "smooth function of the day of study" refers to.
 
-<!-- In @ito2006, a set of weather models is used for sensitivity analysis, while Gemini generates variations in the extent to which these decisions are incorporated. In @huang2009, the term "smoothing function" appears prior to the use of the actual penalized spline to describe the smoothing method. Gemini may capture one or both of these in its extraction. -->
+```{r}
+#| label: tbl-missing-decisions
+#| tbl-cap: "THis is hte caption"
+dt <- gemini_df |> 
+  mutate(decision = is.na(decision), reason = is.na(reason), .keep = "used" ) 
+  
+dt_tbl <- table(dt)
+pct <- round(prop.table(dt_tbl) * 100, 1)
+lab <- matrix(
+  paste0(dt_tbl, " (", pct, "%)"),
+  nrow = nrow(dt_tbl),
+  dimnames = dimnames(dt_tbl)
+)
+
+lab |> knitr::kable(
+  col.names = c("Missing decision", "Missing reason", "FALSE", "TRUE"),
+  format = "latex", booktabs = TRUE) |> 
+   kableExtra::add_header_above(c("", "Missing decision"=2), 
+                    escape = FALSE) 
+```
+
+The results follows examines `r length(unique(gemini_df))` papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in the sensitivity analysis section in @sec-sensitivity. From the `r length(unique(gemini_df))` papers, we extracted `r nrow(gemini_df)` decisions (\~ 5 decisions each paper). Out of which the most are parameter-related decisions and temporal decision, accounting for `r a <- gemini_df |> count(type) |> pull(n); scales::percent_format()(a[2]/sum(a))` and `r scales::percent_format()(a[4]/sum(a))`, respectively. @tbl-missing-decisions summarizes the missingness of the decisions and reason for each record. While most papers provide the choice of their decision (e.g. use of 5 degree of freedom), a `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of the decisions are missing the reason for the choice. This reveals a prevalent phenomenon that authors tend to not justify the choice being made, which requires attention. We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
+
+```{r}
+#| label: tbl-most-common-decisions
+#| tbl-cap: "Count of xxx in the Gemini dataset"
+count_variable_type(gemini_df) |> head(8) |> 
+  knitr::kable(col.names = c("Variable", "Type", "Count"),)
+```
+
+@tbl-most-common-decisions shows the most common decision for air pollution modelling is to the parameter choice for time, PM, temperature, and humidity. Given the count of decisions included by all the papers, we decide to include the first 6 most common variable-type decisions in the analysis to calculate the decision similarities.
+
+@tbl-humidity-temperature-decisions shows number of knots for the natural spline and degree of freedom for smoothing spline for time, humidity and temperature variables. \[TODO\]
+
+-   The choice of knot for natural spline is less varied than the choice of degree of freedom for smoothing spline
+
+-   The choice for temperature and humidity tends to be the same, potentially due to they are both weather related variables.
+
+-   The choice for time is more varied. and we observe interesting choices of 7.7 in @castillejos2000 and flexible choice of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively.
+
+-   most paper choices a fix number for the smoothing parameter while @schwartz2000 choose a proportion of the data: "50% of the data", "5% of the data"
+
+[do the same for temporal lag]
+
+
+\[look at for one type of decision (time) - what are the choices made by different papers\]
+
+```{r}
+#| label: tbl-humidity-temperature-decisions
+#| tbl-cap: "Most common decisions for humidity and temperature variables in the Gemini dataset"
+var_method <- gemini_df |> 
+  filter(type == "parameter", 
+         variable %in% c("humidity", "temperature", "time"),
+         method %in% c("smoothing spline", "natural spline")) |> 
+  mutate(decision = str_remove(decision, " knots| df"),
+          decision = str_replace(decision, " or", ",")) |> 
+  separate_longer_delim(decision, delim = c(", ")) |> 
+  filter(!is.na(decision), !decision %in% c("smooth function")) |> 
+  mutate(id = row_number()) |> 
+  select(paper, variable, method, decision)
+
+var_method_df <- var_method |>
+  filter(paper != "schwartz") |> 
+  mutate(decision = parse_number(decision)) |> 
+  distinct(variable, method, decision) |> 
+  arrange(variable, method, decision) |> 
+  mutate(decision = as.character(decision)) |> 
+  bind_rows(var_method |> filter(paper == "schwartz"))
+
+var_method_df |>
+   mutate(method == ifelse(method == "natural spline", "Natural spline (knot)", "Smoothing spline (df)")) |> 
+  group_by(method, variable) |> 
+  summarize(decision = paste0(decision, collapse = ", ")) |> 
+  knitr::kable(col.names = c("Method", "Variable", "Decision")) 
+```
+
+@fig-cluster-paper shows the clustering of the `r length(unique(gemini_df$paper))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European and U.S. studies \[more on the APHENA\]. The first group (left) primarily uses LOESS smoothing, while the second group (middle) employs natural splines, and the third group (right) uses smoothing splines.
 
 ```{r eval = FALSE}
 root <- "data/gemini/"
@@ -277,19 +341,17 @@ gemini_r1_raw <- tibble(id = as.character(1:length(md_files)),
   ungroup() |> 
   select(paper, id, model:decision, reference)
 
-gemini_df <- gemini_r1_raw |> 
+gemini_df_raw <- gemini_r1_raw |> 
   filter(!model %in% c("case-crossover design", "unconstrained distributed lag model",
                        "regression tree", "lag distributed model", "unconstrained distributed lag models")) |>
-    filter(!str_detect(model, "distributed lag")) |> 
+    filter(!str_detect(model, "distributed lag|alternative weather model")) |> 
   # 2) no method or parameter for type spatial/temporal
   mutate(method = ifelse(type %in% c("spatial", "temporal"), NA, method),
          parameter = ifelse(type %in% c("spatial", "temporal"), NA, parameter)) |> 
   # 5) misc pre-processing
   mutate(variable = str_replace_all(variable, " ", "_"),
          variable = str_replace_all(variable, "dew-point", "dewpoint"),
-         variable = str_replace_all(variable, "dew_point", "dewpoint"),
-         decision = str_replace(decision, "degrees of freedom", ""),
-         decision = str_replace(decision, "df", "")) |> 
+         variable = str_replace_all(variable, "dew_point", "dewpoint")) |> 
   # 3) group variables
   mutate(
          variable = ifelse(str_detect(variable, "pollutant|pollution|particulate"), "PM", variable),
@@ -318,7 +380,43 @@ gemini_df <- gemini_r1_raw |>
   mutate(reason = ifelse(reason == "NA", NA_character_, reason),
          decision = ifelse(decision == "NA", NA_character_, decision)) 
 
-gemini_df <- gemini_df |> 
+#write_csv(gemini_df_raw, file = here::here("data/gemini_df_raw.csv"))
+```
+
+```{r eval = FALSE}
+gemini_df <- gemini_df_raw |> 
+  mutate(decision = ifelse(paper == "schreuder2006ambient" & variable == "time" & type == "parameter", 
+                           "6 degrees of freedom per year", decision), # recode: 42 total df
+         decision = ifelse(paper == "zanobetti2009fine" & variable == "time" & type == "parameter",
+                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
+         decision = ifelse(paper == "zanobetti2009effect" & variable == "time" & type == "parameter",
+                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
+         decision = ifelse(paper == "franklin2008role" & variable == "time" & type == "parameter",
+                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
+         decision = ifelse(paper == "sheppard1999effects" & variable == "time" & type == "parameter",
+                           "8 degrees of freedom per year", decision), # recode: 64 total df
+         decision = ifelse(paper == "klemm2000aerosol" & variable == "time" & type == "parameter",
+                           "12 degrees of freedom per year", decision), # recode: time-based knots at monthly
+         decision = ifelse(paper == "ito2006pm" & variable == "time" & type == "parameter",
+                           "4 degrees of freedom per year", decision), # recode: 38 degree of freedom in total
+         decision = ifelse(paper == "chen2008influence" & variable == "time" & type == "parameter",
+                           "12 degrees of freedom per year", decision), # recode: every 30 days
+         decision = ifelse(paper == "zanobetti" & variable == "time" & type == "parameter",
+                           NA, decision), # no information
+         ) |> 
+  filter(!(paper == "chen2008influence" & id == 1), # multiple extraction
+         !(paper == "stolzel2008daily" & id == 8), # multiple extraction for total mortality and cardio-respiratory mortality
+         !(paper == "lisabeth2008ambient" & id == 2), # multiple extraction 
+         !(paper == "kan20007differentiating" & id == 1), # multiple extraction 
+         !(paper == "kan20007differentiating" & id == 2), # multiple extraction 
+         !(paper == "jalaludin2009association" & id == 2), # multiple extraction 
+         !(paper == "ito2006pm" & id == 2), # multiple extraction 
+         !(paper == "bell2007effect" & id == 4), # multiple extraction 
+         !(paper == "bell2007effect" & id == 5), # multiple extraction 
+         !(paper == "peng2008coarse" & id == 6), # multiple extraction 
+         ) 
+
+gemini_df <- gemini_df |>
   group_by(paper, model) %>%
   tally(name = "count") %>%
   arrange(paper, desc(count)) %>%
@@ -326,25 +424,25 @@ gemini_df <- gemini_df |>
   select(paper, most_common_model = model) %>%
   right_join(gemini_df, by = "paper") %>%
   mutate(model = most_common_model) %>%
-  select(-most_common_model) |> 
+  select(-most_common_model) |>
   group_by(paper, variable, type) %>%
   summarise(
     model = first(model),
     method = first(method),
     parameter = first(parameter),
-    reason = ifelse(all(is.na(reason)), NA_character_, 
-                    paste(unique(na.omit(reason)), collapse = " , ")),
-    decision = ifelse(all(is.na(decision)), NA_character_, 
-                      paste(unique(na.omit(decision)), collapse = " , ")),
+    reason = ifelse(all(is.na(reason)), NA_character_,
+                    paste(unique(na.omit(reason)), collapse = ", ")),
+    decision = ifelse(all(is.na(decision)), NA_character_,
+                      paste(unique(na.omit(decision)), collapse = ", ")),
+    decision = str_trim(decision),
+    reason = str_trim(reason),
     .groups = "drop"
-  )  |> 
-  ungroup() 
+    )
 
 #write_csv(gemini_df, file = here::here("data/gemini_df.csv"))
 ```
 
 ```{r}
-
 #count_variable_type(gemini_df)
 df <- gemini_df |> filter_var_type(n = 6)
 #count_paper_decisions(df) 
@@ -356,7 +454,7 @@ good_pp <- gemini_df |> count(paper) |> filter(n >= 3) |> pull(paper)
 paper_df <- df |> filter(paper %in% good_pp)
 ```
 
-```{r}
+```{r embed}
 embed_df <- paper_df |> compute_text_embed()
 distance_decision_df <- calc_decision_similarity(paper_df, embed = embed_df)
 distance_df <- distance_decision_df |> calc_paper_similarity()
@@ -365,7 +463,8 @@ distance_df <- distance_decision_df |> calc_paper_similarity()
 ```{r}
 #| fig.height: 8
 #| fig.width: 15
-#| fig-cap: "bla bla bla"
+#| label: fig-cluster-paper
+#| fig-cap: "The dendrogram (left) and multi-dimensional scaling (MDS) (right) based on paper similarity distance for 62 air pollution mortality modelling literature. The papers are colored by the most common smoothing method used. The MDS reveals the three distinct groups of papers. This grouping corresponds to the modelling strategies differ in the European and U.S. studies, documented in ALPHENA."
 get_most_common_method <- function(df, cols = c("time_parameter_method", 
                                                 "humidity_parameter_method", 
                                                 "temperature_parameter_method")) {
@@ -398,20 +497,39 @@ p2 <- ggplot() +
   geom_text(data = ddata$labels, 
             aes(x = x, y = y, label = label, color = method, hjust = 0), 
             size = 3) +
+  scale_y_reverse(expand = c(0.2, 0)) + 
+  scale_color_brewer(palette = "Dark2") + 
   coord_flip() +
   theme_void() + 
-  scale_y_reverse(expand = c(0.2, 0))
+  theme(legend.position = 'bottom')
+  
 
 mds_df <- run_mds(distance_df) |> left_join(method_df, by = c("paper" = "paper"))
 
 p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) + 
   ggrepel::geom_text_repel(aes(label = method, color = method)) + 
+  scale_color_brewer(palette = "Dark2") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)  + 
+  theme(legend.position = "none")
+
+p2 + p3 
+```
+
+```{r eval = FALSE}
+mds_df2 <- mds_df |> mutate(year = parse_number(paper)) |> filter(!is.na(year)) |> 
+  mutate(year = ifelse(year == 20007, 2007, year))
+
+mds_df2 |> ggplot(aes(x = V1, y = V2)) + 
+  ggrepel::geom_text_repel(aes(label = method, color = year)) + 
+  #scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
   theme(aspect.ratio = 1) 
 
-p2 + p3 + plot_layout(guides = 'collect') &
-  theme(legend.position = 'bottom')
-
+mds_df2 |> 
+  count(year, method) |> 
+  ggplot(aes(x = year, y = n, color = method)) + 
+  geom_line() 
 ```
 
 ## Sensitivity analysis {#sec-sensitivity}
@@ -653,8 +771,12 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
 
+-   Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
+
 -   Validation of the output:
 
 the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
+
+-   some decisions are more varied than others and can be reported by different ways. e.g. the most common way to report the smoothing parameter for time is the number of knots/ degree of freedom per year. While authors may report this number in different ways, i.e. "every 30 days". A secondary processing with LLM may be useful to align the raw text into the same reporting unit.s
 
 # References {.unnumbered}
