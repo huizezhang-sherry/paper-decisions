@@ -268,7 +268,7 @@ lab |> knitr::kable(
                     escape = FALSE) 
 ```
 
-The results follows examines `r length(unique(gemini_df))` papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in the sensitivity analysis section in @sec-sensitivity. From the `r length(unique(gemini_df))` papers, we extracted `r nrow(gemini_df)` decisions (\~ 5 decisions each paper). Out of which the most are parameter-related decisions and temporal decision, accounting for `r a <- gemini_df |> count(type) |> pull(n); scales::percent_format()(a[2]/sum(a))` and `r scales::percent_format()(a[4]/sum(a))`, respectively. @tbl-missing-decisions summarizes the missingness of the decisions and reason for each record. While most papers provide the choice of their decision (e.g. use of 5 degree of freedom), a `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of the decisions are missing the reason for the choice. This reveals a prevalent phenomenon that authors tend to not justify the choice being made, which requires attention. We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
+The results follows examines `r length(unique(gemini_df$paper))` papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in the sensitivity analysis section in @sec-sensitivity. From the `r length(unique(gemini_df$paper))` papers, we extracted `r nrow(gemini_df)` decisions (\~ 5 decisions each paper). Out of which the most are parameter-related decisions and temporal decision, accounting for `r a <- gemini_df |> count(type) |> pull(n); scales::percent_format()(a[2]/sum(a))` and `r scales::percent_format()(a[4]/sum(a))`, respectively. @tbl-missing-decisions summarizes the missingness of the decisions and reason for each record. While most papers provide the choice of their decision (e.g. use of 5 degree of freedom), a `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of the decisions are missing the reason for the choice. This reveals a prevalent phenomenon that authors tend to not justify the choice being made, which requires attention. We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
 
 ```{r}
 #| label: tbl-most-common-decisions
@@ -289,7 +289,8 @@ count_variable_type(gemini_df) |> head(8) |>
 
 -   most paper choices a fix number for the smoothing parameter while @schwartz2000 choose a proportion of the data: "50% of the data", "5% of the data"
 
-[do the same for temporal lag]
+
+@tbl-temporal-decisions shows ....
 
 
 \[look at for one type of decision (time) - what are the choices made by different papers\]
@@ -303,7 +304,7 @@ var_method <- gemini_df |>
          method %in% c("smoothing spline", "natural spline")) |> 
   mutate(decision = str_remove(decision, " knots| df"),
           decision = str_replace(decision, " or", ",")) |> 
-  separate_longer_delim(decision, delim = c(", ")) |> 
+  separate_longer_delim(decision, delim = c("; ")) |> 
   filter(!is.na(decision), !decision %in% c("smooth function")) |> 
   mutate(id = row_number()) |> 
   select(paper, variable, method, decision)
@@ -314,7 +315,10 @@ var_method_df <- var_method |>
   distinct(variable, method, decision) |> 
   arrange(variable, method, decision) |> 
   mutate(decision = as.character(decision)) |> 
-  bind_rows(var_method |> filter(paper == "schwartz"))
+  bind_rows(var_method |> 
+              filter(paper == "schwartz") |> 
+              mutate(decision = str_remove(decision, "in each neighborhood"))
+            )
 
 var_method_df |>
    mutate(method == ifelse(method == "natural spline", "Natural spline (knot)", "Smoothing spline (df)")) |> 
@@ -323,124 +327,38 @@ var_method_df |>
   knitr::kable(col.names = c("Method", "Variable", "Decision")) 
 ```
 
+
+```{r}
+#| label: tbl-temporal-decisions
+#| tbl-cap: "Temporal lag decisions for PM, temperature, and humidity variables in the Gemini dataset"
+temporal_lags <- gemini_df |> 
+  filter(type == "temporal") |> 
+  distinct(variable, decision) |>
+  arrange(variable, decision) |>
+  mutate(decision = as.character(decision)) |> 
+  filter(variable %in% c("PM", "temperature", "humidity")) |> 
+  mutate(type = ifelse(str_detect(decision, "multi-day"), "multi-day average", "single-day lag"),
+         days = ifelse(type == "multi-day average", 
+                       str_remove(decision, "multi-day \\: lag "), 
+                       str_remove(decision, "single-day \\: "))) |>
+  group_by(type, variable) |>
+  separate_longer_delim(days, delim = ", ") |> 
+  filter(!days %in% c("1-1", "0-0")) |> 
+  distinct(variable, type, days) |>
+  summarize(decision = paste0(days, collapse = ", ")) |> 
+  ungroup()
+
+temporal_lags |> 
+  knitr::kable(col.names = c("Lag type", "Variable", "Decision")) 
+```
+
+
 @fig-cluster-paper shows the clustering of the `r length(unique(gemini_df$paper))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European and U.S. studies \[more on the APHENA\]. The first group (left) primarily uses LOESS smoothing, while the second group (middle) employs natural splines, and the third group (right) uses smoothing splines.
 
-```{r eval = FALSE}
-root <- "data/gemini/"
-md_files <- list.files(here::here("data/gemini"), pattern = "gemini-1.md")
-paper_new <- map_dfr(md_files, function(x){
-  as_decision_tbl(x = here::here(paste0(root, x)))
-}, .id = "id")
-
-gemini_r1_raw <- tibble(id = as.character(1:length(md_files)),
-                   paper = str_remove(md_files, ".md")) |> 
-  left_join(paper_new, by = c("id", "paper")) |> 
-  select(-id) |> 
-  group_by(paper) |> 
-  mutate(id = row_number(), paper = str_remove(paper, "-gemini-1")) |> 
-  ungroup() |> 
-  select(paper, id, model:decision, reference)
-
-gemini_df_raw <- gemini_r1_raw |> 
-  filter(!model %in% c("case-crossover design", "unconstrained distributed lag model",
-                       "regression tree", "lag distributed model", "unconstrained distributed lag models")) |>
-    filter(!str_detect(model, "distributed lag|alternative weather model")) |> 
-  # 2) no method or parameter for type spatial/temporal
-  mutate(method = ifelse(type %in% c("spatial", "temporal"), NA, method),
-         parameter = ifelse(type %in% c("spatial", "temporal"), NA, parameter)) |> 
-  # 5) misc pre-processing
-  mutate(variable = str_replace_all(variable, " ", "_"),
-         variable = str_replace_all(variable, "dew-point", "dewpoint"),
-         variable = str_replace_all(variable, "dew_point", "dewpoint")) |> 
-  # 3) group variables
-  mutate(
-         variable = ifelse(str_detect(variable, "pollutant|pollution|particulate"), "PM", variable),
-         variable = ifelse(str_detect(variable, "PM"), "PM", variable),
-         variable = ifelse(variable %in% c("dewpoint temperature", "dewpoint_temperature", "dewpoint"),
-                           "humidity", variable),
-         variable = ifelse(str_detect(variable, "humidity"), "humidity", variable),
-         variable = ifelse(str_detect(variable, "time|trends|trend|date"), "time", variable),
-         variable = ifelse(str_detect(variable, "temperature"), "temperature", variable),
-         ) |> 
-  # 4) standardize method and parameter
-  mutate(method = ifelse(method %in% c("spline smoother", "spline smooth functions"), 
-                         "smoothing spline", method),
-         method = ifelse(str_detect(method, "penalized"), "smoothing spline", method),
-         method = ifelse(str_detect(method, "smoothing"), "smoothing spline", method),
-         method = ifelse(method %in% c("cubic splines", "cubic regression spline", 
-                                       "cubic regression splines"), 
-                         "natural spline", method),
-         method = ifelse(str_detect(method, "natural"), "natural spline", method),
-         method = ifelse(method %in% c("loess", "LOESS"), "LOESS", method),
-         method = ifelse(str_detect(method, "nonparametric"), "LOESS", method),
-         method = ifelse(str_detect(method, "non-parametric"), "LOESS", method),
-         parameter = ifelse(method == "natural spline", "knots", parameter),
-         parameter = ifelse(method == "LOESS", "smoothing window", parameter),
-         parameter = ifelse(method == "smoothing spline", "smoothing parameter", parameter)) |> 
-  mutate(reason = ifelse(reason == "NA", NA_character_, reason),
-         decision = ifelse(decision == "NA", NA_character_, decision)) 
-
-#write_csv(gemini_df_raw, file = here::here("data/gemini_df_raw.csv"))
-```
-
-```{r eval = FALSE}
-gemini_df <- gemini_df_raw |> 
-  mutate(decision = ifelse(paper == "schreuder2006ambient" & variable == "time" & type == "parameter", 
-                           "6 degrees of freedom per year", decision), # recode: 42 total df
-         decision = ifelse(paper == "zanobetti2009fine" & variable == "time" & type == "parameter",
-                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
-         decision = ifelse(paper == "zanobetti2009effect" & variable == "time" & type == "parameter",
-                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
-         decision = ifelse(paper == "franklin2008role" & variable == "time" & type == "parameter",
-                           "6 degrees of freedom per year", decision), # recode: 1.5 each season each year
-         decision = ifelse(paper == "sheppard1999effects" & variable == "time" & type == "parameter",
-                           "8 degrees of freedom per year", decision), # recode: 64 total df
-         decision = ifelse(paper == "klemm2000aerosol" & variable == "time" & type == "parameter",
-                           "12 degrees of freedom per year", decision), # recode: time-based knots at monthly
-         decision = ifelse(paper == "ito2006pm" & variable == "time" & type == "parameter",
-                           "4 degrees of freedom per year", decision), # recode: 38 degree of freedom in total
-         decision = ifelse(paper == "chen2008influence" & variable == "time" & type == "parameter",
-                           "12 degrees of freedom per year", decision), # recode: every 30 days
-         decision = ifelse(paper == "zanobetti" & variable == "time" & type == "parameter",
-                           NA, decision), # no information
-         ) |> 
-  filter(!(paper == "chen2008influence" & id == 1), # multiple extraction
-         !(paper == "stolzel2008daily" & id == 8), # multiple extraction for total mortality and cardio-respiratory mortality
-         !(paper == "lisabeth2008ambient" & id == 2), # multiple extraction 
-         !(paper == "kan20007differentiating" & id == 1), # multiple extraction 
-         !(paper == "kan20007differentiating" & id == 2), # multiple extraction 
-         !(paper == "jalaludin2009association" & id == 2), # multiple extraction 
-         !(paper == "ito2006pm" & id == 2), # multiple extraction 
-         !(paper == "bell2007effect" & id == 4), # multiple extraction 
-         !(paper == "bell2007effect" & id == 5), # multiple extraction 
-         !(paper == "peng2008coarse" & id == 6), # multiple extraction 
-         ) 
-
-gemini_df <- gemini_df |>
-  group_by(paper, model) %>%
-  tally(name = "count") %>%
-  arrange(paper, desc(count)) %>%
-  slice_head(n = 1) %>%
-  select(paper, most_common_model = model) %>%
-  right_join(gemini_df, by = "paper") %>%
-  mutate(model = most_common_model) %>%
-  select(-most_common_model) |>
-  group_by(paper, variable, type) %>%
-  summarise(
-    model = first(model),
-    method = first(method),
-    parameter = first(parameter),
-    reason = ifelse(all(is.na(reason)), NA_character_,
-                    paste(unique(na.omit(reason)), collapse = ", ")),
-    decision = ifelse(all(is.na(decision)), NA_character_,
-                      paste(unique(na.omit(decision)), collapse = ", ")),
-    decision = str_trim(decision),
-    reason = str_trim(reason),
-    .groups = "drop"
-    )
-
-#write_csv(gemini_df, file = here::here("data/gemini_df.csv"))
-```
+- choose the ones in the baseline model
+- don't include other options considered, only the final value used in the model 
+- no sensitivity analysis
+- only consider PM2.5 and PM10 not other pollutants
 
 ```{r}
 #count_variable_type(gemini_df)

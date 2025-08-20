@@ -873,13 +873,13 @@ TRUE & 179 (61.1\%) & 6 (2\%)\\
 
 \end{table}%
 
-The results follows examines 8 papers for modelling the effect of
+The results follows examines 57 papers for modelling the effect of
 particulate matters on mortality based on Gemini for parsing the
 decision choices. The results from Anthropic Claude is reported in the
 sensitivity analysis section in Section~\ref{sec-sensitivity}. From the
-8 papers, we extracted 292 decisions (\textasciitilde{} 5 decisions each
-paper). Out of which the most are parameter-related decisions and
-temporal decision, accounting for 52\% and 46\%, respectively.
+57 papers, we extracted 273 decisions (\textasciitilde{} 5 decisions
+each paper). Out of which the most are parameter-related decisions and
+temporal decision, accounting for 1\% and 43\%, respectively.
 Table~\ref{tbl-missing-decisions} summarizes the missingness of the
 decisions and reason for each record. While most papers provide the
 choice of their decision (e.g.~use of 5 degree of freedom), a 61\% of
@@ -941,15 +941,15 @@ humidity and temperature variables. {[}TODO{]}
   data'', ``5\% of the data''
 \end{itemize}
 
-{[}do the same for temporal lag{]}
+Table~\ref{tbl-temporal-decisions} shows \ldots.
 
 {[}look at for one type of decision (time) - what are the choices made
 by different papers{]}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1574}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.7315}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1809}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1277}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6915}}@{}}
 
 \caption{\label{tbl-humidity-temperature-decisions}Most common decisions
 for humidity and temperature variables in the Gemini dataset}
@@ -971,14 +971,47 @@ Decision
 natural spline & humidity & 3, 4 \\
 natural spline & temperature & 3, 4, 6 \\
 natural spline & time & 1, 3, 4, 6, 7, 8, 12 \\
-smoothing spline & humidity & 2, 3, 4, 5, 6, 8, 50\% of the data \\
-smoothing spline & temperature & 2, 3, 4, 5, 6, 8, 50\% of the data \\
-smoothing spline & time & 3, 4, 5, 6, 7, 7.7, 8, 9, 10, 12, 30, 100, 5\%
-of the data in each neighborhood \\
+smoothing spline & humidity & 2, 3, 4, 6, 8, 50\% of the data \\
+smoothing spline & temperature & 2, 3, 4, 6, 8, 50\% of the data \\
+smoothing spline & time & 1, 3, 4, 5, 6, 7, 7.7, 8, 9, 10, 12, 30, 100,
+NA, 5\% of the data \\
 
 \end{longtable}
 
-Figure~\ref{fig-cluster-paper} shows the clustering of the 62 papers
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2118}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1412}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6471}}@{}}
+
+\caption{\label{tbl-temporal-decisions}Temporal lag decisions for PM,
+temperature, and humidity variables in the Gemini dataset}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Lag type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Decision
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+multi-day average & PM & 0-1, 0-2, 0-3, 0-4, 0-5, 0-7, 1-0, 1-5 \\
+multi-day average & humidity & 0-1, 0-2, 0-3, 0-5, 1-3, 1-5 \\
+multi-day average & temperature & 0-1, 0-2, 0-3, 0-5, 0-7, 1-3 \\
+single-day lag & PM & lag 0, lag 1, lag 2, lag 3, lag 4, lag 5 \\
+single-day lag & humidity & lag 0, lag 1, lag 2, lag 3, lag 4, lag 5,
+lag 6, lag 7 \\
+single-day lag & temperature & lag 0, lag 1, lag 2, lag 3, lag 4, lag
+5 \\
+
+\end{longtable}
+
+Figure~\ref{fig-cluster-paper} shows the clustering of the 57 papers
 based on the decision similarity scores. The dendrogram is generated
 using hierarchical clustering, and the labels are colored according to
 the most common smoothing method used in each paper. The clustering
@@ -987,6 +1020,19 @@ strategies differ in the European and U.S. studies {[}more on the
 APHENA{]}. The first group (left) primarily uses LOESS smoothing, while
 the second group (middle) employs natural splines, and the third group
 (right) uses smoothing splines.
+
+\begin{itemize}
+\tightlist
+\item
+  choose the ones in the baseline model
+\item
+  don't include other options considered, only the final value used in
+  the model
+\item
+  no sensitivity analysis
+\item
+  only consider PM2.5 and PM10 not other pollutants
+\end{itemize}
 
 \phantomsection\label{cell-fig-cluster-paper}
 \begin{figure}[H]
