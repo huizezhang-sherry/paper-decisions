@@ -61,7 +61,7 @@ gemini_df_raw <- gemini_r1_raw |>
 
 gemini_df <- gemini_df_raw |>
   mutate(
-    # time - parameter
+    # category: time - parameter
     decision = ifelse(paper == "schreuder2006ambient" & variable == "time" & type == "parameter",
                       "6 degrees of freedom per year", decision), # recode: 42 total df
     decision = ifelse(paper == "zanobetti2009fine" & variable == "time" & type == "parameter",
@@ -79,8 +79,8 @@ gemini_df <- gemini_df_raw |>
     decision = ifelse(paper == "chen2008influence" & variable == "time" & type == "parameter",
                       "12 degrees of freedom per year", decision), # recode: every 30 days
     decision = ifelse(paper == "zanobetti" & variable == "time" & type == "parameter",
-                      NA, decision), # no information
-    # PM/ humidity/ temperature - temporal
+                      NA, decision), # fail to capture
+    # category: PM/ humidity/ temperature - temporal
     decision = ifelse(paper == "atkinson2010urban" & variable == "humidity" & type == "temporal",
                       "lag_0-3", decision), # recode: 3 previous day
     decision = ifelse(paper == "atkinson2010urban" & variable == "temperature" & type == "temporal",
@@ -88,7 +88,7 @@ gemini_df <- gemini_df_raw |>
     decision = ifelse(paper == "chen2008influence" & variable == "PM" & type == "temporal",
                       "lag_0-7", decision), # recode: 3 previous day
     decision = ifelse(paper == "chen2008influence" & variable == "temperature" & type == "temporal",
-                      "lag_0-7", decision), # recode: imilar lags and multiday averages
+                      "lag_0-7", decision), # recode: similar lags and multiday averages
     decision = ifelse(paper == "chen2008influence" & variable == "humidity" & type == "temporal",
                       "lag_0-7", decision), # recode: similar lags and multiday averages
     decision = ifelse(paper == "cifuentes2011effect" & variable == "temperature" & type == "temporal",
@@ -98,16 +98,15 @@ gemini_df <- gemini_df_raw |>
     decision = ifelse(paper == "jalaludin2009association" & variable == "exposure" & type == "temporal",
                       "average of lag0 and lag1", decision), # recode: 2-day cumulative lag
 
-
-    # temperature/ humidity - temporal - reason
+    # category: temperature/ humidity - temporal - reason
     reason = ifelse(paper == "lee2006association" & variable == "temperature" & type == "temporal",
-                    "using minimization of Akaike’s Information Criteria (AIC)", reason), # fail to capture
+                    "using minimization of Akaike Information Criteria (AIC)", reason), # fail to capture
     reason = ifelse(paper == "lee2006association" & variable == "humidity" & type == "temporal",
-                    "using minimization of Akaike’s Information Criteria (AIC)", reason), # fail to capture
+                    "using minimization of Akaike Information Criteria (AIC)", reason), # fail to capture
     reason = ifelse(paper == "stolzel2008daily" & variable == "temperature" & type == "temporal",
-                    "using minimization of Akaike’s Information Criteria (AIC)", reason), # fail to capture
+                    "using minimization of Akaike Information Criteria (AIC)", reason), # fail to capture
     reason = ifelse(paper == "stolzel2008daily" & variable == "humidity" & type == "temporal",
-                    "using minimization of Akaike’s Information Criteria (AIC)", reason), # fail to capture
+                    "using minimization of Akaike Information Criteria (AIC)", reason), # fail to capture
 
 
 
@@ -117,45 +116,42 @@ gemini_df <- gemini_df_raw |>
                       "PM", variable) # recode: 3 previous day
   ) |>
   filter(
-    # time - parameter
-    !(paper == "chen2008influence" & id == 1), # multiple extraction
-    !(paper == "stolzel2008daily" & id == 8), # multiple extraction for total mortality and cardio-respiratory mortality
-    !(paper == "lisabeth2008ambient" & id == 2), # multiple extraction
-    !(paper == "kan20007differentiating" & id == 1), # multiple extraction
-    !(paper == "kan20007differentiating" & id == 2), # multiple extraction
-    !(paper == "jalaludin2009association" & id == 2), # multiple extraction
-    !(paper == "ito2006pm" & id == 2), # multiple extraction
-    !(paper == "bell2007effect" & id == 4), # multiple extraction
-    !(paper == "bell2007effect" & id == 5), # multiple extraction
-    !(paper == "peng2008coarse" & id == 6), # multiple extraction
+    # category: time - parameter
+    !(paper == "chen2008influence" & id == 1), # general: number of knots + 2
+    !(paper == "stolzel2008daily" & id == 8), # irrelevant: for total mortality and cardio-respiratory mortality
+    !(paper == "lisabeth2008ambient" & id == 2), # general: small
+    !(paper == "kan20007differentiating" & id == 1), # general: xxx
+    !(paper == "kan20007differentiating" & id == 2), # general: minimum of 1 df per year was required
+    !(paper == "jalaludin2009association" & id == 2), # general: up to 12
+    !(paper == "ito2006pm" & id == 2), # duplicates
+    !(paper == "bell2007effect" & id == 4), # duplicates
+    !(paper == "bell2007effect" & id == 5), # duplicates
     !(paper == "katsouyanni" & id == 2), # general: should not below 2 months
-    !(paper == "lisabeth2008ambient" & id == 6), # irrelevant
-    !(paper == "lopez2010air" & id == 13), # multiple extraction
-    !(paper == "ostro2006effects" & id == 7), # irrelevant
-    !(paper == "ostro" & id == 3), # irrelevant
-    !(paper == "ueda2009effects" & id == 1), # irrelevant
-    !(paper == "ueda2009effects" & id == 2), # irrelevant
-    !(paper == "sheppard1999effects" & id == 3), # wrong extraction
-    # PM - temporal
-    !(paper == "anderson2001particulate" & id == 4), # multiple extraction
-    !(paper == "anderson2001particulate" & id == 5), # multiple extraction
-    !(paper == "atkinson2010urban" & id == 7), # multiple extraction
-    !(paper == "atkinson2010urban" & id == 1), # multiple extraction
-    !(paper == "chen2008influence" & id == 4), # multiple extraction
-    !(paper == "chen2008influence" & id == 5), # multiple extraction
-    !(paper == "chen2008influence" & id == 6), # multiple extraction
-    !(paper == "chen2008influence" & id == 7), # multiple extraction
-    !(paper == "chen2008influence" & id == 8), # multiple extraction
-    !(paper == "chen2008influence" & id == 9), # multiple extraction
+    !(paper == "lisabeth2008ambient" & id == 6), # irrelevant: season
+    !(paper == "lopez2010air" & id == 13), # duplicates
+    !(paper == "ostro2006effects" & id == 7), # irrelevant: season
+    !(paper == "ostro" & id == 3), # irrelevant: season
+    !(paper == "ueda2009effects" & id == 1), # irrelevant: season
+    !(paper == "ueda2009effects" & id == 2), # irrelevant: day-of-the-week
+    # category: PM - temporal
+    !(paper == "anderson2001particulate" & id == 4), # irrelevant: sensitivity analysis
+    !(paper == "anderson2001particulate" & id == 5), # irrelevant: sensitivity analysis
+    !(paper == "atkinson2010urban" & id == 1), # irrelevant: month
+    !(paper == "chen2008influence" & id == 4), # recode: collectively
+    !(paper == "chen2008influence" & id == 5), # recode: collectively
+    !(paper == "chen2008influence" & id == 6), # recode: collectively
+    !(paper == "chen2008influence" & id == 7), # recode: collectively
+    !(paper == "chen2008influence" & id == 8), # recode: collectively
+    !(paper == "chen2008influence" & id == 9), # recode: collectively
     !(paper == "cifuentes2011effect" & id == 1), # definition
     !(paper == "cifuentes2011effect" & id == 2), # definition
     !(paper == "cifuentes2011effect" & id == 3), # definition
     !(paper == "cifuentes2011effect" & id == 4), # definition
-    # temperature/ humidity - temporal
-    !(paper == "lee2006association" & id == 4), # combine
-    !(paper == "lee2006association" & id == 6), # combine
+    # category: temperature/ humidity - temporal
+    !(paper == "lee2006association" & id == 4), # recode: collectively
+    !(paper == "lee2006association" & id == 6), # recode: collectively
 
-    # pollutants
+    # category: pollutants
     !(paper == "bell2008seasonal" & id == 7), # definition: season
     !(paper == "jayaraman2008air" & id == 1), # irrelevant: other pollutants - O3
     !(paper == "jayaraman2008air" & id == 2), # irrelevant: other pollutants - SO2
@@ -189,57 +185,57 @@ gemini_df <- gemini_df_raw |>
     !(paper == "mar2000associations" & id == 17), # duplicates
     !(paper == "mar2000associations" & id == 18), # duplicates
     !(paper == "mar2000associations" & id == 19), # duplicates
-    # mortality
-    !(paper == "castillejos2016airborne" & id == 1), # general info
-    !(paper == "castillejos2016airborne" & id == 2) # general info
+    # category: mortality
+    !(paper == "castillejos2016airborne" & id == 1), # fail to capture
+    !(paper == "castillejos2016airborne" & id == 2) # fail to capture
   ) |>
   filter(!paper %in% c("burnett1998association", "burnett2001association", "burnett2004associations", "linares2010short",
                        "mate2010short"))
 
 gemini_df <- gemini_df |>
   bind_rows(tibble(paper = "chen2008influence", id = 13, model = "general linear model", variable = "temperature",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "first 3 days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "first 3 days"), # recode
             tibble(paper = "chen2008influence", id = 13, model = "general linear model", variable = "humidity",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "first 3 days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "first 3 days"), # recode
             tibble(paper = "ko2007effects", id = 17, model = "generalized additive model", variable = "PM",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 2 (lag 0 and 1)"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 2 (lag 0 and 1)"), # recode
             tibble(paper = "ko2007effects", id = 18, model = "generalized additive model", variable = "PM",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 3 (lag 0 and 2)"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 3 (lag 0 and 2)"), # recode
             tibble(paper = "ko2007effects", id = 19, model = "generalized additive model", variable = "PM",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 4 (lag 0 and 3)"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 4 (lag 0 and 3)"), # recode
             tibble(paper = "ko2007effects", id = 20, model = "generalized additive model", variable = "PM",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 5 (lag 0 and 4)"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 5 (lag 0 and 4)"), # recode
             tibble(paper = "ko2007effects", id = 21, model = "generalized additive model", variable = "PM",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 6 (lag 0 and 5)"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "cumulative lags by 6 (lag 0 and 5)"), # recode
             tibble(paper = "lopez2010air", id = 16, model = "Poisson regression model", variable = "temperature",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"), # recode
             tibble(paper = "lopez2010air", id = 17, model = "Poisson regression model", variable = "humidity",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"), # recode
             tibble(paper = "lopez2010air", id = 18, model = "Poisson regression model", variable = "barometric_pressure",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lags 2 to 4 averages"), # recode
             tibble(paper = "neuberger2007extended", id = 8, model = "overdispersed Poisson GAM", variable = "temperature",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"), # recode
             tibble(paper = "neuberger2007extended", id = 8, model = "overdispersed Poisson GAM", variable = "humidity",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"), # recode
             tibble(paper = "zanobetti", id = 4, model = "generalized additive regression mode", variable = "tempearture",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"), # recode
             tibble(paper = "zanobetti", id = 5, model = "generalized additive regression mode", variable = "humidity",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"), # recode
             tibble(paper = "zanobetti", id = 6, model = "generalized additive regression mode", variable = "tempearture",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"), # recode
             tibble(paper = "zanobetti", id = 7, model = "generalized additive regression mode", variable = "humidity",
-                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"),
+                   method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"), # recode
 
 
 
 
 
             tibble(paper = "neuberger2007extended", id = 8, model = "overdispersed Poisson GAM", variable = "temperature",
-                   method = NA, parameter = NA, type = "parameter", reason = "selected on teh basis of the Akaike information criterion", decision = NA),
+                   method = NA, parameter = NA, type = "parameter", reason = "selected on teh basis of the Akaike information criterion", decision = NA), # fail to capture
             tibble(paper = "neuberger2007extended", id = 8, model = "overdispersed Poisson GAM", variable = "humidity",
-                   method = NA, parameter = NA, type = "parameter", reason = "selected on teh basis of the Akaike information criterion", decision = NA),
+                   method = NA, parameter = NA, type = "parameter", reason = "selected on teh basis of the Akaike information criterion", decision = NA), # fail to capture
             tibble(paper = "sheppard1999effects", id = 4, model = "semiparametric Poisson regression models", variable = "time",
-                   method = "smoothing spline", parameter = "smoothing parameter", type = "parameter", reason = "selected on teh basis of the Akaike information criterion", decision = "12 degrees of freedom per year"),
+                   method = "smoothing spline", parameter = "smoothing parameter", type = "parameter", reason = "selected on the basis of the Akaike information criterion", decision = "12 degrees of freedom per year"), # fail to capture
 
   )
 
@@ -265,7 +261,8 @@ gemini_df <- gemini_df |>
     decision = str_trim(decision),
     reason = str_trim(reason),
     .groups = "drop"
-  )
+  ) |>
+  mutate(reason = str_replace_all(reason, "[^\\x00-\\x7F]", "")) # remove non-ASCII characters
 
 #####################################################################################
 #####################################################################################

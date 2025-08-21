@@ -686,6 +686,187 @@ LLM is provided in the Appendix. The \texttt{ellmer} package
 providing the PDF attachment and the prompt in a markdown file as
 inputs.
 
+\begin{verbatim}
+# Task
+
+Consider yourself as an applied statistician and you will read a PDF file to extract the decisions made in the data analysis. Your output should contain a JSON code block under the top-level key "decisions". Each item in "decisions" should be a dictionary with the following fields:
+
+- `model`: the main model used to model mortality vs. air pollution (e.g., "generalized additive model", "distributed lag model"). Should be one model per paper.
+- `variable`: the variable the statistical method is applied to.
+- `method`: standard statistical method applied, for example, "LOESS", "smoothing spline", and "natural spline". If the `type` is "spatial" or "temporal", write "NA". There may be multiple methods discussed in the paper. Only extract the method that is actually used on the variable.
+- `parameter`: the parameter name of the statistical method discussed, for example, "degrees of freedom", and "number of knots". If the `type` is "spatial" or "temporal", write "NA". Do not use the value of the parameter, for example, "3 df". 
+- `type`: one of "parameter", "spatial", or "temporal", indicating the nature of the decision. 
+- `reason`: the reason for the decision made. If none is given, write "NA".
+- `decision`: the decision made regarding the parameter, spatial, or temporal aspect. If not specified, write "NA".
+- `reference`: if the reason for the decision has any reference, find the corresponding reference in the reference section and write the reference in the following format: abc, where a is the last name of first author (without accent and all lower letters), b is the year in four digit format, and c is the first word of the title, excluding a/an/the, e.g. braga2001lag. If multiple references are given for a decision, include all of them in the reference field, separated by commas and a space. Do not stop at the first reference. Do not split into multiple rows
+
+An example looks like the following:
+
+````json
+{
+  "decisions": [
+    {
+      "model": "generalized additive model",
+      "variable": "PM2.5",
+      "method": "smoothing spline",
+      "parameter": "smoothing parameter",
+      "type": "parameter",
+      "reason": "based on published litearture",
+      "decision": "5 df",
+      "reference": "smith2005trend"
+    }
+  ]
+}
+\end{verbatim}
+
+\subsection{Rules}\label{rules}
+
+\begin{itemize}
+\item
+  Some decisions may require linking information across sentences and/or
+  paragraphs to identify the correct variable. Example:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Text: if a paragraph states ``\ldots{} model adjusted for
+    overdispersion, to estimate associations between day-to-day
+    variations in pollutant concentrations (lag 0--5) and day-to-day
+    variations in hospital admission counts for three health outcomes
+    separately. A basic model without pollutants was built first,
+    \ldots.'', Followed by the next paragraph: ``After assessing the
+    effects of single day concentrations (lags 0--5), \ldots{}''
+  \item
+    Guidance: The temporal decision (``lag 0-5''\,``) refers to
+    pollutant concentrations, not the model.
+  \end{itemize}
+\item
+  If a sentence includes multiple decisions that vary by outcome or
+  variable, each decision should be treated and recorded separately.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Example 1:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Text: ``resulting in a 4-day pollutant average (lag 0--3) for CVD,
+      a 5-day average (lag 0--4) for RD, and a 6-day average (lag 0--5)
+      for asthma''
+    \item
+      Output: three separate decisions of type ``temporal''\,''
+      (variable/ decision): 1) CVD/ 4-day average (lag 0--3), 2) RD/
+      5-day average (lag 0--4), 3) Asthma/ 6-day average (lag 0--5)
+    \end{itemize}
+  \item
+    Example 2:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Text: ``smoothing splines of one-day lags of humidity {[}each with
+      3 degrees of freedom (df){]}''
+    \item
+      Output:
+
+      \begin{itemize}
+      \tightlist
+      \item
+        Decision 1: variable: ``humidity'', type: ``temporal'',
+        decision: ``one-day lag''
+      \item
+        Decision 2: variable: ``humidity'', type: ``parameter'',
+        decision: ``3 df''
+      \end{itemize}
+    \end{itemize}
+  \item
+    Example 3:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Text: ``three- day averaged temperature and dew point temperature
+      with a natural cubic spline with three d.f..''
+    \item
+      Output:
+
+      \begin{itemize}
+      \tightlist
+      \item
+        Decision 1: variable: ``temperature'', method: ``NA'', type:
+        ``temporal'', decision: ``3-day averaged''
+      \item
+        Decision 2: variable: ``dew point temperature'', method: ``NA'',
+        type: ``temporal'', decision: ``3-day averaged''
+      \item
+        Decision 3: variable: ``temperature'', method: ``natural cubic
+        spline'' , type: ``parameter'', decision: ``3 df''
+      \item
+        Decision 4: variable: ``dew point temperature'', method:
+        ``natural cubic spline'', type: ``parameter'', decision: ``3
+        df''
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\item
+  Temporal terms may indicate parameter choices: words like ``monthly,''
+  ``weekly,'' or ``daily'' may appear in sentences, but they do not
+  always imply temporal decisions. Sometimes they describe how a
+  smoothing function is applied, which is a parameter decision. Example:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Text: ``We set time-based knots at monthly midpoints.''
+  \item
+    Interpretation: This describes a spline function applied to time,
+    using 12 knots (one per month)
+  \item
+    Output: This is a \emph{parameter} decision, not a temporal one.
+  \end{itemize}
+\item
+  Please use cognitive reasoning to determine whether the extracted
+  reason is \emph{specific} to the decision made. If the reason is
+  general and doesn't justify the particular choice, write ``NA''.
+  Example:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Text: ``To control for weather variables, the 14-day lagged moving
+    average (including concurrent day and previous 13 days) of
+    temperature, dew point temperature, and barometric pressure (as both
+    linear and quadratic terms) were included in the conditional
+    logistic regression models.'',
+  \item
+    Decision: ``14-day lagged values''
+  \item
+    Extracted reason: ``to control for weather variables''
+  \item
+    Output: ``NA'' because the reason is general to why the weather
+    variables are included and do not justify why this temporal decision
+    of 14-day lag is chosen
+  \end{itemize}
+\item
+  Only include rows where a clear decision is made on a parameter,
+  spatial, or temporal aspect of the modeling. For ambiguous or vague
+  decisions (e.g., ``not below 2 months''), do not record a row.
+\item
+  Do NOT include decisions about inclusion of variables, for example,
+  reasons as ``to filter out cyclical patterns'' and decision as
+  ``include day-of-the-week variable.
+\item
+  A paper may contain multiple models; label them precisely (e.g.,
+  ``generalized additive Poisson regression'', ``lag distributed
+  model'').
+\item
+  Convert numbers written in words to numerals. For example, rewrite
+  ``one-day lag'' as ``1-day lag''. Apply this consistently across all
+  entries. ````
+\end{itemize}
+
 \subsection{Review the LLM output}\label{review-the-llm-output}
 
 \begin{itemize}
@@ -1005,6 +1186,25 @@ single-day lag & temperature & lag 0, lag 1, lag 2, lag 3, lag 4, lag
 
 \end{longtable}
 
+\phantomsection\label{cell-fig-cluster-paper-1}
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-cluster-paper-1-1.pdf}}
+
+}
+
+\caption{\label{fig-cluster-paper-1}The dendrogram (left) and
+multi-dimensional scaling (MDS) (right) based on paper similarity
+distance for 62 air pollution mortality modelling literature. The papers
+are colored by the most common smoothing method used. The MDS reveals
+the three distinct groups of papers. This grouping corresponds to the
+modelling strategies differ in the European and U.S. studies, documented
+in ALPHENA.}
+
+\end{figure}%
+
 \phantomsection\label{cell-fig-cluster-paper}
 \begin{figure}[H]
 
@@ -1244,8 +1444,6 @@ between 0.7 to 1.}
 \section{Discussion}\label{sec-discussion}
 
 \begin{itemize}
-\item
-  Address how sensitivity analysis is/ is not relevant
 \item
   Only prompting engineering is used to extract decisions from the
   literature. We expect that fine-tuning the model on statistical or

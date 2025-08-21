@@ -200,6 +200,10 @@ While decisions can be extracted manually from the literature, this process is l
 
 Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
 
+
+
+
+
 ## Review the LLM output
 
 -   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
@@ -254,7 +258,43 @@ lab <- matrix(
 )
 ```
 
-From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity. 
+From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. [details]
+
+
+
+@tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity. 
+
+```{r}
+#| label: tbl-review
+#| tbl-cap: "tsdjflkajsldf."
+aa_raw <- readLines(here::here("clean-gemini.R"))
+aa <- aa_raw[62:243]
+res <- purrr::map_dfr(
+  as.list(aa),
+  ~tibble(origin = .x, 
+          reason = ifelse(str_detect(.x, "#"),
+                          str_replace(.x, ".*#\\s*", ""),
+                          NA)
+          )
+  )
+
+reason_df <- tibble(reason2 = c("recode", "irrelevant", "fail to capture", "duplicates", "general", "definition"),
+       reason = c("Recode for secondary LLM processing for standardization",
+                  "Irrelevant decisions, e.g. other pollutants, sensitivity analysis",
+                  "Decision captured not correct",
+                  "Duplicates",
+                  "General statements without specific decision, e.g. minimum of 1 df per year was required",
+                  "Definition of variables, e.g. season"))
+
+res |> 
+  mutate(reason2 = str_extract(reason, "^[^:]+")) |> 
+  filter(!is.na(reason2), !reason2 == "category") |>
+  count(reason2, sort = TRUE) |> 
+  left_join(reason_df) |> 
+  select(reason, n) |> 
+  janitor::adorn_totals("row") |> 
+  knitr::kable(col.names = c("Reason", "Count"))
+```
 
 ```{r}
 #| label: tbl-missing-decisions
@@ -339,6 +379,7 @@ temporal_lags |>
 
 ```{r}
 #count_variable_type(gemini_df)
+gemini_df <- gemini_df |> mutate(reason = str_replace_all(reason, "[^\\x00-\\x7F]", "")) 
 df <- gemini_df |> filter_var_type(n = 6)
 #count_paper_decisions(df) 
 # paper_df <- df |> filter_papers(n_value = 3)
@@ -357,8 +398,8 @@ distance_df <- distance_decision_df |> calc_paper_similarity()
 
 ```{r}
 #| fig.height: 8
-#| fig.width: 15
-#| label: fig-cluster-paper
+#| fig.width: 8
+#| label: fig-cluster-paper-1
 #| fig-cap: "The dendrogram (left) and multi-dimensional scaling (MDS) (right) based on paper similarity distance for 62 air pollution mortality modelling literature. The papers are colored by the most common smoothing method used. The MDS reveals the three distinct groups of papers. This grouping corresponds to the modelling strategies differ in the European and U.S. studies, documented in ALPHENA."
 get_most_common_method <- function(df, cols = c("time_parameter_method", 
                                                 "humidity_parameter_method", 
@@ -402,13 +443,21 @@ p2 <- ggplot() +
 mds_df <- run_mds(distance_df) |> left_join(method_df, by = c("paper" = "paper"))
 
 p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) + 
-  ggrepel::geom_text_repel(aes(label = method, color = method)) + 
+  ggrepel::geom_label_repel(aes(label = paper, color = method)) + 
   scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
   theme(aspect.ratio = 1)  + 
   theme(legend.position = "none")
+p2
+```
 
-p2 + p3 
+```{r}
+#| fig.height: 11
+#| fig.width: 11
+#| label: fig-cluster-paper
+#| fig-cap: "The dendrogram (left) and multi-dimensional scaling (MDS) (right) based on paper similarity distance for 62 air pollution mortality modelling literature. The papers are colored by the most common smoothing method used. The MDS reveals the three distinct groups of papers. This grouping corresponds to the modelling strategies differ in the European and U.S. studies, documented in ALPHENA."
+#(p2 | p3) + plot_layout(widths = c(1, 2))
+p3 
 ```
 
 For computing the decision similarity score, we include the first 6 most common variable-type decisions as suggested in @tbl-most-common-decisions. @fig-cluster-paper shows the clustering of the `r length(unique(good_pp))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European (LOESS) and U.S. (...) studies \[more on the APHENA\]. 
@@ -645,20 +694,16 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 
 # Discussion {#sec-discussion}
 
--   Address how sensitivity analysis is/ is not relevant
-
 -   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
 
 -   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
 
 -   Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
 
--   Validation of the output:
-
-the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
-
--   some decisions are more varied than others and can be reported by different ways. e.g. the most common way to report the smoothing parameter for time is the number of knots/ degree of freedom per year. While authors may report this number in different ways, i.e. "every 30 days". A secondary processing with LLM may be useful to align the raw text into the same reporting unit.s
+-   Validation of the output: the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
 
 - the variation of parameters people use can help to identify parameter that needs a separate sensitivity analysis
 
 # References {.unnumbered}
+
+
