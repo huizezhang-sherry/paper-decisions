@@ -488,11 +488,7 @@ This allows scientific literature to be clustered and visualized using
 information about the underlying decisions and reasoning made during
 analysis, providing a basis for studying analysts' decision choices.
 
-\subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling}
-
-\section{Extracting decisions from data
-analysis}\label{sec-extract-decisions}
+\section{Methods}\label{sec-extract-decisions}
 
 \subsection{Decisions in data analysis}\label{sec-decisions}
 
@@ -695,7 +691,11 @@ inputs.
 \begin{itemize}
 \tightlist
 \item
-  \textbf{TODO} something about result validation of LLM output
+  \textbf{TODO} something about result validation of LLM output: We also
+  observe data quality with the extraction: for example in
+  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
+  Authors are unclear about the delivery Specify how much of validation
+  and review has been done.
 \end{itemize}
 
 The shiny app is designed to provide users a visual interface to review
@@ -836,36 +836,36 @@ understand the common practices in the investigated literature.
 
 \section{Results}\label{sec-result}
 
-\subsection{Air pollution mortality
-modelling}\label{air-pollution-mortality-modelling-1}
-
-\begin{itemize}
-\tightlist
-\item
-  a characterization of the field, what are the common variables
-  included, what smoothing methods are used, what are the options for
-  temporal lags often considered, how are models generally estimated
-  spatially.
-\item
-  For \texttt{lee2006association}, it is not clear what specific
-  smoothing method the sentence ``smooth function of the day of study''
-  refers to.
-\end{itemize}
+From the 57 studies examining the effect of particulate matters
+(\(\text{PM}_{10}\) and \(\text{PM}_{2.5}\)) on mortality, we focus on
+the baseline model reported in each paper, excluding secondary models
+(e.g.~lag-distributed models) and sensitivity analysis. We also exclude
+decisions on other pollutants, such as nitrogen dioxide
+(\(\text{NO}_2\)). This yields 273 decisions extracted using Gemini,
+averaging approximately 5 decisions per paper.
+Table~\ref{tbl-missing-decisions} summarizes the missingness of the
+decisions and reason. While most papers report their decision choices
+(e.g.~use of five degree of freedom), 57\% of decisions lack a stated
+rationale for the choice. Table~\ref{tbl-most-common-decisions} lists
+teh eight most frequently reported decision: parameter and temporal
+choice for time, PM, temperature, and humidity.
 
 \begin{table}
 
-\caption{\label{tbl-missing-decisions}THis is hte caption}
+\caption{\label{tbl-missing-decisions}Missingness of decision and reason
+fields in the Gemini-extracted decisions. Most decisions report the
+choice (35.5 + 57.1 = 92\%), but 57.1\% lacks a stated reason.}
 
 \centering{
 
 \begin{tabular}{lll}
 \toprule
-\multicolumn{1}{c}{} & \multicolumn{2}{c}{Missing decision} \\
+\multicolumn{1}{c}{} & \multicolumn{2}{c}{Decision} \\
 \cmidrule(l{3pt}r{3pt}){2-3}
-Missing reason & FALSE & TRUE\\
+Reason & Non-missing & Missing\\
 \midrule
-FALSE & 95 (32.4\%) & 13 (4.4\%)\\
-TRUE & 179 (61.1\%) & 6 (2\%)\\
+Non-missing & 97 (35.5\%) & 16 (5.9\%)\\
+Missing & 156 (57.1\%) & 4 (1.5\%)\\
 \bottomrule
 \end{tabular}
 
@@ -873,27 +873,12 @@ TRUE & 179 (61.1\%) & 6 (2\%)\\
 
 \end{table}%
 
-The results follows examines 57 papers for modelling the effect of
-particulate matters on mortality based on Gemini for parsing the
-decision choices. The results from Anthropic Claude is reported in the
-sensitivity analysis section in Section~\ref{sec-sensitivity}. From the
-57 papers, we extracted 273 decisions (\textasciitilde{} 5 decisions
-each paper). Out of which the most are parameter-related decisions and
-temporal decision, accounting for 1\% and 43\%, respectively.
-Table~\ref{tbl-missing-decisions} summarizes the missingness of the
-decisions and reason for each record. While most papers provide the
-choice of their decision (e.g.~use of 5 degree of freedom), a 61\% of
-the decisions are missing the reason for the choice. This reveals a
-prevalent phenomenon that authors tend to not justify the choice being
-made, which requires attention. We also observe data quality with the
-extraction: for example in \citet{lee2006}, the variable recorded is
-``smoothing parameter''. Authors are unclear about the delivery Specify
-how much of validation and review has been done.
-
 \begin{longtable}[]{@{}llr@{}}
 
-\caption{\label{tbl-most-common-decisions}Count of xxx in the Gemini
-dataset}
+\caption{\label{tbl-most-common-decisions}Count of variable-type
+decisions in the Gemini-extracted decisions. The most commonly reported
+decision are the parameter choices and temporal lags for for time, PM,
+temperature, and humidity.}
 
 \tabularnewline
 
@@ -903,56 +888,62 @@ Variable & Type & Count \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-time & parameter & 47 \\
-PM & temporal & 38 \\
+PM & temporal & 56 \\
+time & parameter & 45 \\
 temperature & parameter & 37 \\
-humidity & parameter & 25 \\
-temperature & temporal & 23 \\
-humidity & temporal & 18 \\
-PM & parameter & 7 \\
-time & temporal & 5 \\
+humidity & parameter & 26 \\
+temperature & temporal & 25 \\
+humidity & temporal & 20 \\
+PM & parameter & 8 \\
+mortality & temporal & 4 \\
 
 \end{longtable}
 
-Table~\ref{tbl-most-common-decisions} shows the most common decision for
-air pollution modelling is to the parameter choice for time, PM,
-temperature, and humidity. Given the count of decisions included by all
-the papers, we decide to include the first 6 most common variable-type
-decisions in the analysis to calculate the decision similarities.
+Table~\ref{tbl-humidity-temperature-decisions} reports the
+parameter-related decisions captured in the literature. They refer to
+the number of knots or degree of freedom for spline methods (natural and
+smoothing spline) applied to variable time, humidity and temperature.
+For consistency, all values have been converted to a \emph{per year}
+scale. The selection of knot for natural spline has less variation than
+the degree of freedom choices for smoothing spline. Choices for
+temperature and humidity tend to be close, given they are both weather
+related variables, while the choices for time are more varied
+inherently. This tabulation offers a reference set for potential options
+for future studies and help to identify anomalies and special treatment
+in practice. Notable example includes the use of 7.7 degree of freedom
+in \citet{castillejos2000}, and highly flexible choices of 30 and 100 in
+\citet{moolgavkar2000} and \citet{moolgavkar2003}, respectively. While
+most papers choice to report the smoothing parameter as a constant
+value, \citet{schwartz2000} specifies it as a proportion of the data
+(``5\% of the data'' and ``5\% of the data'').
 
-Table~\ref{tbl-humidity-temperature-decisions} shows number of knots for
-the natural spline and degree of freedom for smoothing spline for time,
-humidity and temperature variables. {[}TODO{]}
-
-\begin{itemize}
-\item
-  The choice of knot for natural spline is less varied than the choice
-  of degree of freedom for smoothing spline
-\item
-  The choice for temperature and humidity tends to be the same,
-  potentially due to they are both weather related variables.
-\item
-  The choice for time is more varied. and we observe interesting choices
-  of 7.7 in \citet{castillejos2000} and flexible choice of 30 and 100 in
-  \citet{moolgavkar2000} and \citet{moolgavkar2003}, respectively.
-\item
-  most paper choices a fix number for the smoothing parameter while
-  \citet{schwartz2000} choose a proportion of the data: ``50\% of the
-  data'', ``5\% of the data''
-\end{itemize}
-
-Table~\ref{tbl-temporal-decisions} shows \ldots.
-
-{[}look at for one type of decision (time) - what are the choices made
-by different papers{]}
+For temporal decisions, after an initial review, we observed that
+decisions are still highly varied. The decisions can be divided into two
+groups: multi-day lags include expressions such as ``6-day average'',
+``3-d moving average'', ``mean of lags 0+1'', and ``cumulative lags,
+mean 0+1+2'', and single-day lags include ``lagged exposure up to 6
+days'', ``lag days from 0 to 5'' among others. To standardize these
+entries, we applied a secondary LLM process (claude-3-7-sonnet-latest)
+and converted them into a consistent format:
+\texttt{multi-day:\ lag\ {[}start{]}-{[}end{]}} and
+\texttt{single-day:\ lag\ {[}start{]},\ …\ lag\ {[}end{]}}.
+Table~\ref{tbl-temporal-decisions} summarizes the temporal lag choices
+for PM, temperature, and humidity. Both single and multiple day lags are
+generally considered up to five days prior (lag 5). {[}TODO: check
+multi-day starts from one{]}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1809}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1277}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6915}}@{}}
 
-\caption{\label{tbl-humidity-temperature-decisions}Most common decisions
-for humidity and temperature variables in the Gemini dataset}
+\caption{\label{tbl-humidity-temperature-decisions}Options captured for
+parameter choices for time, humidity, and temperature variables in the
+Gemini-extracted decisions. The choices for natural spline knots are
+generally less varied than the degree of freedom choices for smoothing
+spline. Choices for temperature and humidity tend to be close, given
+they are both weather related variables, while the choices for time are
+more varied inherently.}
 
 \tabularnewline
 
@@ -983,8 +974,11 @@ NA, 5\% of the data \\
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1412}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6471}}@{}}
 
-\caption{\label{tbl-temporal-decisions}Temporal lag decisions for PM,
-temperature, and humidity variables in the Gemini dataset}
+\caption{\label{tbl-temporal-decisions}Options captured for temporal lag
+choices for PM, temperature, and humidity variables in the
+Gemini-extracted decisions. Both single-day lags and multi-day average
+lags are commonly used, generally considering up to five days prior (lag
+5).}
 
 \tabularnewline
 
@@ -1011,29 +1005,6 @@ single-day lag & temperature & lag 0, lag 1, lag 2, lag 3, lag 4, lag
 
 \end{longtable}
 
-Figure~\ref{fig-cluster-paper} shows the clustering of the 57 papers
-based on the decision similarity scores. The dendrogram is generated
-using hierarchical clustering, and the labels are colored according to
-the most common smoothing method used in each paper. The clustering
-reveals three distinct groups of papers, which reflect the modelling
-strategies differ in the European and U.S. studies {[}more on the
-APHENA{]}. The first group (left) primarily uses LOESS smoothing, while
-the second group (middle) employs natural splines, and the third group
-(right) uses smoothing splines.
-
-\begin{itemize}
-\tightlist
-\item
-  choose the ones in the baseline model
-\item
-  don't include other options considered, only the final value used in
-  the model
-\item
-  no sensitivity analysis
-\item
-  only consider PM2.5 and PM10 not other pollutants
-\end{itemize}
-
 \phantomsection\label{cell-fig-cluster-paper}
 \begin{figure}[H]
 
@@ -1053,7 +1024,17 @@ in ALPHENA.}
 
 \end{figure}%
 
-\subsection{Sensitivity analysis}\label{sec-sensitivity}
+For computing the decision similarity score, we include the first 6 most
+common variable-type decisions as suggested in
+Table~\ref{tbl-most-common-decisions}. Figure~\ref{fig-cluster-paper}
+shows the clustering of the 50 papers based on the decision similarity
+scores. The dendrogram is generated using hierarchical clustering, and
+the labels are colored according to the most common smoothing method
+used in each paper. The clustering reveals three distinct groups of
+papers, which reflect the modelling strategies differ in the European
+(LOESS) and U.S. (\ldots) studies {[}more on the APHENA{]}.
+
+\section{Sensitivity analysis}\label{sec-sensitivity}
 
 In this section, we examine the reproducibility for using LLMs for text
 extraction tasks in Section~\ref{sec-llm-reproducibility}, discrepancies
@@ -1063,7 +1044,7 @@ Section~\ref{sec-llm-models}, and the sensitivity of our paper
 similarity calculation pipeline to the choice of text model used for
 computing decision similarity scores in Section~\ref{sec-text-model}.
 
-\subsubsection{LLM reproducibility}\label{sec-llm-reproducibility}
+\subsection{LLM reproducibility}\label{sec-llm-reproducibility}
 
 For our text extraction task, we test the reproducibility of Gemini
 (\texttt{gemini-2.0-flash}) by repeating the text extraction task 5
@@ -1153,7 +1134,7 @@ Total & 449 & 100.00 \\
 
 \end{longtable}
 
-\subsubsection{LLM models}\label{sec-llm-models}
+\subsection{LLM models}\label{sec-llm-models}
 
 Reading text from PDF document requires Optical Character Recognition
 (OCR) to convert images into machine-readable text, which currently is
@@ -1161,7 +1142,7 @@ only supported by Antropic Claude (\texttt{claude-3-7-sonnet-latest})
 and Google Gemini (\texttt{gemini-2.0-flash}).
 
 We compare the number of decisions extracted by Claude and Gemini across
-all 62 papers in Figure~\ref{fig-claude-gemini}. Each point represents a
+all 62 papers in \textbf{?@fig-claude-gemini}. Each point represents a
 paper, with the x- and y-axes showing the number of decisions extracted
 by Claude and Gemini, respectively. The dashed 1:1 line marks where both
 models extract the same number of decisions. Most points fall below this
@@ -1200,27 +1181,7 @@ Although our prompt specified that some decisions may require linking
 information across sentences and paragraphs to identify the correct
 variable, this instruction doesn't appear to be applied consistently.
 
-\phantomsection\label{cell-fig-claude-gemini}
-\begin{figure}[H]
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-claude-gemini-1.pdf}}
-
-}
-
-\caption{\label{fig-claude-gemini}Comparison of decisions extracted by
-Claude and Gemini. Each point represents a paper, with the x- and y-axes
-showing the number of decisions extracted by Claude and Gemini,
-respectively. The dashed 1:1 line marks where both models extract the
-same number of decisions. Most points fall below this line, suggesting
-Claude extracts more decisions -- often including noise from data
-pre-processing or secondary data analysis steps -- which requires
-additional manual validation.}
-
-\end{figure}%
-
-\subsubsection{Text model}\label{sec-text-model}
+\subsection{Text model}\label{sec-text-model}
 
 We have conducted sensitivity analysis on the text model for obtaining
 the decision similarity score from the Gemini outputs. The tested
@@ -1256,10 +1217,10 @@ decision level, the BERT model produces the widest variation across all
 five models, while the similarity scores from XLNet are all close to 1.
 These scores are not comparable across models since the difference of
 the underlying transformer architecture. However, the paper similarity
-scores from each model are comparable and Figure~\ref{fig-text-mds}
-shows the multi-dimensional scaling (MDS) of the paper similarity scores
-from each text model: all showing a similar clustering pattern of the
-three main smoothing methods.
+scores from each model are comparable and \textbf{?@fig-text-mds} shows
+the multi-dimensional scaling (MDS) of the paper similarity scores from
+each text model: all showing a similar clustering pattern of the three
+main smoothing methods.
 
 \phantomsection\label{cell-fig-text-density}
 \begin{figure}[H]
@@ -1277,23 +1238,6 @@ language model, BERT, produces the widest variation across the five
 models, while the similarity scores form XLNet are all close to 1. The
 model BioBERT, RoBERTa, and SciBERT yield decision similar scores mostly
 between 0.7 to 1.}
-
-\end{figure}%
-
-\phantomsection\label{cell-fig-text-mds}
-\begin{figure}[H]
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-mds-1.pdf}}
-
-}
-
-\caption{\label{fig-text-mds}The multi-dimensional scaling (MDS) of the
-paper similarity scores from each text model: all showing a similar
-clustering pattern of the three main smoothing methods. The points are
-colored by the most common method used in the paper, and the hulls are
-drawn around each method group.}
 
 \end{figure}%
 
@@ -1329,7 +1273,6 @@ authors, and its justification/ rationale, rather than purely
 summarizing the text through pattern-matching.
 
 \begin{itemize}
-\tightlist
 \item
   some decisions are more varied than others and can be reported by
   different ways. e.g.~the most common way to report the smoothing
@@ -1337,6 +1280,9 @@ summarizing the text through pattern-matching.
   While authors may report this number in different ways, i.e.~``every
   30 days''. A secondary processing with LLM may be useful to align the
   raw text into the same reporting unit.s
+\item
+  the variation of parameters people use can help to identify parameter
+  that needs a separate sensitivity analysis
 \end{itemize}
 
 \bibliographystyle{ACM-Reference-Format}

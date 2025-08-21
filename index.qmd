@@ -129,9 +129,7 @@ Examples above have rendered decision-making in data analysis as a subject to st
 
 Much of the work on IEEE visualizing scientific literature focuses on helping researchers stay aware of relevant publications, given the rapidly growing volume of scientific output and the difficulty of navigating it. Systems have been developed to support the discovery of relevant papers, where relevance is typically determined by keywords [@isenberg2017], citation information (e.g. citation list, co-citation) [@chen2006], or combinations with other relevant paper metadata (e.g. author, title) [@bethard2010; @chou2011; @dörk2012; @heimerl2016]. More recent approaches incorporate text-based information from the abstract or sections of the paper to \[obtain a better similar metric\]. This includes using topic modelling [@alexander2014], argumentation-based information retrieval [@tbahriti2006], and text embedding [@narechania2022]. While these metadata information and high level text-based information are valuable for discovering relevant papers, for data analysis, researchers need tools that help them *make sense* of the literature rather than simply *finding* it. Capturing the decisions and reasoning expressed during analyses within a similar theme can reveal common practices in the field and guide decisions choices in new applications. With recent advances in Large Language Models (LLMs), it has become possible to automatically extract structured information from unstructured text through prompting. This allows scientific literature to be clustered and visualized using information about the underlying decisions and reasoning made during analysis, providing a basis for studying analysts' decision choices.
 
-## Air pollution mortality modelling
-
-# Extracting decisions from data analysis {#sec-extract-decisions}
+# Methods {#sec-extract-decisions}
 
 ## Decisions in data analysis {#sec-decisions}
 
@@ -204,7 +202,7 @@ Text recognition from PDF document relies on Optical Character Recognition (OCR)
 
 ## Review the LLM output
 
--   **TODO** something about result validation of LLM output
+-   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
 
 The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) *overwrite* -- modify the content of a particular cell, equivalently `dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`, 2) *delete* -- remove a particular cell, `dplyr::filter(!(CONDITION))`, and 3) *add* -- manually enter a decision, `dplyr::bind_rows()`. @fig-shiny illustrates the *overwrite* action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from "generalized additive Poisson time series regression" to the less verbose "Poisson regression". Upon confirmation, the corresponding `tidyverse` code is generated, and users can download the edited table and incorporate the code into their R script.
 
@@ -242,62 +240,48 @@ To assign numerical value for the similarity of reason, we use a transformer lan
 
 # Results {#sec-result}
 
-## Air pollution mortality modelling
-
--   a characterization of the field, what are the common variables included, what smoothing methods are used, what are the options for temporal lags often considered, how are models generally estimated spatially.
--   For `lee2006association`, it is not clear what specific smoothing method the sentence "smooth function of the day of study" refers to.
-
 ```{r}
-#| label: tbl-missing-decisions
-#| tbl-cap: "THis is hte caption"
 dt <- gemini_df |> 
   mutate(decision = is.na(decision), reason = is.na(reason), .keep = "used" ) 
   
 dt_tbl <- table(dt)
+rownames(dt_tbl)  <- c("Non-missing", "Missing")
 pct <- round(prop.table(dt_tbl) * 100, 1)
 lab <- matrix(
   paste0(dt_tbl, " (", pct, "%)"),
   nrow = nrow(dt_tbl),
   dimnames = dimnames(dt_tbl)
 )
+```
 
+From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity. 
+
+```{r}
+#| label: tbl-missing-decisions
+#| tbl-cap: "Missingness of decision and reason fields in the Gemini-extracted decisions. Most decisions report the choice (35.5 + 57.1 = 92%), but 57.1% lacks a stated reason."
 lab |> knitr::kable(
-  col.names = c("Missing decision", "Missing reason", "FALSE", "TRUE"),
+  col.names = c("Decision", "Reason", "Non-missing", "Missing"),
   format = "latex", booktabs = TRUE) |> 
-   kableExtra::add_header_above(c("", "Missing decision"=2), 
+   kableExtra::add_header_above(c("", "Decision" = 2), 
                     escape = FALSE) 
 ```
 
-The results follows examines `r length(unique(gemini_df$paper))` papers for modelling the effect of particulate matters on mortality based on Gemini for parsing the decision choices. The results from Anthropic Claude is reported in the sensitivity analysis section in @sec-sensitivity. From the `r length(unique(gemini_df$paper))` papers, we extracted `r nrow(gemini_df)` decisions (\~ 5 decisions each paper). Out of which the most are parameter-related decisions and temporal decision, accounting for `r a <- gemini_df |> count(type) |> pull(n); scales::percent_format()(a[2]/sum(a))` and `r scales::percent_format()(a[4]/sum(a))`, respectively. @tbl-missing-decisions summarizes the missingness of the decisions and reason for each record. While most papers provide the choice of their decision (e.g. use of 5 degree of freedom), a `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of the decisions are missing the reason for the choice. This reveals a prevalent phenomenon that authors tend to not justify the choice being made, which requires attention. We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
 
 ```{r}
 #| label: tbl-most-common-decisions
-#| tbl-cap: "Count of xxx in the Gemini dataset"
+#| tbl-cap: "Count of variable-type decisions in the Gemini-extracted decisions. The most commonly reported decision are the parameter choices and temporal lags for for time, PM, temperature, and humidity."
 count_variable_type(gemini_df) |> head(8) |> 
   knitr::kable(col.names = c("Variable", "Type", "Count"),)
 ```
 
-@tbl-most-common-decisions shows the most common decision for air pollution modelling is to the parameter choice for time, PM, temperature, and humidity. Given the count of decisions included by all the papers, we decide to include the first 6 most common variable-type decisions in the analysis to calculate the decision similarities.
 
-@tbl-humidity-temperature-decisions shows number of knots for the natural spline and degree of freedom for smoothing spline for time, humidity and temperature variables. \[TODO\]
+@tbl-humidity-temperature-decisions reports the parameter-related decisions captured in the literature. They refer to the number of knots or degree of freedom for spline methods (natural and smoothing spline) applied to variable time, humidity and temperature. For consistency, all values have been converted to a  *per year* scale. The selection of knot for natural spline has less variation than the degree of freedom choices for smoothing spline. Choices for temperature and humidity tend to be close, given they are both weather related variables, while the choices for time are more varied inherently. This tabulation offers a reference set for potential options for future studies and help to identify anomalies and special treatment in practice. Notable example includes the use of 7.7 degree of freedom in @castillejos2000, and highly flexible choices of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively. While most papers choice to report the smoothing parameter as a constant value, @schwartz2000 specifies it as a proportion of the data ("5% of the data" and "5% of the data").
 
--   The choice of knot for natural spline is less varied than the choice of degree of freedom for smoothing spline
-
--   The choice for temperature and humidity tends to be the same, potentially due to they are both weather related variables.
-
--   The choice for time is more varied. and we observe interesting choices of 7.7 in @castillejos2000 and flexible choice of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively.
-
--   most paper choices a fix number for the smoothing parameter while @schwartz2000 choose a proportion of the data: "50% of the data", "5% of the data"
-
-
-@tbl-temporal-decisions shows ....
-
-
-\[look at for one type of decision (time) - what are the choices made by different papers\]
+For temporal decisions, after an initial review, we observed that decisions are still highly varied. The decisions can be divided into two groups: multi-day lags include expressions such as "6-day average", "3-d moving average", "mean of lags 0+1", and "cumulative lags, mean 0+1+2", and single-day lags include "lagged exposure up to 6 days", "lag days from 0 to 5" among others. To standardize these entries, we applied a secondary LLM process (claude-3-7-sonnet-latest) and converted them into a consistent format: `multi-day: lag [start]-[end]` and `single-day: lag [start], … lag [end]`. @tbl-temporal-decisions summarizes the temporal lag choices for PM, temperature, and humidity. Both single and multiple day lags are generally considered up to five days prior (lag 5). [TODO: check multi-day starts from one].
 
 ```{r}
 #| label: tbl-humidity-temperature-decisions
-#| tbl-cap: "Most common decisions for humidity and temperature variables in the Gemini dataset"
+#| tbl-cap: "Options captured for parameter choices for time, humidity, and temperature variables in the Gemini-extracted decisions. The choices for natural spline knots are generally less varied than the degree of freedom choices for smoothing spline. Choices for temperature and humidity tend to be close, given they are both weather related variables, while the choices for time are more varied inherently."
 var_method <- gemini_df |> 
   filter(type == "parameter", 
          variable %in% c("humidity", "temperature", "time"),
@@ -317,8 +301,9 @@ var_method_df <- var_method |>
   mutate(decision = as.character(decision)) |> 
   bind_rows(var_method |> 
               filter(paper == "schwartz") |> 
-              mutate(decision = str_remove(decision, "in each neighborhood"))
-            )
+              mutate(decision = str_remove(decision, "in each neighborhood")) |> 
+              select(-paper) 
+            ) 
 
 var_method_df |>
    mutate(method == ifelse(method == "natural spline", "Natural spline (knot)", "Smoothing spline (df)")) |> 
@@ -330,7 +315,7 @@ var_method_df |>
 
 ```{r}
 #| label: tbl-temporal-decisions
-#| tbl-cap: "Temporal lag decisions for PM, temperature, and humidity variables in the Gemini dataset"
+#| tbl-cap: "Options captured for temporal lag choices for PM, temperature, and humidity variables in the Gemini-extracted decisions. Both single-day lags and multi-day average lags are commonly used, generally considering up to five days prior (lag 5)."
 temporal_lags <- gemini_df |> 
   filter(type == "temporal") |> 
   distinct(variable, decision) |>
@@ -351,14 +336,6 @@ temporal_lags <- gemini_df |>
 temporal_lags |> 
   knitr::kable(col.names = c("Lag type", "Variable", "Decision")) 
 ```
-
-
-@fig-cluster-paper shows the clustering of the `r length(unique(gemini_df$paper))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European and U.S. studies \[more on the APHENA\]. The first group (left) primarily uses LOESS smoothing, while the second group (middle) employs natural splines, and the third group (right) uses smoothing splines.
-
-- choose the ones in the baseline model
-- don't include other options considered, only the final value used in the model 
-- no sensitivity analysis
-- only consider PM2.5 and PM10 not other pollutants
 
 ```{r}
 #count_variable_type(gemini_df)
@@ -434,27 +411,15 @@ p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) +
 p2 + p3 
 ```
 
-```{r eval = FALSE}
-mds_df2 <- mds_df |> mutate(year = parse_number(paper)) |> filter(!is.na(year)) |> 
-  mutate(year = ifelse(year == 20007, 2007, year))
+For computing the decision similarity score, we include the first 6 most common variable-type decisions as suggested in @tbl-most-common-decisions. @fig-cluster-paper shows the clustering of the `r length(unique(good_pp))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European (LOESS) and U.S. (...) studies \[more on the APHENA\]. 
 
-mds_df2 |> ggplot(aes(x = V1, y = V2)) + 
-  ggrepel::geom_text_repel(aes(label = method, color = year)) + 
-  #scale_color_brewer(palette = "Dark2") + 
-  theme_bw() + 
-  theme(aspect.ratio = 1) 
 
-mds_df2 |> 
-  count(year, method) |> 
-  ggplot(aes(x = year, y = n, color = method)) + 
-  geom_line() 
-```
 
-## Sensitivity analysis {#sec-sensitivity}
+# Sensitivity analysis {#sec-sensitivity}
 
 In this section, we examine the reproducibility for using LLMs for text extraction tasks in @sec-llm-reproducibility, discrepancies between different LLM models: Gemini (`gemini-2.0-flash`) and Claude (`claude-3-7-sonnet-latest`) in @sec-llm-models, and the sensitivity of our paper similarity calculation pipeline to the choice of text model used for computing decision similarity scores in @sec-text-model.
 
-### LLM reproducibility {#sec-llm-reproducibility}
+## LLM reproducibility {#sec-llm-reproducibility}
 
 ```{r eval = FALSE}
 all_geminis <- list.files(here::here("data/gemini"), full.names = TRUE) |>
@@ -552,7 +517,7 @@ tibble(n_diff = 0:11) |>
   knitr::kable(digits = 2)
 ```
 
-### LLM models {#sec-llm-models}
+## LLM models {#sec-llm-models}
 
 Reading text from PDF document requires Optical Character Recognition (OCR) to convert images into machine-readable text, which currently is only supported by Antropic Claude (`claude-3-7-sonnet-latest`) and Google Gemini (`gemini-2.0-flash`).
 
@@ -566,7 +531,7 @@ Gemini sometimes also include irrelevant decisions, such as in @mar2000, where s
 
 For both Claude and Gemini, we find they fail to link the general term "weather variables" to the specific weather variables. For example Gemini misses this link in @dockery1992 and @burnett2004, while Claude does so in @dockery1992 and @katsouyanni2001. Although our prompt specified that some decisions may require linking information across sentences and paragraphs to identify the correct variable, this instruction doesn't appear to be applied consistently.
 
-```{r}
+```{r eval = FALSE}
 #| label: fig-claude-gemini
 #| fig.height: 6
 #| fig.width: 6
@@ -603,7 +568,7 @@ claude_gemini |>
 
 ```
 
-### Text model {#sec-text-model}
+## Text model {#sec-text-model}
 
 We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include
 
@@ -653,18 +618,17 @@ p2 <- text_distance_df |>
 
 (p1 | p2) + plot_layout(guides = 'collect') &
   theme_bw() + 
-  theme(legend.position='bottom') 
+  theme(legend.position = 'bottom') 
 ```
 
-```{r}
+```{r eval = FALSE}
 #| fig.height: 6
 #| fig.width: 10
 #| fig.cap: "The multi-dimensional scaling (MDS) of the paper similarity scores from each text model: all showing a similar clustering pattern of the three main smoothing methods. The points are colored by the most common method used in the paper, and the hulls are drawn around each method group."
 #| label: fig-text-mds
-text_distance_df <- text_distance_df |> 
-  filter(!paper1 %in% bad & !paper2 %in% bad)
-
-mds_df <- text_distance_df |> group_split(id) |> 
+mds_df <- text_distance_df |> 
+  filter(!paper1 %in% bad & !paper2 %in% bad) |> 
+  group_split(id) |> 
   map_dfr(run_mds, .id = "id") |> 
   mutate(id = as.numeric(id)) |> 
   left_join(method_df, by = c("paper" = "paper")) |> 
@@ -672,8 +636,6 @@ mds_df <- text_distance_df |> group_split(id) |>
 
 mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) + 
   geom_point(aes(color = method)) +
-  # ggrepel::geom_text_repel(aes(label = method, color = method),
-  #                          max.overlaps=Inf) + 
   ggforce::geom_mark_hull(concavity = 5, aes(color = method), 
                           expand = unit(2.2, "mm")) + 
   facet_wrap(vars(name)) + 
@@ -696,5 +658,7 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
 
 -   some decisions are more varied than others and can be reported by different ways. e.g. the most common way to report the smoothing parameter for time is the number of knots/ degree of freedom per year. While authors may report this number in different ways, i.e. "every 30 days". A secondary processing with LLM may be useful to align the raw text into the same reporting unit.s
+
+- the variation of parameters people use can help to identify parameter that needs a separate sensitivity analysis
 
 # References {.unnumbered}
