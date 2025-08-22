@@ -130,7 +130,7 @@ gemini_df <- gemini_df_raw |>
     !(paper == "lisabeth2008ambient" & id == 6), # irrelevant: season
     !(paper == "lopez2010air" & id == 13), # duplicates
     !(paper == "ostro2006effects" & id == 7), # irrelevant: season
-    !(paper == "ostro" & id == 3), # irrelevant: season
+    !(paper == "ostro2006fine" & id == 3), # irrelevant: season
     !(paper == "ueda2009effects" & id == 1), # irrelevant: season
     !(paper == "ueda2009effects" & id == 2), # irrelevant: day-of-the-week
     # category: PM - temporal
@@ -158,7 +158,7 @@ gemini_df <- gemini_df_raw |>
     !(paper == "jayaraman2008air" & id == 3), # irrelevant: other pollutants - NO2
     !(paper == "jayaraman2008air" & id == 4), # duplicates
     !(paper == "jayaraman2008air" & id == 6), # irrelevant: other pollutants - CO
-    !(paper == "katsouyanni" & id == 6), # irrelevant: other pollutants: BS
+    !(paper == "katsouyanni2000confounding" & id == 6), # irrelevant: other pollutants: BS
     !(paper == "ko2007effects" & id == 3), # irrelevant: other pollutants - NO2
     !(paper == "ko2007effects" & id == 4), # irrelevant: other pollutants - SO2
     !(paper == "ko2007effects" & id == 5), # irrelevant: other pollutants - O2
@@ -217,13 +217,13 @@ gemini_df <- gemini_df |>
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"), # recode
             tibble(paper = "neuberger2007extended", id = 8, model = "overdispersed Poisson GAM", variable = "humidity",
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "lagged effect (days 0, 1, and 2"), # recode
-            tibble(paper = "zanobetti", id = 4, model = "generalized additive regression mode", variable = "tempearture",
+            tibble(paper = "zanobetti2003temporal", id = 4, model = "generalized additive regression mode", variable = "tempearture",
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"), # recode
-            tibble(paper = "zanobetti", id = 5, model = "generalized additive regression mode", variable = "humidity",
+            tibble(paper = "zanobetti2003temporal", id = 5, model = "generalized additive regression mode", variable = "humidity",
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "on the previous day or up to 3 previous days"), # recode
-            tibble(paper = "zanobetti", id = 6, model = "generalized additive regression mode", variable = "tempearture",
+            tibble(paper = "zanobetti2003temporal", id = 6, model = "generalized additive regression mode", variable = "tempearture",
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"), # recode
-            tibble(paper = "zanobetti", id = 7, model = "generalized additive regression mode", variable = "humidity",
+            tibble(paper = "zanobetti2003temporal", id = 7, model = "generalized additive regression mode", variable = "humidity",
                    method = NA, parameter = NA, type = "temporal", reason = NA, decision = "average of previous day up to 3 previous days"), # recode
 
 
@@ -287,6 +287,7 @@ temporal_df <- gemini_df |>
 # #Using model = "claude-3-7-sonnet-latest".
 # chat <- chat_claude()
 # temporal_decision_claude <- parallel_chat_structured(chat, text, type = type_named_lag)
+# save!!!
 
 temporal_decision_df <- temporal_decision_claude |> as_tibble() |>
   mutate(operation = ifelse(operation %in% c("average", "mean"), "multi-day", "single-day"),
@@ -299,7 +300,7 @@ temporal_decision_clean <- temporal_decision_df |>
   mutate(temporal = ifelse(operation == "multi-day",
                            paste0("lag ", lag_start, "-", lag_end),
                            paste0("lag ", seq(lag_start, lag_end, 1), collapse = ", ")),
-         decision_clean = paste0(operation, " : ", temporal))
+         decision_clean = paste0(operation, " ", temporal))
 
 temporal_df_aug <- temporal_df |>
   bind_cols(temporal_decision_clean |> select(decision_clean))
