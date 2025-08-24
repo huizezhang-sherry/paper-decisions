@@ -13,6 +13,22 @@ gemini_r1_raw <- tibble(id = as.character(1:length(md_files)),
   ungroup() |>
   select(paper, id, model:decision, reference)
 
+gemini_r1_raw <- gemini_r1_raw |>
+  mutate(model = ifelse(paper == "anderson2001particulate", "Generalised additive models", model),
+         model = ifelse(paper %in% c("bell2007effect", "lisabeth2008ambient", "burnett2004associations", "franklin2008role",
+                                     "peng2008coarse",
+                                     "ostro2006fine", "peel2005ambient"), "GLM", model),
+         model = ifelse(paper == "bell2008seasonal", "bayesian hierarchical model", model),
+         model = ifelse(paper == "breitner2009short", "generalized semiparametric poisson regression models", model),
+         model = ifelse(paper %in% c("burnett1998association", "burnett2001association",
+                                     "castillejos2016airborne", "cifuentes2011effect",
+                                     "neuberger2007extended", "schwartz2002concentration",
+                                     "stolzel2008daily", "zanobetti2003temporal","zanobetti2003temporal"),
+                        "generalized additive model", model)
+         )
+
+gemini_df |> distinct(paper, model) |> View()
+
 gemini_df_raw <- gemini_r1_raw |>
   filter(!model %in% c("case-crossover design", "unconstrained distributed lag model",
                        "regression tree", "lag distributed model", "unconstrained distributed lag models")) |>
@@ -26,6 +42,9 @@ gemini_df_raw <- gemini_r1_raw |>
          variable = str_replace_all(variable, "dew_point", "dewpoint")) |>
   # 3) group variables
   mutate(
+    model = str_to_lower(model),
+    model = ifelse(str_detect(model, "generalized additive|generalised additive|gam|general additive"), "GAM", model),
+    model = ifelse(str_detect(model, "generalized linear model|glm|poisson regression|general linear"), "GLM", model),
     variable = ifelse(str_detect(variable, "pollutant|pollution|particulate|NCtot|exposure"), "PM", variable),
     variable = ifelse(str_detect(variable, "PM"), "PM", variable),
     variable = ifelse(variable %in% c("dewpoint temperature", "dewpoint_temperature", "dewpoint", "RH"),
@@ -37,7 +56,7 @@ gemini_df_raw <- gemini_r1_raw |>
   # 4) standardize method and parameter
   mutate(method = ifelse(method %in% c("spline smoother", "spline smooth functions"),
                          "smoothing spline", method),
-         method = ifelse(str_detect(method, "penalized"), "smoothing spline", method),
+         method = ifelse(str_detect(method, "penalized|penalised"), "smoothing spline", method),
          method = ifelse(str_detect(method, "smoothing"), "smoothing spline", method),
          method = ifelse(method %in% c("cubic splines", "cubic regression spline",
                                        "cubic regression splines", "cubic spline"),
@@ -61,6 +80,11 @@ gemini_df_raw <- gemini_r1_raw |>
 
 gemini_df <- gemini_df_raw |>
   mutate(
+    # category: model
+    model = ifelse(paper == "jalaludin2009association" & id %in% c(7,8),
+                      "generalized additive model", model), # recode: 42 total df
+
+
     # category: time - parameter
     decision = ifelse(paper == "schreuder2006ambient" & variable == "time" & type == "parameter",
                       "6 degrees of freedom per year", decision), # recode: 42 total df
@@ -97,6 +121,7 @@ gemini_df <- gemini_df_raw |>
                       "averaged over the day before and the day of death", decision), # recode: single- and multiple-day exposure lags
     decision = ifelse(paper == "jalaludin2009association" & variable == "exposure" & type == "temporal",
                       "average of lag0 and lag1", decision), # recode: 2-day cumulative lag
+
 
     # category: temperature/ humidity - temporal - reason
     reason = ifelse(paper == "lee2006association" & variable == "temperature" & type == "temporal",
@@ -187,7 +212,25 @@ gemini_df <- gemini_df_raw |>
     !(paper == "mar2000associations" & id == 19), # duplicates
     # category: mortality
     !(paper == "castillejos2016airborne" & id == 1), # fail to capture
-    !(paper == "castillejos2016airborne" & id == 2) # fail to capture
+    !(paper == "castillejos2016airborne" & id == 2), # fail to capture
+    # category: model
+    !(paper == "fairley1999daily" & id == 1), # fail to capture
+    !(paper == "fairley1999daily" & id == 2), # fail to capture
+    !(paper == "franklin2008role" & id == 5), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 7), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 8), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 9), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 10), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 11), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 12), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 13), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 14), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 15), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 16), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 17), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 18), # irrelevant: secondary model
+    !(paper == "ito2006pm" & id == 19) # irrelevant: secondary model
+
   ) |>
   filter(!paper %in% c("burnett1998association", "burnett2001association", "burnett2004associations", "linares2010short",
                        "mate2010short"))

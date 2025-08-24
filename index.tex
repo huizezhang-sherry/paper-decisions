@@ -24,17 +24,17 @@
 %% The original source files were:
 %%
 %% samples.dtx  (with options: `manuscript')
-%%
+%% 
 %% IMPORTANT NOTICE:
-%%
+%% 
 %% For the copyright see the source file.
-%%
+%% 
 %% Any modified versions of this file must be renamed
 %% with new filenames distinct from sample-manuscript.tex.
-%%
+%% 
 %% For distribution of the original source see the terms
 %% for copying and modification in the file samples.dtx.
-%%
+%% 
 %% This generated file may be distributed as long as the
 %% original source files, as listed above, are part of the
 %% same distribution. (The sources need not necessarily be
@@ -102,7 +102,7 @@
 
 
 
-
+ 
 \usepackage[]{natbib}
 \bibliographystyle{plainnat}
 
@@ -236,20 +236,20 @@ analysis via decision similarity}
 
 
   \author{H. Sherry Zhang}
-
+  
             \affiliation{%
                   \institution{University of Texas at Austin}
                                   \city{Austin}
                                   \country{USA}
                       }
         \author{Roger D. Peng}
-
+  
             \affiliation{%
                   \institution{University of Texas at Austin}
                                   \city{Austin}
                                   \country{USA}
                       }
-
+      
 
 %% By default, the full list of authors will be used in the page
 %% headers. Often, this list is too long, and will overlap
@@ -257,7 +257,7 @@ analysis via decision similarity}
 %% the author to define a more concise list
 %% of authors' names for this purpose.
 %\renewcommand{\shortauthors}{Trovato et al.}
-%%
+%%  
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
@@ -277,7 +277,7 @@ of these extracted decisions and their reasons, and visualize the
 results through clustering algorithms. This approach offers an efficient
 way to study decision-making practices than traditional interviews. We
 also provide insights into the use of LLMs for text extraction tasks and
-the communication of analytic choices in data analysis practice.
+the communication of analytic choices in data analysis practice.    
 \end{abstract}
 
 %%
@@ -1290,33 +1290,44 @@ between 0.7 to 1.}
 
 \section{Discussion}\label{sec-discussion}
 
-\begin{itemize}
-\item
-  Only prompting engineering is used to extract decisions from the
-  literature. We expect that fine-tuning the model on statistical or
-  domain-specific literature to yield more robust performance on the
-  same document, though it would require substantially more training
-  effort.
-\item
-  people from the NYU-LMU workshop are interested to have code script
-  attached as well because people can do one thing in the script but
-  report another in the paper - it would be interesting to compare the
-  paper and the script with some syntax extraction.
-\item
-  Spatial decisions are generally not well captured because it often
-  conducted uniformly as estimating the city individually to accommodate
-  city heterogeneity. Some papers only consider a handful of cities,
-  while in larger studies the individual city effects are then pooled
-  together using random effect.
-\item
-  Validation of the output: the nature of the task: Our task involve a
-  reasoning component in that it requires casual reasoning to identify
-  the decisions made by the authors, and its justification/ rationale,
-  rather than purely summarizing the text through pattern-matching.
-\item
-  the variation of parameters people use can help to identify parameter
-  that needs a separate sensitivity analysis
-\end{itemize}
+There are other decisions in an analysis that are worth comparing and
+documenting. For example data pre-processing decisions, e.g.~how
+pollutant series are defined and collected, treatment on missing values,
+etc. Again, for a complete review of the field, these decisions ideally
+would be included, but for our demonstration of idea, we focus on the
+modelling decisions. Spatial decisions are generally not well captured
+because it often conducted uniformly as estimating the city individually
+to accommodate city heterogeneity. Some papers only consider a handful
+of cities, while in larger studies the individual city effects are then
+pooled together using random effect.
+
+The variation in the choice of parameters degree of freedom or knot for
+smoothing can motivate separate investigation on the sensitivity
+analysis. For instance, parameters that exhibit a wide range of choices
+across studies may indicate areas of uncertainty or debate within the
+field, suggesting that further investigation is needed to assess their
+impact on study outcomes \citep{peng2006, touloumi2006}.
+
+With LLMs, the extraction of decisions from literature could be largely
+automated, but manual review is still needed to ensure the quality of
+the extracted decisions. We also find secondary LLMs can be used to
+standardize the extracted decisions, such as for temporal lag choices
+from text expressing this decision in various ways. In this work, we use
+prompt engineering to optimize the prompt for extracting decisions from
+general LLMs (Claude and Gemini). Fine-tuning a local model is an
+alternative approach for a locally-trained model. While it could
+potentially yield more accurate extraction and hence less manual review,
+for a systematic literature review, it would require substantially more
+training efforts and a labelled decision dataset. We also find sometimes
+the prompt is not fully followed throughout the extraction (example).
+Claude and Gemini\ldots{}
+
+With the advocacy for reproducibility in science, it is expected that
+more papers will share their code and data. The availability of the code
+could be a supplementary source for understanding the decisions made in
+the analysis and cross comparison of the manuscript with the code.
+However, given the lack of comments in the current practice, we are not
+there to extract reasons for the decisions encoded in the script.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references.bib}

@@ -200,10 +200,6 @@ While decisions can be extracted manually from the literature, this process is l
 
 Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
 
-
-
-
-
 ## Review the LLM output
 
 -   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
@@ -258,11 +254,9 @@ lab <- matrix(
 )
 ```
 
-From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. [details]
+From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. \[details\]
 
-
-
-@tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity. 
+@tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity.
 
 ```{r}
 #| label: tbl-review
@@ -306,7 +300,6 @@ lab |> knitr::kable(
                     escape = FALSE) 
 ```
 
-
 ```{r}
 #| label: tbl-most-common-decisions
 #| tbl-cap: "Count of variable-type decisions in the Gemini-extracted decisions. The most commonly reported decision are the parameter choices and temporal lags for for time, PM, temperature, and humidity."
@@ -314,10 +307,9 @@ count_variable_type(gemini_df) |> head(8) |>
   knitr::kable(col.names = c("Variable", "Type", "Count"),)
 ```
 
+@tbl-humidity-temperature-decisions reports the parameter-related decisions captured in the literature. They refer to the number of knots or degree of freedom for spline methods (natural and smoothing spline) applied to variable time, humidity and temperature. For consistency, all values have been converted to a *per year* scale. The selection of knot for natural spline has less variation than the degree of freedom choices for smoothing spline. Choices for temperature and humidity tend to be close, given they are both weather related variables, while the choices for time are more varied inherently. This tabulation offers a reference set for potential options for future studies and help to identify anomalies and special treatment in practice. Notable example includes the use of 7.7 degree of freedom in @castillejos2000, and highly flexible choices of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively. While most papers choice to report the smoothing parameter as a constant value, @schwartz2000 specifies it as a proportion of the data ("5% of the data" and "5% of the data").
 
-@tbl-humidity-temperature-decisions reports the parameter-related decisions captured in the literature. They refer to the number of knots or degree of freedom for spline methods (natural and smoothing spline) applied to variable time, humidity and temperature. For consistency, all values have been converted to a  *per year* scale. The selection of knot for natural spline has less variation than the degree of freedom choices for smoothing spline. Choices for temperature and humidity tend to be close, given they are both weather related variables, while the choices for time are more varied inherently. This tabulation offers a reference set for potential options for future studies and help to identify anomalies and special treatment in practice. Notable example includes the use of 7.7 degree of freedom in @castillejos2000, and highly flexible choices of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively. While most papers choice to report the smoothing parameter as a constant value, @schwartz2000 specifies it as a proportion of the data ("5% of the data" and "5% of the data").
-
-For temporal decisions, after an initial review, we observed that decisions are still highly varied. The decisions can be divided into two groups: multi-day lags include expressions such as "6-day average", "3-d moving average", "mean of lags 0+1", and "cumulative lags, mean 0+1+2", and single-day lags include "lagged exposure up to 6 days", "lag days from 0 to 5" among others. To standardize these entries, we applied a secondary LLM process (claude-3-7-sonnet-latest) and converted them into a consistent format: `multi-day: lag [start]-[end]` and `single-day: lag [start], … lag [end]`. @tbl-temporal-decisions summarizes the temporal lag choices for PM, temperature, and humidity. Both single and multiple day lags are generally considered up to five days prior (lag 5). [TODO: check multi-day starts from one].
+For temporal decisions, after an initial review, we observed that decisions are still highly varied. The decisions can be divided into two groups: multi-day lags include expressions such as "6-day average", "3-d moving average", "mean of lags 0+1", and "cumulative lags, mean 0+1+2", and single-day lags include "lagged exposure up to 6 days", "lag days from 0 to 5" among others. To standardize these entries, we applied a secondary LLM process (claude-3-7-sonnet-latest) and converted them into a consistent format: `multi-day: lag [start]-[end]` and `single-day: lag [start], … lag [end]`. @tbl-temporal-decisions summarizes the temporal lag choices for PM, temperature, and humidity. Both single and multiple day lags are generally considered up to five days prior (lag 5). \[TODO: check multi-day starts from one\].
 
 ```{r}
 #| label: tbl-humidity-temperature-decisions
@@ -351,7 +343,6 @@ var_method_df |>
   summarize(decision = paste0(decision, collapse = ", ")) |> 
   knitr::kable(col.names = c("Method", "Variable", "Decision")) 
 ```
-
 
 ```{r}
 #| label: tbl-temporal-decisions
@@ -460,9 +451,7 @@ p2
 p3 
 ```
 
-For computing the decision similarity score, we include the first 6 most common variable-type decisions as suggested in @tbl-most-common-decisions. @fig-cluster-paper shows the clustering of the `r length(unique(good_pp))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European (LOESS) and U.S. (...) studies \[more on the APHENA\]. 
-
-
+For computing the decision similarity score, we include the first 6 most common variable-type decisions as suggested in @tbl-most-common-decisions. @fig-cluster-paper shows the clustering of the `r length(unique(good_pp))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European (LOESS) and U.S. (...) studies \[more on the APHENA\].
 
 # Sensitivity analysis {#sec-sensitivity}
 
@@ -694,16 +683,14 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 
 # Discussion {#sec-discussion}
 
--   Only prompting engineering is used to extract decisions from the literature. We expect that fine-tuning the model on statistical or domain-specific literature to yield more robust performance on the same document, though it would require substantially more training effort.
+There are other decisions in an analysis that are worth comparing and documenting. For example data pre-processing decisions, e.g. how pollutant series are defined and collected, treatment on missing values, etc. Again, for a complete review of the field, these decisions ideally would be included, but for our demonstration of idea, we focus on the modelling decisions.  Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
 
--   people from the NYU-LMU workshop are interested to have code script attached as well because people can do one thing in the script but report another in the paper - it would be interesting to compare the paper and the script with some syntax extraction.
+The variation in the choice of parameters degree of freedom or knot for smoothing can motivate separate investigation on the sensitivity analysis. For instance, parameters that exhibit a wide range of choices across studies may indicate areas of uncertainty or debate within the field, suggesting that further investigation is needed to assess their impact on study outcomes [@peng2006; @touloumi2006].
 
--   Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
+With LLMs, the extraction of decisions from literature could be largely automated, but manual review is still needed to ensure the quality of the extracted decisions. We also find secondary LLMs can be used to standardize the extracted decisions, such as for temporal lag choices from text expressing this decision in various ways. In this work, we use prompt engineering to optimize the prompt for extracting decisions from general LLMs (Claude and Gemini). Fine-tuning a local model is an alternative approach for a locally-trained model. While it could potentially yield more accurate extraction and hence less manual review, for a systematic literature review, it would require substantially more training efforts and a labelled decision dataset. We also find sometimes the prompt is not fully followed throughout the extraction (example). Claude and Gemini...
 
--   Validation of the output: the nature of the task: Our task involve a reasoning component in that it requires casual reasoning to identify the decisions made by the authors, and its justification/ rationale, rather than purely summarizing the text through pattern-matching.
 
-- the variation of parameters people use can help to identify parameter that needs a separate sensitivity analysis
+With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. The availability of the code could be a supplementary source for understanding the decisions made in the analysis and cross comparison of the manuscript with the code.  However, given the lack of comments in the current practice, we are not there to extract reasons for the decisions encoded in the script. 
+
 
 # References {.unnumbered}
-
-
