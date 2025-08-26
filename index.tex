@@ -266,18 +266,19 @@ decisions they make, as these choices inform how results are interpreted
 and compared across studies. Such decisions -- for example, selecting
 the degree of freedom for a smoothing spline -- are often not
 systematically studied, since onece an analysis is published, it is done
-seldom revisited or replicated with alternative choices. In this work,
-we focus on a body of data analysis studies on the effect of particulate
-matter on mortality, conducted by researchers worldwide, which naturally
-provide alteranative analyes of the same question. We automatically
-extract analytic decisions from the published literature into structured
-data using Large Language Models (Claude and Gemini). We then proposed a
-pipeline to calculate paper similarity based on the semantic similarity
-of these extracted decisions and their reasons, and visualize the
-results through clustering algorithms. This approach offers an efficient
-way to study decision-making practices than traditional interviews. We
-also provide insights into the use of LLMs for text extraction tasks and
-the communication of analytic choices in data analysis practice.    
+and seldomly revisited or replicated with alternative choices. In this
+work, we focus on a body of data analysis studies on the effect of
+particulate matter on mortality, conducted by researchers worldwide,
+which naturally provide alteranative analyes of the same question. We
+automatically extract analytic decisions from the published literature
+into structured data using Large Language Models (Claude and Gemini). We
+then proposed a pipeline to calculate paper similarity based on the
+semantic similarity of these extracted decisions and their reasons, and
+visualize the results through clustering algorithms. This approach
+offers an efficient way to study decision-making practices than
+traditional interviews. We also provide insights into the use of LLMs
+for text extraction tasks and the communication of analytic choices in
+data analysis practice.    
 \end{abstract}
 
 %%
@@ -737,7 +738,7 @@ the Download CSV button.}
 
 \end{figure}%
 
-\section{Calculating paper similarity}\label{sec-paper-similarity}
+\subsection{Calculating paper similarity}\label{sec-paper-similarity}
 
 Once the decisions have been extracted and validated, this opens up a
 structured data for analyzing these information. For example, we can
@@ -1311,6 +1312,29 @@ could be a supplementary source for understanding the decisions made in
 the analysis and cross comparison of the manuscript with the code.
 However, given the lack of comments in the current practice, we are not
 there to extract reasons for the decisions encoded in the script.
+
+\section{Conclusion}\label{sec-conclusion}
+
+In this paper, {[}we study how decisions are made in practical data
+analysis{]}. We developed a pipeline for automatically extracting
+decisions using LLMs (Claude and Gemini) and introduced a method for
+calculating paper similarity through decision similarity. This enables
+us to cluster papers by their decision choices and visualization through
+hierarchical clustering and multidimensional scaling. We applied this
+pipeline to mortality/ hospital admission -- PM modelling literature. We
+extracted key modelling decisions, such as the choice of smoothing
+methods and parameters for time, temperature, and humidity, and revealed
+paper clusters that correspond to different modelling strategies, as
+documented in the APHENA project.
+
+While sensitivity analyses are commonly used to assess the robustness of
+findings to different analytical choices, the set of choices tested is
+often limited and selected subjectively by the authors. Our approach
+offers a new perspective by pooling decisions made in analyses across
+studies in the fields. This allows for a holistic account on the
+alternatives in the field and identification of both consensus and
+divergence within the field, providing insights for future research and
+methodological development.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references.bib}

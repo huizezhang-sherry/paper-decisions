@@ -4,7 +4,7 @@ keep-tex: true
 pdf-engine: pdflatex
 bibliography: references.bib
 title: "Dossier: visualizing/ understanding decision choices in data analysis via decision similarity"
-abstract: "In data analysis, analysts are expected to clearly communicate the decisions they make, as these choices inform how results are interpreted and compared across studies. Such decisions -- for example, selecting the degree of freedom for a smoothing spline -- are often not systematically studied, since onece an analysis is published, it is done seldom revisited or replicated with alternative choices. In this work, we focus on a body of data analysis studies on the effect of particulate matter on mortality, conducted by researchers worldwide, which naturally provide alteranative analyes of the same question. We automatically extract analytic decisions from the published literature into structured data using Large Language Models (Claude and Gemini). We then proposed a pipeline to calculate paper similarity based on the semantic similarity of these extracted decisions and their reasons, and visualize the results through clustering algorithms. This approach offers an efficient way to study decision-making  practices than traditional interviews. We also provide insights into the use of LLMs for text extraction tasks and the communication of analytic choices in data analysis practice."
+abstract: "In data analysis, analysts are expected to clearly communicate the decisions they make, as these choices inform how results are interpreted and compared across studies. Such decisions -- for example, selecting the degree of freedom for a smoothing spline -- are often not systematically studied, since onece an analysis is published, it is done and seldomly revisited or replicated with alternative choices. In this work, we focus on a body of data analysis studies on the effect of particulate matter on mortality, conducted by researchers worldwide, which naturally provide alteranative analyes of the same question. We automatically extract analytic decisions from the published literature into structured data using Large Language Models (Claude and Gemini). We then proposed a pipeline to calculate paper similarity based on the semantic similarity of these extracted decisions and their reasons, and visualize the results through clustering algorithms. This approach offers an efficient way to study decision-making  practices than traditional interviews. We also provide insights into the use of LLMs for text extraction tasks and the communication of analytic choices in data analysis practice."
 notebook-links: false
 author:
   - name: H. Sherry Zhang
@@ -213,7 +213,7 @@ The shiny app is designed to provide users a visual interface to review and edit
 knitr::include_graphics("figures/shiny.png")
 ```
 
-# Calculating paper similarity {#sec-paper-similarity}
+## Calculating paper similarity {#sec-paper-similarity}
 
 Once the decisions have been extracted and validated, this opens up a structured data for analyzing these information. For example, we can compare whether author's choices at different times changes, or across decisions varies at different regions. In this section, we present a method to calculate paper similarity based on the decisions shared in the paper pairs. The goal is to construct a distance metric based on similarity of the decision choice among papers that could be further used for clustering paper based on choices made by different authors in the literature. An overview of the method is illustrated in @fig-similarity-diag.
 
@@ -712,5 +712,10 @@ Currently, only one model per paper - some have comparison of GLM and GAM, compa
 
 With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. The availability of the code could be a supplementary source for understanding the decisions made in the analysis and cross comparison of the manuscript with the code.  However, given the lack of comments in the current practice, we are not there to extract reasons for the decisions encoded in the script. 
 
+# Conclusion {#sec-conclusion}
+
+In this paper, [we study how decisions are made in practical data analysis]. We developed a pipeline for automatically extracting decisions using LLMs (Claude and Gemini) and introduced a method for calculating paper similarity through decision similarity. This enables us to cluster papers by their decision choices and visualization through hierarchical clustering and multidimensional scaling. We applied this pipeline to mortality/ hospital admission -- PM modelling literature. We extracted key modelling decisions, such as the choice of smoothing methods and parameters for time, temperature, and humidity, and revealed paper clusters that correspond to different modelling strategies, as documented in the APHENA project. 
+
+While sensitivity analyses are commonly used to assess the robustness of findings to different analytical choices, the set of choices tested is often limited and selected subjectively by the authors. Our approach offers a new perspective by pooling decisions made in analyses across studies in the fields. This allows for a holistic account on the alternatives in the field and identification of both consensus and divergence within the field, providing insights for future research and methodological development.
 
 # References {.unnumbered}
