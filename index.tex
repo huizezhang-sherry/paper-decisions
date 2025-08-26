@@ -317,8 +317,6 @@ analyses.
 
 \setlength{\parskip}{-0.1pt}
 
-\newpage
-
 \section{Introduction}\label{introduction}
 
 Decisions are made at every stage of data analysis: from initial data
@@ -369,7 +367,7 @@ find three distinct clusters corresponding to different smoothing
 methods (LOESS, natural spline, and smoothing spline) used in European
 and U.S. studies, consistent with findings from the APHENA project.
 
-The contribution of this work includes:
+In summary, the contribution of this work includes:
 
 \begin{itemize}
 \item
@@ -377,11 +375,11 @@ The contribution of this work includes:
   automatic extraction of decisions from scientific literature using
   LLMs,
 \item
-  A dataset compiled from 62 papers to study decision-making in air
-  pollution mortality modelling, and
+  A dataset of decisions and rationale, along with metadata, compiled
+  from 62 studies in air pollution mortality modelling, and
 \item
-  A method to construct similarities between papers based on decision
-  similarities.
+  A method to construct paper similarities based on the decisions and
+  the semantic similarity of their rationale.
 \end{itemize}
 
 \section{Related work}\label{sec-background}
@@ -389,75 +387,86 @@ The contribution of this work includes:
 \subsection{Decision-making in data
 analysis}\label{decision-making-in-data-analysis}
 
-A data analysis is a process of making choices at each step, from the
-initial data collection to model specification, and post-processing.
-Each decision represents a branching point where analysts choose a
-specific path to follow, and the vast number of possible choices
-analysts can take forms what \citet{gelman2014} describe as the ``garden
-of forking paths''. While researchers may hope their inferential results
-are robust to the specific path taken through the garden, in practice,
-different choices can lead to substantially different conclusions. This
-has been empirically demonstrated through ``many analyst experiments'',
-where independent research groups analyze the same dataset to the same
-answer using their chosen analytic approach. A classic example is
-\citet{silberzahn2018}, where researchers reported an odds ratio from
-0.89 to 2.93 for the effect of soccer players' skin tone on the number
-of red cards awarded by referees. Similar variability has been observed
-in structural equation modeling \citep{sarstedt2024}, applied
-microeconomics \citep{huntington-klein2021}, neuroimaging
-\citep{botvinik-nezer2020}, and ecology and evolutionary biology
-\citep{gould2025}.
+Data analysis involves making choices at every step, from initial data
+collection, data pre-processing to model specification, and
+post-processing. Each decision represents a branching point where
+analysts choose a specific path to follow, and the vast number of
+possible choices analysts can take forms what \citet{gelman2014}
+describe as the ``garden of forking paths''. While researchers may hope
+their inferential results are robust to the specific path taken through
+the garden, in practice, different choices can lead to substantially
+different conclusions. This has been empirically demonstrated through
+``many analyst experiments'', where independent research groups analyze
+the same dataset to address the same research questions with their own
+chosen analytic approach. A classic example is \citet{silberzahn2018},
+where researchers reported an odds ratio from 0.89 to 2.93 for the
+effect of soccer players' skin tone on the number of red cards awarded
+by referees. Similar variability has been observed in structural
+equation modeling \citep{sarstedt2024}, applied microeconomics
+\citep{huntington-klein2021}, neuroimaging \citep{botvinik-nezer2020},
+and ecology and evolutionary biology \citep{gould2025}.
 
-Examples above have rendered decision-making in data analysis as a
-subject to study in data science. To collect data on how analysts making
-decisions during data analysis, researchers have conducted interviews
-with analysts and researchers on data analysis practices
-\citep{kale2019, alspaugh2019, liu_understanding_2020}, visualization of
-the decision process through the analytic decision graphics (ADG)
-\citep{liu2020}. Recently, \citet{simson2025} describes a participatory
-approach to decisions choices in fairness ML algorithms. Software tools
-have also developed to incorporate potential alternatives in the
-analysis workflow, including the \texttt{DeclareDesign} package
-\citep{blair2019} and the \texttt{multiverse} package
-\citep{multiverse}. The \texttt{DeclareDesign} package \citep{blair2019}
-introduces the MIDA framework for researchers to declare, diagnose, and
-redesign their analyses to produce a distribution of the statistic of
-interest, which has been applied in the randomized controlled trial
-study \citep{bishop2024}. The \texttt{multiverse} package
-\citep{multiverse} provides a framework for researchers to
-systematically explore how different choices affect results and to
-report the range of plausible outcomes that arise from alternative
-analytic paths. Other systems have been developed to visualize
-\texttt{multiverse} analysis \citep{liu2021}.
+Examples like above have rendered decision-making in data analysis as a
+subject to study in human computer interaction. To understand how
+analysts making decisions during data analysis and navigating the garden
+of forking path, researchers have conducted qualitative interviews with
+analysts on data analysis practices
+\citep{kale2019, alspaugh2019, liu_understanding_2020}. Visualization
+tools have also been explored to communicate the decision process
+through analytic decision graphics (ADG) \citep{liu2020}. In fairness
+machine learning literature, \citet{simson2025} contributed a reusable
+workflow that supports participatory input to democratize decisions in
+machine learning algorithms related to fairness, privacy,
+interpretability and performance. Conducting qualitative studies through
+interviews to study how assumptions and decisions are made in data
+analysis practices takes a significant amount of time and effort, and
+the findings may not generalize to other contexts. While published
+research papers may not provide a complete picture of the
+decision-making process, they do contain valuable information about the
+choices made by analysts and the rationale behind them. With recent
+advances in Large Language Models (LLMs), it has become possible to
+automatically extract structured information from unstructured text.
+This could provide a scalable way to study decision-making practices in
+data analysis.
+
+On top of qualitative studies, software tools have also developed to
+incorporate potential alternatives in the analysis workflow. The
+\texttt{DeclareDesign} package \citep{blair2019} introduces the MIDA
+framework for researchers to declare, diagnose, and redesign their
+analyses to produce a distribution of the statistic of interest, which
+has been applied in the randomized controlled trial study
+\citep{bishop2024}. The \texttt{multiverse} package
+{[}\citet{multiverse}; liu2021{]} provides a framework for researchers
+to conduct multiverse analysis to systematically explore how different
+choices affect results and to report the range of plausible outcomes
+that arise from alternative analytic paths.
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
 
-Much of the work on IEEE visualizing scientific literature focuses on
-helping researchers stay aware of relevant publications, given the
-rapidly growing volume of scientific output and the difficulty of
-navigating it. Systems have been developed to support the discovery of
-relevant papers, where relevance is typically determined by keywords
-\citep{isenberg2017}, citation information (e.g.~citation list,
-co-citation) \citep{chen2006}, or combinations with other relevant paper
-metadata (e.g.~author, title)
-\citep{bethard2010, chou2011, dörk2012, heimerl2016}. More recent
-approaches incorporate text-based information from the abstract or
-sections of the paper to {[}obtain a better similar metric{]}. This
-includes using topic modelling \citep{alexander2014},
-argumentation-based information retrieval \citep{tbahriti2006}, and text
-embedding \citep{narechania2022}. While these metadata information and
-high level text-based information are valuable for discovering relevant
-papers, for data analysis, researchers need tools that help them
-\emph{make sense} of the literature rather than simply \emph{finding}
-it. Capturing the decisions and reasoning expressed during analyses
-within a similar theme can reveal common practices in the field and
-guide decisions choices in new applications. With recent advances in
-Large Language Models (LLMs), it has become possible to automatically
-extract structured information from unstructured text through prompting.
-This allows scientific literature to be clustered and visualized using
-information about the underlying decisions and reasoning made during
-analysis, providing a basis for studying analysts' decision choices.
+With the rapid growth of scientific publications, there has been
+increasing interest in developing tools to visualize and navigate the
+scientific literature. These tools aim to help researchers discover
+relevant papers, understand the relationships between different works,
+and identify trends and patterns in the literature. Systems have been
+developed to support the discovery of relevant papers, where relevance
+is typically determined by keywords \citep{isenberg2017}, citation
+information (e.g.~citation list, co-citation) \citep{chen2006}, or
+combinations with other relevant paper metadata (e.g.~author, title)
+\citep{bethard2010, chou2011, dörk2012, heimerl2016}. Recent approaches
+incorporate text-based information from the paper abstract to obtain a
+more relevant metric for connecting similar papers. This includes using
+topic modelling \citep{alexander2014}, argumentation-based information
+retrieval \citep{tbahriti2006}, and text embedding
+\citep{narechania2022}. While metadata and high-level text-based
+information are useful for finding relevant papers, researchers also
+need tools that help them \emph{make sense} of the literature rather
+than simply \emph{locating} it. In applied data analysis, one interest
+is to understand how studies differ or align in their analytical
+approaches. Capturing the decisions and reasoning expressed in analyses
+on a shared theme enables the calculation of similarity metrics based on
+these choice and their underlying rationale, which supports clustering
+and visualizing paper to identify common practices in the field.
 
 \section{Methods}\label{sec-extract-decisions}
 
