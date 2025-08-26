@@ -436,50 +436,44 @@ framework for researchers to declare, diagnose, and redesign their
 analyses to produce a distribution of the statistic of interest, which
 has been applied in the randomized controlled trial study
 \citep{bishop2024}. The \texttt{multiverse} package
-{[}\citet{multiverse}; liu2021{]} provides a framework for researchers
-to conduct multiverse analysis to systematically explore how different
+\citep{multiverse, liu2021} provides a framework for researchers to
+conduct multiverse analysis to systematically explore how different
 choices affect results and to report the range of plausible outcomes
 that arise from alternative analytic paths.
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
 
-With the rapid growth of scientific publications, there has been
-increasing interest in developing tools to visualize and navigate the
-scientific literature. These tools aim to help researchers discover
-relevant papers, understand the relationships between different works,
-and identify trends and patterns in the literature. Systems have been
-developed to support the discovery of relevant papers, where relevance
-is typically determined by keywords \citep{isenberg2017}, citation
-information (e.g.~citation list, co-citation) \citep{chen2006}, or
-combinations with other relevant paper metadata (e.g.~author, title)
+With the growing volume of scientific publications and the difficulty of
+navigating the literature to stay informed, there is increasing interest
+in developing tools to visualize and recommend scientific papers. These
+systems link papers based on their similarity and relevance, typically
+determined by keywords \citep{isenberg2017}, citation information
+(e.g.~citation list, co-citation) \citep{chen2006}, or combinations with
+other relevant paper metadata (e.g.~author, title)
 \citep{bethard2010, chou2011, dörk2012, heimerl2016}. Recent approaches
-incorporate text-based information from the paper abstract to obtain a
-more relevant metric for connecting similar papers. This includes using
-topic modelling \citep{alexander2014}, argumentation-based information
-retrieval \citep{tbahriti2006}, and text embedding
-\citep{narechania2022}. While metadata and high-level text-based
-information are useful for finding relevant papers, researchers also
-need tools that help them \emph{make sense} of the literature rather
-than simply \emph{locating} it. In applied data analysis, one interest
-is to understand how studies differ or align in their analytical
-approaches. Capturing the decisions and reasoning expressed in analyses
-on a shared theme enables the calculation of similarity metrics based on
-these choice and their underlying rationale, which supports clustering
-and visualizing paper to identify common practices in the field.
+incorporate text-based information using topic modelling
+\citep{alexander2014}, argumentation-based information retrieval
+\citep{tbahriti2006}, and text embedding \citep{narechania2022}. While
+metadata and high-level text-based information are useful for finding
+relevant papers, researchers also need tools that help them \emph{make
+sense} of the literature rather than simply \emph{locating} it. In
+applied data analysis, one interest is to understand how studies differ
+or align in their analytical approaches. Capturing the decisions and
+reasoning expressed in analyses on a shared theme enables the
+calculation of similarity metrics based on these choice and their
+underlying rationale, which supports clustering and visualizing paper to
+identify common practices in the field.
 
 \section{Methods}\label{sec-extract-decisions}
 
-\subsection{Decisions in data analysis}\label{sec-decisions}
+TODO: a generic summary of the workflow, maybe an illustration
 
-Decisions occur throughout the entire data analysis process -- from the
-selection of variables and data source, to pre-processing steps to
-prepare the data for modelling, to the model specification and variable
-inclusion. In this work, we focus specifically on modelling decisions in
-the air pollution mortality modelling literature. These include the
-choice of modelling approach, covariate inclusion and smoothing, and
-specifications of spatial and temporal structure. Consider the following
-excerpt from \citet{ostro2006}:
+\subsection{Record decisions in data analysis}\label{sec-decisions}
+
+Consider the following excerpt from \citet{ostro2006} that describes the
+modelling approach to provide evidence of an association between daily
+counts of mortality and ambient particulate matter (PM10):
 
 \begin{quote}
 Based on previous findings reported in the literature (e.g., Samet et
@@ -508,39 +502,52 @@ This sentence encode the following components of a decision:
   \textbf{decision}: 7 degrees of freedom (df) per year of data
 \end{itemize}
 
-The decision above is regarding a certain parameter in the statistical
-method, we categorize this as a ``parameter'' type decisions. Other
-types of decisions - such as spatial modelling structure or the
-inclusion of temporal lags - may not include an explicit method or
-parameter, but still reference a variable and rationale, which we will
-provide further examples below.
+To record these decisions in a tabular format, we follow the tidy data
+principle \citep{wickham2014}, which states each variable should be in a
+column and each observation in a row. For our purpose, each row
+represents a decision made by the authors in a paper and an analysis
+often include multiple decisions. To retain the original context of the
+decision, we extract the original text in the paper, without paraphrase
+or summarization. The decision choice above is a parameter choice of a
+statistical method applied to the variable. Analyses also include other
+types of decisions, such as temporal and spatial treatments, for
+example, the choice of lagged exposure for certain variables or whether
+the model is estimated collectively or separated for individual
+locations. These decisions don't have a specific method or parameter,
+but should still be recorded with the variable, type (spatial or
+temporal), reason, and decision fields.
 
-To record these decisions, we follow the tidy data principle
-\citep{wickham2014}, where each variable should be in a column, each
-observation in a row. In our context, each row represents a decision
-made by the authors of a paper and an analysis often include multiple
-decisions. To retain the original context of the decision, we extract
-the original text in the paper, without paraphrase or summarization,
-from the paper. Below we present an example of how to structure the
-decisions made in a paper, using the paper by \citet{ostro2006}:
+Given the writing style and the quality of the analysis itself, multiple
+decisions may be combined in one sentence and certain fields,
+e.g.~decision and reason, may be omitted. Consider the following excerpt
+from \citet{ostro2006}:
+
+\begin{quote}
+Other covariates, such as day of the week and smoothing splines of 1-day
+lags of average temperature and humidity (each with 3 df), were also
+included in the model because they may be associated with daily
+mortality and are likely to vary over time in concert with air pollution
+levels.
+\end{quote}
+
+This sentence contains four decisions: two for temperature (the temporal
+lag and the smoothing spline parameter) and two for humidity and should
+be structured as separate entries:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1167}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1167}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0833}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Paper
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 ID
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Model
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 variable
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -558,59 +565,22 @@ decision
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-ostro & 1 & Poisson regression & temperature & smoothing spline & degree
-of freedom & parameter & NA & 3 degree of freedom \\
-ostro & 2 & Poisson regression & temperature & smoothing spline & degree
-of freedom & temporal & NA & 1-day lag \\
-ostro & 3 & Poisson regression & relative humidity & LOESS & smoothing
-parameter & parameter & to minimize Akaike's Information Criterion &
-NA \\
-ostro & 4 & Poisson regression & model & NA & NA & spatial & to account
-for variation among cities & separate regression models fit in each
-city \\
+ostro & 1 & temperature & smoothing spline & degree of freedom &
+parameter & 3 degree of freedom & NA \\
+ostro & 2 & relative humidity & smoothing spline & degree of freedom &
+parameter & 3 degree of freedom & NA \\
+ostro & 3 & temperature & NA & NA & temporal & 1-day lags & NA \\
+ostro & 4 & relative humidity & NA & NA & temporal & 1-day lags & NA \\
 \end{longtable}
 
-Most decisions in the published papers are not explicitly stated, this
-could due to the coherence and conciseness of the writing or authors'
-decision to include only necessary details. Here, we identify a few
-common anomalies where decisions may be combined or omit certain fields:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \textbf{Authors may combine multiple decisions into a single sentence}
-  for coherence and conciseness of the writing. Consider the following
-  excerpt from \citet{ostro2006}:
-\end{enumerate}
-
-\begin{quote}
-Other covariates, such as day of the week and smoothing splines of 1-day
-lags of average temperature and humidity (each with 3 df), were also
-included in the model because they may be associated with daily
-mortality and are likely to vary over time in concert with air pollution
-levels.
-\end{quote}
-
-This sentence contains four decisions: two for temperature (the temporal
-lag and the smoothing spline parameter) and two for humidity. These
-decisions should be structured as separate entries.
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{1}
-\item
-  \textbf{The justification does not directly address the decision
-  choice.} In the example above, the stated rationale (``and are likely
-  to vary over time in concert with air pollution levels'') supports the
-  general inclusion of temporal lags but does not justify the specific
-  choice of 1-day lag over alternatives, such as 2-day average of lags 0
-  and 1 (lag01) and single-day lag of 2 days (lag2). As such, the reason
-  field should be recorded as NA.
-\item
-  \textbf{Some decisions may be omitted because they are data-driven}.
-  For instance, \citet{katsouyanni2001} states:
-\end{enumerate}
+Notice in the example above, the reason field are recorded as NA. This
+is because the stated rationale (``and are likely to vary over time in
+concert with air pollution levels'') only supports the general inclusion
+of temporal lags but does not justify the specific choice of 1-day lag
+over other alternatives, for example, 2-day average of lags 0 and 1 and
+single-day lag of 2 days. Similar scenario can happen when a direct
+decision is missing while a reason is provided (``done by minimizing
+Akaike's information criterion''), as in \citet{katsouyanni2001}:
 
 \begin{quote}
 The inclusion of lagged weather variables and the choice of smoothing
@@ -618,27 +588,8 @@ parameters for all of the weather variables were done by minimizing
 Akaike's information criterion.
 \end{quote}
 
-In this case, while the method of selection (minimizing AIC) is
-specified, the actual degree of freedom used is not. Such data-driven
-decisions may be recorded with ``NA'' in the decision field, but the
-reason field should still be recorded as ``by minimizing Akaike's
-information criterion''
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{3}
-\tightlist
-\item
-  \textbf{Information required to interpret the decision may be
-  distributed across multiple sections}. In the previous example,
-  ``weather variables'' refers to mean temperature and relative
-  humidity, as defined earlier in the text. This requires
-  cross-referencing across sections to identify the correct variables
-  associated with each modeling choice.
-\end{enumerate}
-
-\subsection{Automatic reading of literature with
-LLMs}\label{automatic-reading-of-literature-with-llms}
+\subsection{Extract decisions automatically from literature with
+LLMs}\label{extract-decisions-automatically-from-literature-with-llms}
 
 \textbf{TODO}: Prompt engineering: these models may paraphrase or
 hallucinate unless explicitly told not to since it is generative in
@@ -666,7 +617,7 @@ LLM is provided in the Appendix. The \texttt{ellmer} package
 providing the PDF attachment and the prompt in a markdown file as
 inputs.
 
-\subsection{Review the LLM output}\label{review-the-llm-output}
+\subsection{Review the LLM outputs}\label{review-the-llm-outputs}
 
 \begin{itemize}
 \tightlist
@@ -717,7 +668,8 @@ the Download CSV button.}
 
 \end{figure}%
 
-\subsection{Calculating paper similarity}\label{sec-paper-similarity}
+\subsection{Calculate paper similarity and
+visualization}\label{sec-paper-similarity}
 
 Once the decisions have been extracted and validated, this opens up a
 structured data for analyzing these information. For example, we can
@@ -1297,14 +1249,14 @@ there to extract reasons for the decisions encoded in the script.
 In this paper, {[}we study how decisions are made in practical data
 analysis{]}. We developed a pipeline for automatically extracting
 decisions using LLMs (Claude and Gemini) and introduced a method for
-calculating paper similarity through decision similarity. This enables
-us to cluster papers by their decision choices and visualization through
-hierarchical clustering and multidimensional scaling. We applied this
-pipeline to mortality/ hospital admission -- PM modelling literature. We
-extracted key modelling decisions, such as the choice of smoothing
-methods and parameters for time, temperature, and humidity, and revealed
-paper clusters that correspond to different modelling strategies, as
-documented in the APHENA project.
+calculating paper similarity through decision similarity. This
+similarity metric enables us to cluster papers by their decision choices
+and visualization through hierarchical clustering and multidimensional
+scaling. We applied this pipeline to mortality/ hospital admission -- PM
+modelling literature and extracted key modelling decisions, such as the
+choice of smoothing methods and parameters for time, temperature, and
+humidity, and revealed paper clusters that correspond to different
+modelling strategies, as documented in the APHENA project.
 
 While sensitivity analyses are commonly used to assess the robustness of
 findings to different analytical choices, the set of choices tested is
