@@ -92,19 +92,13 @@ claude_df <- read_csv(here::here("data/claude_df.csv")) |> as_decision_tbl()
 
 <!-- This approach treats decisions in data analysis as data to analyse, allowing us to track them over time, compare methodology across papers, and query commonly used approaches. -->
 
-<!-- While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question. -->
-
-<!-- This class of studies has significant impact to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants in the U.S.  -->
-
-<!-- Decisions occur throughout the entire data analysis process -- from the selection of variables and data source, to pre-processing steps to prepare the data for modelling, to the model specification and variable inclusion. In this work, we focus specifically on modelling decisions in the air pollution mortality modelling literature. These include the choice of modelling approach, covariate inclusion and smoothing, and specifications of spatial and temporal structure.  -->
-
 # Introduction
 
-Decisions are made at every stage of data analysis: from initial data collection and pre-processing to modelling choices. Different decision choices can have a direct impact to the final results, which can lead to different interpretation and policy recommendations that follow. When independent analysts analyzing the same dataset even to answer the same research questions, through many-analysts experiments, they often arrive at markedly different conclusions [@silberzahn2018; @botvinik-nezer2020; @gould2025]. This variability in results can be attributed to the flexibility analysts have in making decisions throughout the data analysis process, which @gelman2014 describe as the "garden of forking paths". When such flexibility is misused, data analysis can lead to p-hacking, selective reporting, inflated effect sizes, and other issues, undermining the quality and credibility of the findings. 
+Decisions are made at every stage of data analysis: from initial data collection and pre-processing to modelling choices. Different decision choices can have a direct impact to the final results, which can lead to different interpretation and policy recommendations that follow. When independent analysts analyzing the same dataset even to answer the same research questions, through many-analysts experiments, they often arrive at markedly different conclusions [@silberzahn2018; @botvinik-nezer2020; @gould2025]. This variability in results can be attributed to the flexibility analysts have in making decisions throughout the data analysis process, which @gelman2014 describe as the "garden of forking paths". When such flexibility is misused, data analysis can lead to p-hacking, selective reporting, inflated effect sizes, and other issues, undermining the quality and credibility of the findings.
 
 Multiple recommendations have been proposed to improve data analysis practices, such as pre-registration and multiverse analysis. Bayesian methods also offer a different paradigm to p-value driven inference for interpreting statistical evidence. Most empirical studies of data analysis practices focus on specially designed and simplified analysis scenarios. While informative, these setups may not adequately capture the complexity of the data analysis with significant policy implications. \[In practice, studying the data analysis decisions with actual applications is challenging.\] Analysts may no longer be available for interviews due to job changes, and even when they are, recalling the full set of decisions and thinking process made during the analysis is often infeasible. Moreover, only until the last decades, analysis scripts and reproducible materials were not commonly required by journals for publishing. \[As a result, it remains challenging to study how analytical decisions are made. \]
 
-In this work, we develop a tabular format to record analytical decisions in data analysis and automate the extraction of these decisions from published papers using large language models (Gemini and Claude). The workflow also include a component to calculate paper similarity based on both the decisions and the semantic similarity of their rationales, and use clustering methods to visualize papers according to distance based on decision similarity. We apply this workflow to a set of 62 air pollution modelling studies estimating the effect size of particulate matter (PM2.5 or PM10) on mortality and hospital admissions, typically modeled using Poisson generalised linear models (GLMs) or generalized additive models (GAMs). Analysis of the extracted decisions reveals common choices in this type of analysis (number of knots or degree of freedom for smoothing methods for time, temperature and humidity) and find three distinct clusters corresponding to different smoothing methods (LOESS, natural spline, and smoothing spline) used in European and U.S. studies, consistent with findings from the APHENA project.
+In this work, we develop a tabular format to record analytical decisions in data analysis and automate the extraction of these decisions from published papers using large language models (Gemini and Claude). The workflow also include a component to calculate paper similarity based on both the decisions and the semantic similarity of their rationales, and use clustering methods to visualize papers according to distance based on decision similarity. We apply this workflow to a set of `r length(unique(gemini_df$paper))` air pollution modelling studies estimating the effect size of particulate matter (PM2.5 or PM10) on mortality and hospital admissions, typically modeled using Poisson generalised linear models (GLMs) or generalized additive models (GAMs). Analysis of the extracted decisions reveals common choices in this type of analysis (number of knots or degree of freedom for smoothing methods for time, temperature and humidity) and find three distinct clusters corresponding to different smoothing methods (LOESS, natural spline, and smoothing spline) used in European and U.S. studies, consistent with findings from the APHENA project.
 
 In summary, the contribution of this work includes:
 
@@ -148,7 +142,7 @@ This sentence encode the following components of a decision:
 -   **reason**: Based on previous findings reported in the literature (e.g., Samet et al. 2000); This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
 -   **decision**: 7 degrees of freedom (df) per year of data
 
-To record these decisions in a tabular format, we follow the tidy data principle [@wickham2014], which states each variable should be in a column and each observation in a row. For our purpose, each row represents a decision made by the authors in a paper and an analysis often include multiple decisions. To retain the original context of the decision, we extract the original text in the paper, without paraphrase or summarization. The decision choice above is a parameter choice of a statistical method applied to the variable. Analyses also include other types of decisions, such as temporal and spatial treatments, for example, the choice of lagged exposure for certain variables or whether the model is estimated collectively or separated for individual locations. These decisions don't have a specific method or parameter, but should still be recorded with the variable, type (spatial or temporal), reason, and decision fields. 
+To record these decisions in a tabular format, we follow the tidy data principle [@wickham2014], which states each variable should be in a column and each observation in a row. For our purpose, each row represents a decision made by the authors in a paper and an analysis often include multiple decisions. To retain the original context of the decision, we extract the original text in the paper, without paraphrase or summarization. The decision choice above is a parameter choice of a statistical method applied to the variable. Analyses also include other types of decisions, such as temporal and spatial treatments, for example, the choice of lagged exposure for certain variables or whether the model is estimated collectively or separated for individual locations. These decisions don't have a specific method or parameter, but should still be recorded with the variable, type (spatial or temporal), reason, and decision fields.
 
 Given the writing style and the quality of the analysis itself, multiple decisions may be combined in one sentence and certain fields, e.g. decision and reason, may be omitted. Consider the following excerpt from @ostro2006:
 
@@ -157,11 +151,11 @@ Given the writing style and the quality of the analysis itself, multiple decisio
 This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity and should be structured as separate entries:
 
 | Paper | ID | variable | method | parameter | type | reason | decision |
-|---|--|------------|---------|-------|-------|---------------|-----|
-| ostro | 1 | temperature | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA|
-| ostro | 2 | relative humidity | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA|
-| ostro | 3 | temperature | NA | NA | temporal | 1-day lags| NA|
-| ostro | 4 | relative humidity | NA | NA | temporal | 1-day lags | NA|
+|---|--|---------|---------|---------|---------|---------|---------|
+| ostro | 1 | temperature | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA |
+| ostro | 2 | relative humidity | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA |
+| ostro | 3 | temperature | NA | NA | temporal | 1-day lags | NA |
+| ostro | 4 | relative humidity | NA | NA | temporal | 1-day lags | NA |
 
 Notice in the example above, the reason field are recorded as NA. This is because the stated rationale ("and are likely to vary over time in concert with air pollution levels") only supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over other alternatives, for example, 2-day average of lags 0 and 1 and single-day lag of 2 days. Similar scenario can happen when a direct decision is missing while a reason is provided ("done by minimizing Akaike’s information criterion"), as in @katsouyanni2001:
 
@@ -169,51 +163,44 @@ Notice in the example above, the reason field are recorded as NA. This is becaus
 
 ## Extract decisions automatically from literature with LLMs
 
-**TODO**: Prompt engineering: these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction
+Manually extracting decisions from published papers is labor-intensive and time-consuming. With Large Language Models (LLMs), it has become possible to automatically extract structured information from unstructured text by supplying a set of PDF documents and a prompt for instruction. Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. In the prompt, we assign the LLM a role as an applied statistician and instruct it to generate a markdown file containing a JSON block that extract decisions  from the PDF in the format described in @sec-decisions. We also provide a set of instructions and examples on the potential missing of reason and decision fields. Prompt engineering techniques [@chen2025; @xu] are used to optimize the prompt script. The full prompt feed to the LLM is provided in the Appendix. We use the `chat_PROVIDER()` functions from the `ellmer` package [@ellmer] in R to obtain the output with Gemini and Claude API.
 
-**TODO**: The Prompt Report: A Systematic Survey of Prompt Engineering Techniques <https://arxiv.org/pdf/2406.06608>
+## Validate and standardize LLM outputs 
 
-While decisions can be extracted manually from the literature, this process is labor-intensive and time-consuming. Recent advances in Large Language Models (LLMs) have demonstrated potential for automating the extraction of structured information from unstructured text \[ref\]. In this work, we use LLMs to automatically identify decisions made by authors during their data analysis processes.
-
-Text recognition from PDF document relies on Optical Character Recognition (OCR) to convert scanned images into machine-readable text -- capability currently offered by Antropic Claude and Google Gemini. We instruct the LLM to generate a markdown file containing a JSON block that records extracted decisions, which can then be read into statistical software for further analysis. The exact prompt feed to the LLM is provided in the Appendix. The `ellmer` package [@ellmer] in R is used to connect to the Gemini and Claude API, providing the PDF attachment and the prompt in a markdown file as inputs.
-
-## Review the LLM outputs
-
--   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
-
-The shiny app is designed to provide users a visual interface to review and edit the decisions extracted by the LLM from the literature. The app allows three actions from the users: 1) *overwrite* -- modify the content of a particular cell, equivalently `dplyr::mutate(xxx = ifelse(CONDITION, "yyy" , xxx))`, 2) *delete* -- remove a particular cell, `dplyr::filter(!(CONDITION))`, and 3) *add* -- manually enter a decision, `dplyr::bind_rows()`. @fig-shiny illustrates the *overwrite* action in the Shiny application, where users interactively filter the data and preview the rows affected by their edits—in this case, changing the model entry from "generalized additive Poisson time series regression" to the less verbose "Poisson regression". Upon confirmation, the corresponding `tidyverse` code is generated, and users can download the edited table and incorporate the code into their R script.
+The LLM outputs need to be validated and standardized before further analysis. Validation focuses on ensuring the correctness of the extracted decisions by LLMs, while standardization aims to ensure consistency in variable and model names across papers, given authors may express the same concept in different ways.  For example, "mean temperature", "average temperature", and "temperature" all refer to the same variable, which can be all standardized to "temperature" for consistency. To help with the validation and standardization process, we developed a Shiny application that provides an interactive interface for users to review and edit the LLM outputs. A Shiny application takes a CSV of extracted decisions as input and allows three types of edits: 1) *overwrite* -- modify the content of a particular cell, 2) *delete* -- remove a particular irrelevant decision, and 3) *add* -- manually enter a missing decision. @fig-shiny illustrates the *overwrite* action for standardizing the variable NCtot (The number concentration of urban background particles <100 nm in diameter) to "pollution": the user enters a predicate function in the filter condition box on the left panel, and the filtered data will appear interactively in the right panel. The user can then specify the variable to overwrite and the new value and the corresponding cells in the right panel will be updated. This change need to be confirmed by pressing the "Apply changes" button to update the full dataset. The corresponding `tidyverse` [@tidyverse] code will then be generated in the left panel to be included in an R script, and the edited table can be downloaded for future analysis.
 
 ```{r}
 #| echo: false
 #| label: fig-shiny
-#| out.width: 100%
-#| fig-cap: 'The Shiny application interface for editting Large Language Model (LLM)-generated decisions (overwrite, delete, and add). (1) the default interface after loading the input CSV file. (2) The table view will update interactively upon the user-defined filter condition -- expressed using `dplyr::filter()` syntax (e.g., `paper == anderson2008size"`), (3) The user edits the `model` column to "Poisson regression" and applies the change by clicking the Apply changes button. The table view updates to reflect the changes (4) After clicking the Confirm button, the corresponding `tidyverse` code is generated, and the table view returns to its original unfiltered view. The edited data can be downloaded by clicking the Download CSV button.'
+#| out.height: "80%"
+#| out.width: "80%"
+#| fig-cap: 'The Shiny application interface to validate and standardize Large Language Model (LLM)-generated output. (1) the default interface after loading the input CSV file. (2) The table view will update interactively to reflect the edit: for paper with handle "andersen2008size" and id in 4, 5, 6, replace the value in "variable" with "pollutant". (3) After clicking the Confirm button, the corresponding `tidyverse` code is generated, and the table view returns to its original unfiltered view with the edits applied. The edited data can be downloaded by clicking the Download CSV button.'
 knitr::include_graphics("figures/shiny.png")
 ```
 
 ## Calculate paper similarity and visualization {#sec-paper-similarity}
 
-Once the decisions have been extracted and validated, this opens up a structured data for analyzing these information. For example, we can compare whether author's choices at different times changes, or across decisions varies at different regions. In this section, we present a method to calculate paper similarity based on the decisions shared in the paper pairs. The goal is to construct a distance metric based on similarity of the decision choice among papers that could be further used for clustering paper based on choices made by different authors in the literature. An overview of the method is illustrated in @fig-similarity-diag.
-
 ```{r}
+#| eval: FALSE
 #| fig-cap: "Workflow for calculating paper similarity based on decision choices: (1) standardize variable names, (2) identify most frequent variable-type decisions across all papers, (3) identify papers with at least x identified decisions, (4) calculate decisions similarity score on the *decision* and *reason* fields using transformer language models, e.g. BERT, (5) calculate paper similarity score based on aggregating decision similarity scores."
-#| out-width: "100%"
+#| out.width: "60%"
 #| label: fig-similarity-diag
 knitr::include_graphics("figures/similarity-diag.png")
 ```
 
+
+Once the decisions have been extracted and validated.
+
+The goal is to construct a distance metric based on similarity of the decision choice among papers that could be further used for clustering paper based on choices made by different authors in the literature. An overview of the method is illustrated in @fig-similarity-diag.
+
+
+
+
 -   **TODO** some discussion on what it means by for two papers to be similar based on decisions.
 
-The calculation of paper similarity is based on the similarity of decisions shared by each paper pair. A decision comparable in two papers are the ones that share the same variable and type, e.g. temperature and parameter (a decisions on the choosing the statistical method *parameter* for the *temperature* variable), or humidity and temporal (any *temporal* treatment, e.g. choice of lag value for the *humidity* variable). While many decisions share a similar variable, different authors may refer to them with slightly different names, such as "mean temperature" and "average temperature", hence variable names are first standardized to a common set of variable names. For example, "mean temperature" and "average temperature" are both standardized to "temperature". Notice that "dewpoint temperature" is standardized into "humidity" since it is a proxy of temperature to achieve a relative humidity (RH) of 100%. For literature with a common theme, there is usually a set of variables that shared by most papers and additional variables are justified in individual research. For our air pollution mortality modelling literature, we standardize the following variable names:
+The calculation of paper similarity is based on the similarity of decisions shared by each paper pair. A decision comparable in two papers are the ones that share the same variable and type, e.g. parameter decision on the variable temperature or the temporal lag decision on the variable humidity. Depending on the specific pairs, papers have varied number of decisions that can be compared and aggregated. While paper similarities can be computed for all paper pairs, using the similarity of one or two pair of decisions to represent paper similarity is less ideal. Hence, before calculating the text similarity of decisions, we also include two optional steps to identify and subset the most frequent decisions across papers, and to retain only papers that report more than a certain number of frequent decisions. Research questions in different fields may have different levels of homogeneity, depending on the maturity of the field and for air pollution mortality modelling, it is helpful to focus on decisions and papers that share a substantial number of decisions.
 
--   **temperature**: "mean temperature", "average temperature", "temperature", "air temperature", "ambient temperature"
--   **humidity**: "dewpoint temperature" and its hyphenated variants, relative humidity", "humidity"
--   **PM**: "pollutant", "pollution", "particulate matter", "particulate", "PM10", "PM2.5"
--   **time**: "date", "time", "trends", "trend"
-
-Depending on the specific pairs, papers have varied number of decisions that can be compared and aggregated. While paper similarities can be computed for all paper pairs, using the similarity of one or two pair of decisions to represent paper similarity is less ideal. Hence, before calculating the text similarity of decisions, we also include two optional steps to identify and subset the most frequent decisions across papers, and to retain only papers that report more than a certain number of frequent decisions. Research questions in different fields may have different levels of homogeneity, depending on the maturity of the field and for air pollution mortality modelling, it is helpful to focus on decisions and papers that share a substantial number of decisions.
-
-To assign numerical value for the similarity of reason, we use a transformer language model, such as BERT, to measure the semantic text similarity between the decision itself and its justification. The decision similarity is calculated by comparing the *decision* and *reason* fields of the decisions in each paper pair. To obtain paper similarity, we average the decision similarities across all decisions in each paper pair and other method can be customized for aggregation. The resulting paper similarity score can be used as a distance matrix to cluster papers based on their decision choices to understand the common practices in the investigated literature.
+To assign numerical value for the similarity of reason, we use a transformer language model, such as BERT, to measure the semantic text similarity between the decision itself and its justification. The decision similarity is calculated by comparing the decision and reason fields of the decisions in each paper pair. To obtain the paper similarity metric for each paper pair, we average the decision similarities across all the matched decisions. The resulting paper similarity metric can be seen as a distance measure to cluster papers based on their decision choices and visualize accordingly.
 
 # Results {#sec-result}
 
@@ -231,7 +218,20 @@ lab <- matrix(
 )
 ```
 
-From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. \[details\]
+This class of studies has significant impact to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants in the U.S. While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question.
+
+While decisions occur throughout the entire data analysis process -- from the selection of variables and data source, to pre-processing steps to prepare the data for modelling, to the model specification and variable inclusion. From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. \[details\]
+
+-   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
+
+While many decisions share a similar variable, different authors may refer to them with slightly different names (e.g. "mean temperature" vs. "average temperature"). For our air pollution mortality modelling literature, we standardize the following variable names:
+
+-   **temperature**: "mean temperature", "average temperature", "temperature", "air temperature", "ambient temperature"
+-   **humidity**: "dewpoint temperature" and its hyphenated variants, relative humidity", "humidity"
+-   **PM**: "pollutant", "pollution", "particulate matter", "particulate", "PM10", "PM2.5"
+-   **time**: "date", "time", "trends", "trend"
+
+Notice that "dewpoint temperature" is standardized into "humidity" since it is a proxy of temperature to achieve a relative humidity (RH) of 100%. 
 
 @tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity.
 
@@ -431,6 +431,8 @@ For computing the decision similarity score, we include the first 6 most common 
 
 # Discussion {#sec-discussion}
 
+Prompt engineering: these models may paraphrase or hallucinate unless explicitly told not to since it is generative in nature based on the predicted probability of the next word from the text and the instruction.
+
 In this section, we examine the reproducibility for using LLMs for text extraction tasks in @sec-llm-reproducibility, discrepancies between different LLM models: Gemini (`gemini-2.0-flash`) and Claude (`claude-3-7-sonnet-latest`) in @sec-llm-models, and the sensitivity of our paper similarity calculation pipeline to the choice of text model used for computing decision similarity scores in @sec-text-model.
 
 ## LLM reproducibility {#sec-llm-reproducibility}
@@ -498,7 +500,7 @@ tbl <- llm_temp_df |>
   mutate(prop = n / sum(n) * 100) 
 ```
 
-For our text extraction task, we test the reproducibility of Gemini (`gemini-2.0-flash`) by repeating the text extraction task 5 times for each of the 62 papers. For each of the 31 papers, five runs yield $5 \times 4 /2 = 10$ pairwise comparisons per field and including both the “reason” and “decision” fields results in a total of $31 \times 10 \times 2 = 620$ pairs. We exclude the pairs that have different number of decisions since it would require manually align the decision to compare and this left us with `r nrow(llm_temp_df |> filter(!is.na(n_diff)))` out of `r nrow(llm_temp_df)` (`r scales::label_percent()(nrow(llm_temp_df |> filter(!is.na(n_diff)))/nrow(llm_temp_df))`) pairwise comparisons. @tbl-gemini-1 shows an example of such comparison in @andersen2008, where all the four reasons are identical among the two runs, hence a zero number of difference.
+For our text extraction task, we test the reproducibility of Gemini (`gemini-2.0-flash`) by repeating the text extraction task 5 times for each of the `r length(unique(gemini_df$paper))` papers. For each of the 31 papers, five runs yield $5 \times 4 /2 = 10$ pairwise comparisons per field and including both the “reason” and “decision” fields results in a total of $31 \times 10 \times 2 = 620$ pairs. We exclude the pairs that have different number of decisions since it would require manually align the decision to compare and this left us with `r nrow(llm_temp_df |> filter(!is.na(n_diff)))` out of `r nrow(llm_temp_df)` (`r scales::label_percent()(nrow(llm_temp_df |> filter(!is.na(n_diff)))/nrow(llm_temp_df))`) pairwise comparisons. @tbl-gemini-1 shows an example of such comparison in @andersen2008, where all the four reasons are identical among the two runs, hence a zero number of difference.
 
 ```{r}
 #| label: tbl-gemini-1
@@ -535,7 +537,7 @@ tibble(n_diff = 0:11) |>
 
 Reading text from PDF document requires Optical Character Recognition (OCR) to convert images into machine-readable text, which currently is only supported by Antropic Claude (`claude-3-7-sonnet-latest`) and Google Gemini (`gemini-2.0-flash`).
 
-We compare the number of decisions extracted by Claude and Gemini across all 62 papers in @fig-claude-gemini. Each point represents a paper, with the x- and y-axes showing the number of decisions extracted by Claude and Gemini, respectively. The dashed 1:1 line marks where both models extract the same number of decisions. Most points fall below this line, indicating that Claude extracts more decisions -- often from data pre-processing or secondary data analysis steps requiring more manual validation -- whereas Gemini focuses more on modelling choices relevant to our analysis. Some of these decisions captured by Claude are
+We compare the number of decisions extracted by Claude and Gemini across all `r length(unique(gemini_df$paper))`  papers in @fig-claude-gemini. Each point represents a paper, with the x- and y-axes showing the number of decisions extracted by Claude and Gemini, respectively. The dashed 1:1 line marks where both models extract the same number of decisions. Most points fall below this line, indicating that Claude extracts more decisions -- often from data pre-processing or secondary data analysis steps requiring more manual validation -- whereas Gemini focuses more on modelling choices relevant to our analysis. Some of these decisions captured by Claude are
 
 -   the definition of "cold day" and "hot day" indicators in @dockery1992 ("defined at the 5th/ 95th percentile"),
 -   the choice to summarize $\text{NO}_2$, $\text{O}_3$, and $\text{SO}_2$ using a "24 hr average on variable" in @huang2009, and
@@ -613,8 +615,6 @@ t2 - t1
 #save(text_sensitivity_decision_df, file = here::here("data/text_sensitivity_decision_df.rda"))
 ```
 
-
-
 ```{r}
 #| fig.height: 6
 #| fig.width: 10
@@ -680,7 +680,7 @@ mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
 
 ## Others
 
-There are other decisions in an analysis that are worth comparing and documenting. For example data pre-processing decisions, e.g. how pollutant series are defined and collected, treatment on missing values, etc. Again, for a complete review of the field, these decisions ideally would be included, but for our demonstration of idea, we focus on the modelling decisions.  Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
+There are other decisions in an analysis that are worth comparing and documenting. For example data pre-processing decisions, e.g. how pollutant series are defined and collected, treatment on missing values, etc. Again, for a complete review of the field, these decisions ideally would be included, but for our demonstration of idea, we focus on the modelling decisions. Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect.
 
 The variation in the choice of parameters degree of freedom or knot for smoothing can motivate separate investigation on the sensitivity analysis. For instance, parameters that exhibit a wide range of choices across studies may indicate areas of uncertainty or debate within the field, suggesting that further investigation is needed to assess their impact on study outcomes [@peng2006; @touloumi2006].
 
@@ -688,11 +688,11 @@ With LLMs, the extraction of decisions from literature could be largely automate
 
 Currently, only one model per paper - some have comparison of GLM and GAM, compare different pollutants, stratify by ....
 
-With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. The availability of the code could be a supplementary source for understanding the decisions made in the analysis and cross comparison of the manuscript with the code.  However, given the lack of comments in the current practice, we are not there to extract reasons for the decisions encoded in the script. 
+With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. The availability of the code could be a supplementary source for understanding the decisions made in the analysis and cross comparison of the manuscript with the code. However, given the lack of comments in the current practice, we are not there to extract reasons for the decisions encoded in the script.
 
 # Conclusion {#sec-conclusion}
 
-In this paper, [we study how decisions are made in practical data analysis]. We developed a pipeline for automatically extracting decisions using LLMs (Claude and Gemini) and introduced a method for calculating paper similarity through decision similarity. This similarity metric enables us to cluster papers by their decision choices and visualization through hierarchical clustering and multidimensional scaling. We applied this pipeline to mortality/ hospital admission -- PM modelling literature and extracted key modelling decisions, such as the choice of smoothing methods and parameters for time, temperature, and humidity, and revealed paper clusters that correspond to different modelling strategies, as documented in the APHENA project. 
+In this paper, \[we study how decisions are made in practical data analysis\]. We developed a pipeline for automatically extracting decisions using LLMs (Claude and Gemini) and introduced a method for calculating paper similarity through decision similarity. This similarity metric enables us to cluster papers by their decision choices and visualization through hierarchical clustering and multidimensional scaling. We applied this pipeline to mortality/ hospital admission -- PM modelling literature and extracted key modelling decisions, such as the choice of smoothing methods and parameters for time, temperature, and humidity, and revealed paper clusters that correspond to different modelling strategies, as documented in the APHENA project.
 
 While sensitivity analyses are commonly used to assess the robustness of findings to different analytical choices, the set of choices tested is often limited and selected subjectively by the authors. Our approach offers a new perspective by pooling decisions made in analyses across studies in the fields. This allows for a holistic account on the alternatives in the field and identification of both consensus and divergence within the field, providing insights for future research and methodological development.
 

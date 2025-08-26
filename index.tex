@@ -356,7 +356,7 @@ published papers using large language models (Gemini and Claude). The
 workflow also include a component to calculate paper similarity based on
 both the decisions and the semantic similarity of their rationales, and
 use clustering methods to visualize papers according to distance based
-on decision similarity. We apply this workflow to a set of 62 air
+on decision similarity. We apply this workflow to a set of 56 air
 pollution modelling studies estimating the effect size of particulate
 matter (PM2.5 or PM10) on mortality and hospital admissions, typically
 modeled using Poisson generalised linear models (GLMs) or generalized
@@ -535,14 +535,14 @@ lag and the smoothing spline parameter) and two for humidity and should
 be structured as separate entries:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1167}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1167}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0833}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0508}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0339}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Paper
@@ -591,33 +591,144 @@ Akaike's information criterion.
 \subsection{Extract decisions automatically from literature with
 LLMs}\label{extract-decisions-automatically-from-literature-with-llms}
 
-\textbf{TODO}: Prompt engineering: these models may paraphrase or
-hallucinate unless explicitly told not to since it is generative in
-nature based on the predicted probability of the next word from the text
-and the instruction
+Manually extracting decisions from published papers is labor-intensive
+and time-consuming. With Large Language Models (LLMs), it has become
+possible to automatically extract structured information from
+unstructured text by supplying a set of PDF documents and a prompt for
+instruction. Text recognition from PDF document relies on Optical
+Character Recognition (OCR) to convert scanned images into
+machine-readable text -- capability currently offered by Antropic Claude
+and Google Gemini. In the prompt, we assign the LLM a role as an applied
+statistician and instruct it to generate a markdown file containing a
+JSON block that extract decisions from the PDF in the format described
+in Section~\ref{sec-decisions}. We also provide a set of instructions
+and examples on the potential missing of reason and decision fields.
+Prompt engineering techniques \citep{chen2025, xu} are used to optimize
+the prompt script. The full prompt feed to the LLM is provided in the
+Appendix. We use the \texttt{chat\_PROVIDER()} functions from the
+\texttt{ellmer} package \citep{ellmer} in R to obtain the output with
+Gemini and Claude API.
 
-\textbf{TODO}: The Prompt Report: A Systematic Survey of Prompt
-Engineering Techniques \url{https://arxiv.org/pdf/2406.06608}
+\subsection{Validate and standardize LLM
+outputs}\label{validate-and-standardize-llm-outputs}
 
-While decisions can be extracted manually from the literature, this
-process is labor-intensive and time-consuming. Recent advances in Large
-Language Models (LLMs) have demonstrated potential for automating the
-extraction of structured information from unstructured text {[}ref{]}.
-In this work, we use LLMs to automatically identify decisions made by
-authors during their data analysis processes.
+The LLM outputs need to be validated and standardized before further
+analysis. Validation focuses on ensuring the correctness of the
+extracted decisions by LLMs, while standardization aims to ensure
+consistency in variable and model names across papers, given authors may
+express the same concept in different ways. For example, ``mean
+temperature'', ``average temperature'', and ``temperature'' all refer to
+the same variable, which can be all standardized to ``temperature'' for
+consistency. To help with the validation and standardization process, we
+developed a Shiny application that provides an interactive interface for
+users to review and edit the LLM outputs. A Shiny application takes a
+CSV of extracted decisions as input and allows three types of edits: 1)
+\emph{overwrite} -- modify the content of a particular cell, 2)
+\emph{delete} -- remove a particular irrelevant decision, and 3)
+\emph{add} -- manually enter a missing decision. Figure~\ref{fig-shiny}
+illustrates the \emph{overwrite} action for standardizing the variable
+NCtot (The number concentration of urban background particles
+\textless100 nm in diameter) to ``pollution'': the user enters a
+predicate function in the filter condition box on the left panel, and
+the filtered data will appear interactively in the right panel. The user
+can then specify the variable to overwrite and the new value and the
+corresponding cells in the right panel will be updated. This change need
+to be confirmed by pressing the ``Apply changes'' button to update the
+full dataset. The corresponding \texttt{tidyverse} \citep{tidyverse}
+code will then be generated in the left panel to be included in an R
+script, and the edited table can be downloaded for future analysis.
 
-Text recognition from PDF document relies on Optical Character
-Recognition (OCR) to convert scanned images into machine-readable text
--- capability currently offered by Antropic Claude and Google Gemini. We
-instruct the LLM to generate a markdown file containing a JSON block
-that records extracted decisions, which can then be read into
-statistical software for further analysis. The exact prompt feed to the
-LLM is provided in the Appendix. The \texttt{ellmer} package
-\citep{ellmer} in R is used to connect to the Gemini and Claude API,
-providing the PDF attachment and the prompt in a markdown file as
-inputs.
+\begin{figure}
 
-\subsection{Review the LLM outputs}\label{review-the-llm-outputs}
+\centering{
+
+\includegraphics[width=0.8\linewidth,height=0.8\textheight]{figures/shiny.png}
+
+}
+
+\caption{\label{fig-shiny}The Shiny application interface to validate
+and standardize Large Language Model (LLM)-generated output. (1) the
+default interface after loading the input CSV file. (2) The table view
+will update interactively to reflect the edit: for paper with handle
+``andersen2008size'' and id in 4, 5, 6, replace the value in
+``variable'' with ``pollutant''. (3) After clicking the Confirm button,
+the corresponding \texttt{tidyverse} code is generated, and the table
+view returns to its original unfiltered view with the edits applied. The
+edited data can be downloaded by clicking the Download CSV button.}
+
+\end{figure}%
+
+\subsection{Calculate paper similarity and
+visualization}\label{sec-paper-similarity}
+
+Once the decisions have been extracted and validated.
+
+The goal is to construct a distance metric based on similarity of the
+decision choice among papers that could be further used for clustering
+paper based on choices made by different authors in the literature. An
+overview of the method is illustrated in \textbf{?@fig-similarity-diag}.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{TODO} some discussion on what it means by for two papers to be
+  similar based on decisions.
+\end{itemize}
+
+The calculation of paper similarity is based on the similarity of
+decisions shared by each paper pair. A decision comparable in two papers
+are the ones that share the same variable and type, e.g.~parameter
+decision on the variable temperature or the temporal lag decision on the
+variable humidity. Depending on the specific pairs, papers have varied
+number of decisions that can be compared and aggregated. While paper
+similarities can be computed for all paper pairs, using the similarity
+of one or two pair of decisions to represent paper similarity is less
+ideal. Hence, before calculating the text similarity of decisions, we
+also include two optional steps to identify and subset the most frequent
+decisions across papers, and to retain only papers that report more than
+a certain number of frequent decisions. Research questions in different
+fields may have different levels of homogeneity, depending on the
+maturity of the field and for air pollution mortality modelling, it is
+helpful to focus on decisions and papers that share a substantial number
+of decisions.
+
+To assign numerical value for the similarity of reason, we use a
+transformer language model, such as BERT, to measure the semantic text
+similarity between the decision itself and its justification. The
+decision similarity is calculated by comparing the decision and reason
+fields of the decisions in each paper pair. To obtain the paper
+similarity metric for each paper pair, we average the decision
+similarities across all the matched decisions. The resulting paper
+similarity metric can be seen as a distance measure to cluster papers
+based on their decision choices and visualize accordingly.
+
+\section{Results}\label{sec-result}
+
+This class of studies has significant impact to provide scientific
+evidence for to guide public policy on setting the National Ambient Air
+Quality Standards (NAAQS) for air pollutants in the U.S. While
+individual modelling choices vary, these studies often share a common
+structure: they adjust for meteorological covariates such as temperature
+and humidity, apply temporal or spatial treatments, like including
+lagged variables and may estimate the effect by city or region before
+combining results. Because these studies investigate similar scientific
+questions using a shared modelling framework, they form a natural
+many-analyst setting. This allows us to examine, in a real-world
+context, the range of analytical decisions made by different researchers
+addressing the same underlying question.
+
+While decisions occur throughout the entire data analysis process --
+from the selection of variables and data source, to pre-processing steps
+to prepare the data for modelling, to the model specification and
+variable inclusion. From the 56 studies examining the effect of
+particulate matters (\(\text{PM}_{10}\) and \(\text{PM}_{2.5}\)) on
+mortality, we focus on the baseline model reported in each paper,
+excluding secondary models (e.g.~lag-distributed models) and sensitivity
+analysis. We also exclude decisions on other pollutants, such as
+nitrogen dioxide (\(\text{NO}_2\)). This yields 242 decisions extracted
+using Gemini, averaging approximately 4 decisions per paper.
+Table~\ref{tbl-review} summarizes the number of edits made during the
+review process using the Shiny app. {[}details{]}
 
 \begin{itemize}
 \tightlist
@@ -629,102 +740,10 @@ inputs.
   and review has been done.
 \end{itemize}
 
-The shiny app is designed to provide users a visual interface to review
-and edit the decisions extracted by the LLM from the literature. The app
-allows three actions from the users: 1) \emph{overwrite} -- modify the
-content of a particular cell, equivalently
-\texttt{dplyr::mutate(xxx\ =\ ifelse(CONDITION,\ "yyy"\ ,\ xxx))}, 2)
-\emph{delete} -- remove a particular cell,
-\texttt{dplyr::filter(!(CONDITION))}, and 3) \emph{add} -- manually
-enter a decision, \texttt{dplyr::bind\_rows()}. Figure~\ref{fig-shiny}
-illustrates the \emph{overwrite} action in the Shiny application, where
-users interactively filter the data and preview the rows affected by
-their edits---in this case, changing the model entry from ``generalized
-additive Poisson time series regression'' to the less verbose ``Poisson
-regression''. Upon confirmation, the corresponding \texttt{tidyverse}
-code is generated, and users can download the edited table and
-incorporate the code into their R script.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/shiny.png}
-
-}
-
-\caption{\label{fig-shiny}The Shiny application interface for editting
-Large Language Model (LLM)-generated decisions (overwrite, delete, and
-add). (1) the default interface after loading the input CSV file. (2)
-The table view will update interactively upon the user-defined filter
-condition -- expressed using \texttt{dplyr::filter()} syntax (e.g.,
-\texttt{paper\ ==\ anderson2008size"}), (3) The user edits the
-\texttt{model} column to ``Poisson regression'' and applies the change
-by clicking the Apply changes button. The table view updates to reflect
-the changes (4) After clicking the Confirm button, the corresponding
-\texttt{tidyverse} code is generated, and the table view returns to its
-original unfiltered view. The edited data can be downloaded by clicking
-the Download CSV button.}
-
-\end{figure}%
-
-\subsection{Calculate paper similarity and
-visualization}\label{sec-paper-similarity}
-
-Once the decisions have been extracted and validated, this opens up a
-structured data for analyzing these information. For example, we can
-compare whether author's choices at different times changes, or across
-decisions varies at different regions. In this section, we present a
-method to calculate paper similarity based on the decisions shared in
-the paper pairs. The goal is to construct a distance metric based on
-similarity of the decision choice among papers that could be further
-used for clustering paper based on choices made by different authors in
-the literature. An overview of the method is illustrated in
-Figure~\ref{fig-similarity-diag}.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/similarity-diag.png}
-
-}
-
-\caption{\label{fig-similarity-diag}Workflow for calculating paper
-similarity based on decision choices: (1) standardize variable names,
-(2) identify most frequent variable-type decisions across all papers,
-(3) identify papers with at least x identified decisions, (4) calculate
-decisions similarity score on the \emph{decision} and \emph{reason}
-fields using transformer language models, e.g.~BERT, (5) calculate paper
-similarity score based on aggregating decision similarity scores.}
-
-\end{figure}%
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{TODO} some discussion on what it means by for two papers to be
-  similar based on decisions.
-\end{itemize}
-
-The calculation of paper similarity is based on the similarity of
-decisions shared by each paper pair. A decision comparable in two papers
-are the ones that share the same variable and type, e.g.~temperature and
-parameter (a decisions on the choosing the statistical method
-\emph{parameter} for the \emph{temperature} variable), or humidity and
-temporal (any \emph{temporal} treatment, e.g.~choice of lag value for
-the \emph{humidity} variable). While many decisions share a similar
-variable, different authors may refer to them with slightly different
-names, such as ``mean temperature'' and ``average temperature'', hence
-variable names are first standardized to a common set of variable names.
-For example, ``mean temperature'' and ``average temperature'' are both
-standardized to ``temperature''. Notice that ``dewpoint temperature'' is
-standardized into ``humidity'' since it is a proxy of temperature to
-achieve a relative humidity (RH) of 100\%. For literature with a common
-theme, there is usually a set of variables that shared by most papers
-and additional variables are justified in individual research. For our
-air pollution mortality modelling literature, we standardize the
-following variable names:
+While many decisions share a similar variable, different authors may
+refer to them with slightly different names (e.g.~``mean temperature''
+vs.~``average temperature''). For our air pollution mortality modelling
+literature, we standardize the following variable names:
 
 \begin{itemize}
 \tightlist
@@ -741,40 +760,9 @@ following variable names:
   \textbf{time}: ``date'', ``time'', ``trends'', ``trend''
 \end{itemize}
 
-Depending on the specific pairs, papers have varied number of decisions
-that can be compared and aggregated. While paper similarities can be
-computed for all paper pairs, using the similarity of one or two pair of
-decisions to represent paper similarity is less ideal. Hence, before
-calculating the text similarity of decisions, we also include two
-optional steps to identify and subset the most frequent decisions across
-papers, and to retain only papers that report more than a certain number
-of frequent decisions. Research questions in different fields may have
-different levels of homogeneity, depending on the maturity of the field
-and for air pollution mortality modelling, it is helpful to focus on
-decisions and papers that share a substantial number of decisions.
-
-To assign numerical value for the similarity of reason, we use a
-transformer language model, such as BERT, to measure the semantic text
-similarity between the decision itself and its justification. The
-decision similarity is calculated by comparing the \emph{decision} and
-\emph{reason} fields of the decisions in each paper pair. To obtain
-paper similarity, we average the decision similarities across all
-decisions in each paper pair and other method can be customized for
-aggregation. The resulting paper similarity score can be used as a
-distance matrix to cluster papers based on their decision choices to
-understand the common practices in the investigated literature.
-
-\section{Results}\label{sec-result}
-
-From the 56 studies examining the effect of particulate matters
-(\(\text{PM}_{10}\) and \(\text{PM}_{2.5}\)) on mortality, we focus on
-the baseline model reported in each paper, excluding secondary models
-(e.g.~lag-distributed models) and sensitivity analysis. We also exclude
-decisions on other pollutants, such as nitrogen dioxide
-(\(\text{NO}_2\)). This yields 242 decisions extracted using Gemini,
-averaging approximately 4 decisions per paper. Table~\ref{tbl-review}
-summarizes the number of edits made during the review process using the
-Shiny app. {[}details{]}
+Notice that ``dewpoint temperature'' is standardized into ``humidity''
+since it is a proxy of temperature to achieve a relative humidity (RH)
+of 100\%.
 
 Table~\ref{tbl-missing-decisions} summarizes the missingness of the
 decisions and reason. While most papers report their decision choices
@@ -980,6 +968,11 @@ papers, which reflect the modelling strategies differ in the European
 
 \section{Discussion}\label{sec-discussion}
 
+Prompt engineering: these models may paraphrase or hallucinate unless
+explicitly told not to since it is generative in nature based on the
+predicted probability of the next word from the text and the
+instruction.
+
 In this section, we examine the reproducibility for using LLMs for text
 extraction tasks in Section~\ref{sec-llm-reproducibility}, discrepancies
 between different LLM models: Gemini (\texttt{gemini-2.0-flash}) and
@@ -992,7 +985,7 @@ computing decision similarity scores in Section~\ref{sec-text-model}.
 
 For our text extraction task, we test the reproducibility of Gemini
 (\texttt{gemini-2.0-flash}) by repeating the text extraction task 5
-times for each of the 62 papers. For each of the 31 papers, five runs
+times for each of the 56 papers. For each of the 31 papers, five runs
 yield \(5 \times 4 /2 = 10\) pairwise comparisons per field and
 including both the ``reason'' and ``decision'' fields results in a total
 of \(31 \times 10 \times 2 = 620\) pairs. We exclude the pairs that have
@@ -1086,7 +1079,7 @@ only supported by Antropic Claude (\texttt{claude-3-7-sonnet-latest})
 and Google Gemini (\texttt{gemini-2.0-flash}).
 
 We compare the number of decisions extracted by Claude and Gemini across
-all 62 papers in \textbf{?@fig-claude-gemini}. Each point represents a
+all 56 papers in \textbf{?@fig-claude-gemini}. Each point represents a
 paper, with the x- and y-axes showing the number of decisions extracted
 by Claude and Gemini, respectively. The dashed 1:1 line marks where both
 models extract the same number of decisions. Most points fall below this
