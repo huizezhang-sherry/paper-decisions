@@ -261,24 +261,25 @@ analysis via decision similarity}
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-In data analysis, analysts are expected to clearly communicate the
-decisions they make, as these choices inform how results are interpreted
-and compared across studies. Such decisions -- for example, selecting
-the degree of freedom for a smoothing spline -- are often not
-systematically studied, since onece an analysis is published, it is done
-and seldomly revisited or replicated with alternative choices. In this
-work, we focus on a body of data analysis studies on the effect of
-particulate matter on mortality, conducted by researchers worldwide,
-which naturally provide alteranative analyes of the same question. We
-automatically extract analytic decisions from the published literature
-into structured data using Large Language Models (Claude and Gemini). We
-then proposed a pipeline to calculate paper similarity based on the
-semantic similarity of these extracted decisions and their reasons, and
-visualize the results through clustering algorithms. This approach
-offers an efficient way to study decision-making practices than
-traditional interviews. We also provide insights into the use of LLMs
-for text extraction tasks and the communication of analytic choices in
-data analysis practice.    
+Decision choices made during data analysis, along with the reasons
+motivating them, are center to how results are interpreted and to
+comparisons across similar studies. However, such decisions -- such as
+selecting the degree of freedom for a smoothing spline and the
+rationalebehind them -- are rarely studied, since it is impractical to
+interview authors for all the alternatives and their motivations or to
+rerun the analysis under different options. In this work, we propose a
+workflow to automatically extract analytic decisions from the published
+literature and organize them into structured data using Large Language
+Models (Claude and Gemini). The pipeline then calculates paper
+similarity based on the semantic similarity of these extracted decisions
+and their reasons, and visualizes the results using clustering
+algorithms. We apply this workflow to a set of studies on the effect of
+particulate matter on mortality and hospital admission, conducted by
+researchers worldwide, which naturally provide alteranative analyses of
+the same question. Our approach offers an efficient way to study
+decision-making practices and robustness in data analysis compared with
+traditional interviews or author-focused sensitivity or multiverse
+analyses.    
 \end{abstract}
 
 %%
@@ -292,16 +293,16 @@ data analysis practice.
     <concept_desc>Applied computing~Document analysis</concept_desc>
     <concept_significance>300</concept_significance>
     </concept>
-   <concept>
-    <concept_id>10003120.10003121.10003126</concept_id>
-    <concept_desc>Human-centered computing~HCI theory, concepts and models</concept_desc>
+ <concept>
+    <concept_id>10003120.10003121.10011748</concept_id>
+    <concept_desc>Human-centered computing~Empirical studies in HCI</concept_desc>
     <concept_significance>500</concept_significance>
     </concept>
 </ccs2012>
 \end{CCSXML}
 
 \ccsdesc[300]{Applied computing~Document analysis}
-\ccsdesc[500]{Human-centered computing~HCI theory, concepts and models}
+\ccsdesc[500]{Human-centered computing~Empirical studies in HCI}
 
 %%
 %% Keywords. The author(s) should pick words that accurately describe
@@ -316,32 +317,24 @@ data analysis practice.
 
 \setlength{\parskip}{-0.1pt}
 
-\begin{itemize}
-\tightlist
-\item
-  Something about ``analysis review'' - Roger thinks it's a better to
-  have a new word for this.
-\item
-  demonstrate - analytically homogeneous - the table won't look like
-  that
-\end{itemize}
+\newpage
 
 \section{Introduction}\label{introduction}
 
-Decisions are everywhere in data analysis, from the initial data
-collection, data pre-processing to the modelling choices. These
-decisions will impact the final output of the data analysis, which may
-lead to different conclusions and policy recommendations. When such
-flexibility can be misused---through practices such as p-hacking,
-selective reporting, or unjustified analytical adjustments---it can
-inflate effect sizes or produce misleading results that meet
-conventional thresholds for statistical significance. They have been
-demonstrated through many-analysts experiments, where independent teams
-analyzing the same dataset to answer a pre-defined research question
-often arrive at markedly different conclusions. These practices not only
-compromise the validity of individual studies but also threaten the
-broader credibility of statistical analysis and scientific research as a
-whole.
+Decisions are made at every stage of data analysis: from initial data
+collection and pre-processing to modelling choices. Different decision
+choices can have a direct impact to the final results, which can lead to
+different interpretation and policy recommendations that follow. When
+independent analysts analyzing the same dataset even to answer the same
+research questions, through many-analysts experiments, they often arrive
+at markedly different conclusions
+\citep{silberzahn2018, botvinik-nezer2020, gould2025}. This variability
+in results can be attributed to the flexibility analysts have in making
+decisions throughout the data analysis process, which \citet{gelman2014}
+describe as the ``garden of forking paths''. When such flexibility is
+misused, data analysis can lead to p-hacking, selective reporting,
+inflated effect sizes, and other issues, undermining the quality and
+credibility of the findings.
 
 Multiple recommendations have been proposed to improve data analysis
 practices, such as pre-registration and multiverse analysis. Bayesian
@@ -359,30 +352,22 @@ analysis scripts and reproducible materials were not commonly required
 by journals for publishing. {[}As a result, it remains challenging to
 study how analytical decisions are made. {]}
 
-In this work, we focus on a specific class of air pollution modelling
-studies that estimate the effect size of particulate matter (PM2.5 or
-PM10) on mortality, typically using Poisson regression or generalized
-additive models (GAMs). While individual modelling choices vary, these
-studies often share a common structure: they adjust for meteorological
-covariates such as temperature and humidity, apply temporal or spatial
-treatments, like including lagged variables and may estimate the effect
-by city or region before combining results. Because these studies
-investigate similar scientific questions using a shared modelling
-framework, they form a natural many-analyst setting. This allows us to
-examine, in a real-world context, the range of analytical decisions made
-by different researchers addressing the same underlying question.
-
-In this work, we develop a structured tabular format to record the
-analytical decisions made by researchers in the air pollution modelling
-literature. Using large language models (LLMs), we automate the
-extraction of these decisions from published papers. This allows us to
-treat decisions as data -- allowing us to track them over time, compare
-methodology across papers, and query commonly used approaches. We
-further introduce a workflow to cluster studies based on decision
-similarity, revealing three distinct groups of papers that reflect the
-modelling strategies differs in the European and U.S. studies, which
-offers a new way to visualize the field in the air pollution mortality
-modelling.
+In this work, we develop a tabular format to record analytical decisions
+in data analysis and automate the extraction of these decisions from
+published papers using large language models (Gemini and Claude). The
+workflow also include a component to calculate paper similarity based on
+both the decisions and the semantic similarity of their rationales, and
+use clustering methods to visualize papers according to distance based
+on decision similarity. We apply this workflow to a set of 62 air
+pollution modelling studies estimating the effect size of particulate
+matter (PM2.5 or PM10) on mortality and hospital admissions, typically
+modeled using Poisson generalised linear models (GLMs) or generalized
+additive models (GAMs). Analysis of the extracted decisions reveals
+common choices in this type of analysis (number of knots or degree of
+freedom for smoothing methods for time, temperature and humidity) and
+find three distinct clusters corresponding to different smoothing
+methods (LOESS, natural spline, and smoothing spline) used in European
+and U.S. studies, consistent with findings from the APHENA project.
 
 The contribution of this work includes:
 
@@ -393,26 +378,11 @@ The contribution of this work includes:
   LLMs,
 \item
   A dataset compiled from 62 papers to study decision-making in air
-  pollution mortality modelling,
+  pollution mortality modelling, and
 \item
-  A pipeline to construct similarities between papers based on decision
-  similarities, and
-\item
-  Issues we found from existing data analysis reporting
+  A method to construct similarities between papers based on decision
+  similarities.
 \end{itemize}
-
-The rest of the paper is organized as follows. In
-Section~\ref{sec-background}, we review the background on data analysis
-decisions. Section~\ref{sec-extract-decisions} describes the data
-structure for recording decisions, the use of large language models to
-process research papers, and the validation of LLM outputs. In
-Section~\ref{sec-paper-similarity}, we present the method for
-calculating paper similarity based on decision similarities.
-Section~\ref{sec-result} reports the finding of our analysis, including
-the clustering of papers according to similarity scores and sensitivity
-analyses related to LLM providers, prompt engineering, and LLM
-parameters. Finally, Section~\ref{sec-discussion} discusses the
-implications of our study.
 
 \section{Related work}\label{sec-background}
 
@@ -1047,7 +1017,7 @@ used in each paper. The clustering reveals three distinct groups of
 papers, which reflect the modelling strategies differ in the European
 (LOESS) and U.S. (\ldots) studies {[}more on the APHENA{]}.
 
-\section{Sensitivity analysis}\label{sec-sensitivity}
+\section{Discussion}\label{sec-discussion}
 
 In this section, we examine the reproducibility for using LLMs for text
 extraction tasks in Section~\ref{sec-llm-reproducibility}, discrepancies
@@ -1269,7 +1239,7 @@ drawn around each method group.}
 
 \end{figure}%
 
-\section{Discussion}\label{sec-discussion}
+\subsection{Others}\label{others}
 
 There are other decisions in an analysis that are worth comparing and
 documenting. For example data pre-processing decisions, e.g.~how
