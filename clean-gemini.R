@@ -1,3 +1,5 @@
+library(tidyverse)
+library(dossier)
 root <- "data/gemini/"
 md_files <- list.files(here::here("data/gemini"), pattern = "gemini-1.md")
 paper_new <- map_dfr(md_files, function(x){
@@ -12,7 +14,7 @@ gemini_v1_raw <- tibble(id = as.character(1:length(md_files)),
   mutate(id = row_number(), paper = str_remove(paper, "-gemini-1")) |>
   ungroup() |>
   select(paper, id, model:decision, reference)
-save(gemini_v1_raw, file = here::here("data/gemini_v1_raw.rda"))
+#save(gemini_v1_raw, file = here::here("data/gemini_v1_raw.rda"))
 
 ##################################################################
 ##################################################################
@@ -97,8 +99,8 @@ gemini_edited <- gemini_v1_raw |>
     !(paper == "chen2008influence" & id == 1), # general: number of knots + 2
     !(paper == "stolzel2008daily" & id == 8), # irrelevant: for total mortality and cardio-respiratory mortality
     !(paper == "lisabeth2008ambient" & id == 2), # general: small
-    !(paper == "kan20007differentiating" & id == 1), # general: xxx
-    !(paper == "kan20007differentiating" & id == 2), # general: minimum of 1 df per year was required
+    !(paper == "kan2007differentiating" & id == 1), # general: xxx
+    !(paper == "kan2007differentiating" & id == 2), # general: minimum of 1 df per year was required
     !(paper == "jalaludin2009association" & id == 2), # general: up to 12
     !(paper == "ito2006pm" & id == 2), # duplicates
     !(paper == "bell2007effect" & id == 4), # duplicates

@@ -678,12 +678,12 @@ underlying data. To assign numerical value for measuring the similarity,
 we use the semantic similarity from text model (default to BERT). For
 parameter type decisions, the statistical method used also contributes
 to the similarity of the decision. Since semantic similarity cannot
-fully capture the difference between statistical methods (the difference
-between smoothing spline and natural spline is not well represented by
-the textual difference of ``smoothing'' and ``natural''), method
-similarity is encoded as binary: 1 if the two papers used the same
-method, and 0 otherwise. The paper similarity is then computed as the
-average similarity across all the matched methods, decisions, and
+fully capture the difference betweenit statistical methods (the
+difference between smoothing spline and natural spline is not well
+represented by the textual difference of ``smoothing'' and ``natural''),
+method similarity is encoded as binary: 1 if the two papers used the
+same method, and 0 otherwise. The paper similarity is then computed as
+the average similarity across all the matched methods, decisions, and
 reasons. The resulting paper similarity metric can be interpreted as a
 distance measure to cluster and visualize papers based on their decision
 choices.
@@ -701,46 +701,79 @@ when calculating paper similarity.
 
 \section{Results}\label{sec-result}
 
-This class of studies has significant impact to provide scientific
-evidence for to guide public policy on setting the National Ambient Air
-Quality Standards (NAAQS) for air pollutants in the U.S. While
-individual modelling choices vary, these studies often share a common
-structure: they adjust for meteorological covariates such as temperature
-and humidity, apply temporal or spatial treatments, like including
-lagged variables and may estimate the effect by city or region before
-combining results. Because these studies investigate similar scientific
-questions using a shared modelling framework, they form a natural
-many-analyst setting. This allows us to examine, in a real-world
-context, the range of analytical decisions made by different researchers
-addressing the same underlying question.
+In the study of the health effects of outdoor air pollution, one area of
+interest is the association between short-term, day-to-day changes in
+particulate matter air pollution and daily mortality counts. This
+question has been studied extensively by researchers across the globe
+and in the US, it serves to provide scientific evidence for to guide
+public policy on setting the National Ambient Air Quality Standards
+(NAAQS) for air pollutants. While individual modelling choices vary,
+these studies often share a common structure: they adjust for
+meteorological covariates such as temperature and humidity, apply
+temporal or spatial treatments, like including lagged variables and may
+estimate the effect by city or region before combining results. This
+naturally forms a ``many-analyst'' experiment setting where different
+researchers analyze similar data to address the same scientific question
+and the analyses are documented in published papers.
 
-While decisions occur throughout the entire data analysis process --
-from the selection of variables and data source, to pre-processing steps
-to prepare the data for modelling, to the model specification and
-variable inclusion. From the 56 studies examining the effect of
-particulate matters (\(\text{PM}_{10}\) and \(\text{PM}_{2.5}\)) on
-mortality, we focus on the baseline model reported in each paper,
+From the 56 studies examining the effect of particulate matters
+(\(\text{PM}_{10}\) and \(\text{PM}_{2.5}\)) on mortality and hospital
+admission, we focus on the baseline model reported in each paper,
 excluding secondary models (e.g.~lag-distributed models) and sensitivity
 analysis. We also exclude decisions on other pollutants, such as
 nitrogen dioxide (\(\text{NO}_2\)). This yields 242 decisions extracted
 using Gemini, averaging approximately 4 decisions per paper.
+
+\subsection{Validation and standardization of LLM
+outputs}\label{validation-and-standardization-of-llm-outputs}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.9355}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.0645}}@{}}
+
+\caption{\label{tbl-review}Summary of validation and standardization
+edits made during the review process.}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Reason
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Count
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Remove decisions out of scope: other pollutants and sensitivity analysis
+& 50 \\
+Edit made to recode smoothing parametser unit to per year & 45 \\
+Duplicates & 9 \\
+Fix incorrect capture & 9 \\
+Edit made due to decisions are too general, e.g.~minimum of 1 df per
+year was required & 6 \\
+Remove decisions related to definition of variables, e.g.~season & 5 \\
+Total & 124 \\
+
+\end{longtable}
+
 Table~\ref{tbl-review} summarizes the number of edits made during the
-review process using the Shiny app. {[}details{]}
+review process using the Shiny application. These edits fall into two
+main categories: 1) correcting LLM outputs and 2) standardizing
+extracted decision. The first category includes fixing incorrect
+captures, removing non-decision (e.g.~definition of variables), removing
+duplication, excluding irrelevant decisions (e.g.~sensitivity analyses),
+and excluding decisions whose stated reasons reflect general guidelines
+rather than actual choices (e.g.~``minimum of 1 degree of freedom per
+year is required'').
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{TODO} something about result validation of LLM output: We also
-  observe data quality with the extraction: for example in
-  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
-  Authors are unclear about the delivery Specify how much of validation
-  and review has been done.
-\end{itemize}
-
-While many decisions share a similar variable, different authors may
-refer to them with slightly different names (e.g.~``mean temperature''
-vs.~``average temperature''). For our air pollution mortality modelling
-literature, we standardize the following variable names:
+Standardization addresses variation in how authors express variable
+names and decisions. For example, variable names such as ``mean
+temperature'' and ``average temperature'' refer to the same variable and
+should be aligned for comparison for later decision similarity
+calculation. Variable names are manually standardized into four main
+categories:
 
 \begin{itemize}
 \tightlist
@@ -757,9 +790,41 @@ literature, we standardize the following variable names:
   \textbf{time}: ``date'', ``time'', ``trends'', ``trend''
 \end{itemize}
 
-Notice that ``dewpoint temperature'' is standardized into ``humidity''
-since it is a proxy of temperature to achieve a relative humidity (RH)
-of 100\%.
+Notice that ``dewpoint temperature'' is standardized under humidity
+because it serves as a proxy for temperature in achieving a 100\%
+relative humidity.
+
+Decisions themselves also require standardization. For example, the
+smoothing parameter (number of knots and degree of freedom) may be
+expressed \emph{per year} or \emph{in total}, and temporal lag decision
+may be expressed in different formats (e.g.~``6-day average'', ``mean of
+lags 0+1'', ``lagged exposure up to 6 days''). Smoothing parameter units
+are manually recoded to a \emph{per year} basis for consistency,
+asreflected in Table~\ref{tbl-review}. Temporal decision show a wider
+variety, generally falling into two categories:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{multi-day average lags}, such as ``6-day average'', ``3-d
+  moving average'', ``mean of lags 0+1'', ``cumulative lags, mean
+  0+1+2'' and
+\item
+  \textbf{single-day lags}, such as ``lagged exposure up to 6 days'',
+  ``lag days from 0 to 5''.
+\end{itemize}
+
+This variability makes manual standardization impractical, hence we
+apply a secondary LLM process (claude-3-7-sonnet-latest) using the
+\texttt{ellmer} package to convert temporal decisions into a consistent
+format: \texttt{multi-day:\ lag\ {[}start{]}-{[}end{]}} and
+\texttt{single-day:\ lag\ {[}start{]},\ …\ ,lag\ {[}end{]}}. For
+instance, ``6-day average'' is converted to ``multi-day: lag 0-5'' and
+``lagged exposure up to 6 days'' is converted to ``single-day: lag 0,
+lag 1, lag 2, lag 3, lag 4, lag 5''.
+
+\subsection{Exploratory analysis of decision
+choices}\label{exploratory-analysis-of-decision-choices}
 
 Table~\ref{tbl-missing-decisions} summarizes the missingness of the
 decisions and reason. While most papers report their decision choices
@@ -768,35 +833,15 @@ rationale for the choice. Table~\ref{tbl-most-common-decisions} lists
 teh eight most frequently reported decision: parameter and temporal
 choice for time, PM, temperature, and humidity.
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.9368}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.0632}}@{}}
-
-\caption{\label{tbl-review}tsdjflkajsldf.}
-
-\tabularnewline
-
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Reason
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Count
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Irrelevant decisions, e.g.~other pollutants, sensitivity analysis &
-50 \\
-Recode for secondary LLM processing for standardization & 45 \\
-Decision captured not correct & 11 \\
-Duplicates & 9 \\
-General statements without specific decision, e.g.~minimum of 1 df per
-year was required & 6 \\
-Definition of variables, e.g.~season & 5 \\
-Total & 126 \\
-
-\end{longtable}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{TODO} something about result validation of LLM output: We also
+  observe data quality with the extraction: for example in
+  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
+  Authors are unclear about the delivery Specify how much of validation
+  and review has been done.
+\end{itemize}
 
 \begin{table}
 
@@ -865,16 +910,6 @@ most papers choice to report the smoothing parameter as a constant
 value, \citet{schwartz2000} specifies it as a proportion of the data
 (``5\% of the data'' and ``5\% of the data'').
 
-For temporal decisions, after an initial review, we observed that
-decisions are still highly varied. The decisions can be divided into two
-groups: multi-day lags include expressions such as ``6-day average'',
-``3-d moving average'', ``mean of lags 0+1'', and ``cumulative lags,
-mean 0+1+2'', and single-day lags include ``lagged exposure up to 6
-days'', ``lag days from 0 to 5'' among others. To standardize these
-entries, we applied a secondary LLM process (claude-3-7-sonnet-latest)
-and converted them into a consistent format:
-\texttt{multi-day:\ lag\ {[}start{]}-{[}end{]}} and
-\texttt{single-day:\ lag\ {[}start{]},\ …\ lag\ {[}end{]}}.
 Table~\ref{tbl-temporal-decisions} summarizes the temporal lag choices
 for PM, temperature, and humidity. Both single and multiple day lags are
 generally considered up to five days prior (lag 5). {[}TODO: check
@@ -952,6 +987,9 @@ modelling strategies differ in the European and U.S. studies, documented
 in ALPHENA.}
 
 \end{figure}%
+
+\subsection{Paper similarity and
+clustering}\label{paper-similarity-and-clustering}
 
 For computing the decision similarity score, we include the first 6 most
 common variable-type decisions as suggested in

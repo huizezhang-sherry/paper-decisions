@@ -202,26 +202,16 @@ lab <- matrix(
 )
 ```
 
-This class of studies has significant impact to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants in the U.S. While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. Because these studies investigate similar scientific questions using a shared modelling framework, they form a natural many-analyst setting. This allows us to examine, in a real-world context, the range of analytical decisions made by different researchers addressing the same underlying question.
+In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. This question has been studied extensively by researchers across the globe and in the US, it serves to provide scientific evidence for to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants. While individual modelling choices vary, these studies often share a common structure: they adjust for meteorological covariates such as temperature and humidity, apply temporal or spatial treatments, like including lagged variables and may estimate the effect by city or region before combining results. This naturally forms a "many-analyst" experiment setting where different researchers analyze similar data to address the same scientific question and the analyses are documented in published papers.
 
-While decisions occur throughout the entire data analysis process -- from the selection of variables and data source, to pre-processing steps to prepare the data for modelling, to the model specification and variable inclusion. From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. @tbl-review summarizes the number of edits made during the review process using the Shiny app. \[details\]
+From the `r length(unique(gemini_df$paper))` studies examining the effect of particulate matters ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality and hospital admission, we focus on the baseline model reported in each paper, excluding secondary models (e.g. lag-distributed models) and sensitivity analysis. We also exclude decisions on other pollutants, such as nitrogen dioxide ($\text{NO}_2$). This yields `r nrow(gemini_df)` decisions extracted using Gemini, averaging approximately `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper. 
 
--   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
+## Validation and standardization of LLM outputs
 
-While many decisions share a similar variable, different authors may refer to them with slightly different names (e.g. "mean temperature" vs. "average temperature"). For our air pollution mortality modelling literature, we standardize the following variable names:
-
--   **temperature**: "mean temperature", "average temperature", "temperature", "air temperature", "ambient temperature"
--   **humidity**: "dewpoint temperature" and its hyphenated variants, relative humidity", "humidity"
--   **PM**: "pollutant", "pollution", "particulate matter", "particulate", "PM10", "PM2.5"
--   **time**: "date", "time", "trends", "trend"
-
-Notice that "dewpoint temperature" is standardized into "humidity" since it is a proxy of temperature to achieve a relative humidity (RH) of 100%. 
-
-@tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity.
 
 ```{r}
 #| label: tbl-review
-#| tbl-cap: "tsdjflkajsldf."
+#| tbl-cap: "Summary of validation and standardization edits made during the review process. "
 aa_raw <- readLines(here::here("clean-gemini.R"))
 aa <- aa_raw[35:228]
 res <- purrr::map_dfr(
@@ -234,12 +224,12 @@ res <- purrr::map_dfr(
   )
 
 reason_df <- tibble(reason2 = c("recode", "irrelevant", "fail to capture", "duplicates", "general", "definition"),
-       reason = c("Recode for secondary LLM processing for standardization",
-                  "Irrelevant decisions, e.g. other pollutants, sensitivity analysis",
-                  "Decision captured not correct",
+       reason = c("Edit made to recode smoothing parametser unit to per year",
+                  "Remove decisions out of scope: other pollutants and sensitivity analysis",
+                  "Fix incorrect capture",
                   "Duplicates",
-                  "General statements without specific decision, e.g. minimum of 1 df per year was required",
-                  "Definition of variables, e.g. season"))
+                  "Edit made due to decisions are too general, e.g. minimum of 1 df per year was required",
+                  "Remove decisions related to definition of variables, e.g. season"))
 
 res |> 
   mutate(reason2 = str_extract(reason, "^[^:]+")) |> 
@@ -250,6 +240,35 @@ res |>
   janitor::adorn_totals("row") |> 
   knitr::kable(col.names = c("Reason", "Count"))
 ```
+
+
+@tbl-review summarizes the number of edits made during the review process using the Shiny application. These edits fall into two main categories: 1) correcting LLM outputs and 2) standardizing extracted decision. The first category includes fixing incorrect captures, removing non-decision (e.g. definition of variables), removing duplication,  excluding irrelevant decisions (e.g. sensitivity analyses), and excluding decisions whose stated reasons reflect general guidelines rather than actual choices (e.g. "minimum of 1 degree of freedom per year is required"). 
+
+Standardization addresses variation in how authors express variable names and decisions. For example, variable names such as  "mean temperature" and "average temperature" refer to the same variable and should be aligned for comparison for later decision similarity calculation. Variable names are manually standardized into four main categories: 
+
+-   **temperature**: "mean temperature", "average temperature", "temperature", "air temperature", "ambient temperature"
+-   **humidity**: "dewpoint temperature" and its hyphenated variants, relative humidity", "humidity"
+-   **PM**: "pollutant", "pollution", "particulate matter", "particulate", "PM10", "PM2.5"
+-   **time**: "date", "time", "trends", "trend"
+
+Notice that "dewpoint temperature" is standardized under humidity because it serves as a proxy for temperature in achieving a 100% relative humidity. 
+
+Decisions themselves also require standardization. For example, the smoothing parameter (number of knots and degree of freedom) may be expressed *per year* or *in total*, and temporal lag decision may be expressed in different formats (e.g. "6-day average", "mean of lags 0+1", "lagged exposure up to 6 days"). Smoothing parameter units are manually recoded to a *per year* basis for consistency, asreflected in @tbl-review. Temporal decision show a wider variety, generally falling into two categories: 
+
+* **multi-day average lags**, such as "6-day average", "3-d moving average", "mean of lags 0+1", "cumulative lags, mean 0+1+2" and 
+* **single-day lags**, such as "lagged exposure up to 6 days", "lag days from 0 to 5".
+
+This variability makes manual standardization impractical, hence we apply a secondary LLM process (claude-3-7-sonnet-latest) using the `ellmer` package to convert temporal decisions into a consistent format: `multi-day: lag [start]-[end]` and `single-day: lag [start], … ,lag [end]`. For instance, "6-day average" is converted to "multi-day: lag 0-5" and "lagged exposure up to 6 days" is converted to "single-day: lag 0, lag 1, lag 2, lag 3, lag 4, lag 5".
+
+
+## Exploratory analysis of decision choices
+
+@tbl-missing-decisions summarizes the missingness of the decisions and reason. While most papers report their decision choices (e.g. use of five degree of freedom), `r pct <- dt |> count(reason, decision) |> mutate(prop = n / sum(n)) |> filter(reason, !decision) |> pull(prop); scales::percent_format()(pct)` of decisions lack a stated rationale for the choice. @tbl-most-common-decisions lists teh eight most frequently reported decision: parameter and temporal choice for time, PM, temperature, and humidity.
+
+
+-   **TODO** something about result validation of LLM output: We also observe data quality with the extraction: for example in @lee2006, the variable recorded is "smoothing parameter". Authors are unclear about the delivery Specify how much of validation and review has been done.
+
+
 
 ```{r}
 #| label: tbl-missing-decisions
@@ -270,7 +289,7 @@ count_variable_type(gemini_df) |> head(8) |>
 
 @tbl-humidity-temperature-decisions reports the parameter-related decisions captured in the literature. They refer to the number of knots or degree of freedom for spline methods (natural and smoothing spline) applied to variable time, humidity and temperature. For consistency, all values have been converted to a *per year* scale. The selection of knot for natural spline has less variation than the degree of freedom choices for smoothing spline. Choices for temperature and humidity tend to be close, given they are both weather related variables, while the choices for time are more varied inherently. This tabulation offers a reference set for potential options for future studies and help to identify anomalies and special treatment in practice. Notable example includes the use of 7.7 degree of freedom in @castillejos2000, and highly flexible choices of 30 and 100 in @moolgavkar2000 and @moolgavkar2003, respectively. While most papers choice to report the smoothing parameter as a constant value, @schwartz2000 specifies it as a proportion of the data ("5% of the data" and "5% of the data").
 
-For temporal decisions, after an initial review, we observed that decisions are still highly varied. The decisions can be divided into two groups: multi-day lags include expressions such as "6-day average", "3-d moving average", "mean of lags 0+1", and "cumulative lags, mean 0+1+2", and single-day lags include "lagged exposure up to 6 days", "lag days from 0 to 5" among others. To standardize these entries, we applied a secondary LLM process (claude-3-7-sonnet-latest) and converted them into a consistent format: `multi-day: lag [start]-[end]` and `single-day: lag [start], … lag [end]`. @tbl-temporal-decisions summarizes the temporal lag choices for PM, temperature, and humidity. Both single and multiple day lags are generally considered up to five days prior (lag 5). \[TODO: check multi-day starts from one\].
+@tbl-temporal-decisions summarizes the temporal lag choices for PM, temperature, and humidity. Both single and multiple day lags are generally considered up to five days prior (lag 5). \[TODO: check multi-day starts from one\].
 
 ```{r}
 #| label: tbl-humidity-temperature-decisions
@@ -410,6 +429,8 @@ p2
 #(p2 | p3) + plot_layout(widths = c(1, 2))
 p3 
 ```
+
+## Paper similarity and clustering
 
 For computing the decision similarity score, we include the first 6 most common variable-type decisions as suggested in @tbl-most-common-decisions. @fig-cluster-paper shows the clustering of the `r length(unique(good_pp))` papers based on the decision similarity scores. The dendrogram is generated using hierarchical clustering, and the labels are colored according to the most common smoothing method used in each paper. The clustering reveals three distinct groups of papers, which reflect the modelling strategies differ in the European (LOESS) and U.S. (...) studies \[more on the APHENA\].
 
