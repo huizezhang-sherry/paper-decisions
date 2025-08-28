@@ -534,14 +534,14 @@ lag and the smoothing spline parameter) and two for humidity and should
 be structured as separate entries:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0508}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0339}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1525}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Paper
@@ -725,7 +725,7 @@ nitrogen dioxide (\(\text{NO}_2\)). This yields 242 decisions extracted
 using Gemini, averaging approximately 4 decisions per paper.
 
 \subsection{Validation and standardization of LLM
-outputs}\label{validation-and-standardization-of-llm-outputs}
+outputs}\label{sec-res-validation}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.9355}}
@@ -826,23 +826,6 @@ lag 1, lag 2, lag 3, lag 4, lag 5''.
 \subsection{Exploratory analysis of decision
 choices}\label{exploratory-analysis-of-decision-choices}
 
-Table~\ref{tbl-missing-decisions} summarizes the missingness of the
-decisions and reason. While most papers report their decision choices
-(e.g.~use of five degree of freedom), 55\% of decisions lack a stated
-rationale for the choice. Table~\ref{tbl-most-common-decisions} lists
-teh eight most frequently reported decision: parameter and temporal
-choice for time, PM, temperature, and humidity.
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{TODO} something about result validation of LLM output: We also
-  observe data quality with the extraction: for example in
-  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
-  Authors are unclear about the delivery Specify how much of validation
-  and review has been done.
-\end{itemize}
-
 \begin{table}
 
 \caption{\label{tbl-missing-decisions}Missingness of decision and reason
@@ -865,6 +848,21 @@ Missing & 134 (55.4\%) & 4 (1.7\%)\\
 }
 
 \end{table}%
+
+As raised in Section~\ref{sec-decisions}, not all decisions reported in
+the literature include both the decision choice and the rationale. Some
+decisions may only report the choice without a stated reason, while
+others may provide a reason without specifying the exact choice made.
+Table~\ref{tbl-missing-decisions} summarizes the missingness of the
+decisions and reason for the extracted decisions. While 2\% of decisions
+are complete for both decision and reasons, 55\% of decisions lack a
+stated rationale for the choice. This reflects a common reporting
+practice in the field, where authors often present the decision itself
+without providing a justification, e.g.~``We decide to use \(x\) degree
+of freedom for variable \(y_1\) and \(y_2\)''. This also includes cases
+where authors provide general guidelines for selecting the parameter,
+but the rationale is too broad to justify the specific choice made
+(hence validated as \texttt{NA} in Section~\ref{sec-res-validation}).
 
 \begin{longtable}[]{@{}llr@{}}
 
@@ -892,33 +890,20 @@ time & temporal & 3 \\
 
 \end{longtable}
 
-Table~\ref{tbl-humidity-temperature-decisions} reports the
-parameter-related decisions captured in the literature. They refer to
-the number of knots or degree of freedom for spline methods (natural and
-smoothing spline) applied to variable time, humidity and temperature.
-For consistency, all values have been converted to a \emph{per year}
-scale. The selection of knot for natural spline has less variation than
-the degree of freedom choices for smoothing spline. Choices for
-temperature and humidity tend to be close, given they are both weather
-related variables, while the choices for time are more varied
-inherently. This tabulation offers a reference set for potential options
-for future studies and help to identify anomalies and special treatment
-in practice. Notable example includes the use of 7.7 degree of freedom
-in \citet{castillejos2000}, and highly flexible choices of 30 and 100 in
-\citet{moolgavkar2000} and \citet{moolgavkar2003}, respectively. While
-most papers choice to report the smoothing parameter as a constant
-value, \citet{schwartz2000} specifies it as a proportion of the data
-(``5\% of the data'' and ``5\% of the data'').
-
-Table~\ref{tbl-temporal-decisions} summarizes the temporal lag choices
-for PM, temperature, and humidity. Both single and multiple day lags are
-generally considered up to five days prior (lag 5). {[}TODO: check
-multi-day starts from one{]}.
+Table~\ref{tbl-most-common-decisions} lists the eight most frequently
+reported decision: parameter and temporal choice for time, PM,
+temperature, and humidity. While a wider list of variables have been
+used in the analysis, these four variables are most commonly included in
+baseline models. Parameter choices for time, temperature, and humidity
+are typically made on the use of smoothing parameter for the smoothing
+method (natural spline and smoothing spline), whereas temporal choices
+are commonly reported for PM, temperature, and humidity for the number
+of lag to consider in the model.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2179}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1538}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6282}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1889}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6778}}@{}}
 
 \caption{\label{tbl-humidity-temperature-decisions}Options captured for
 parameter choices for time, humidity, and temperature variables in the
@@ -944,13 +929,89 @@ Decision
 \endlastfoot
 natural spline & humidity & 3, 4 \\
 natural spline & temperature & 3, 4, 6 \\
-natural spline & time & 1, 1.5, 3, 4, 6, 7, 8, 12, 15, 30, NA \\
-smoothing spline & humidity & 2, 3, 4, 6, 8, 50 \\
-smoothing spline & temperature & 2, 3, 4, 6, 8, 50 \\
+natural spline & time & 1, 1.5, 3, 4, 6, 7, 8, 12, 15, 30 \\
+smoothing spline & humidity & 2, 3, 4, 6, 8, 50\% of the data \\
+smoothing spline & temperature & 2, 3, 4, 6, 8, 50\% of the data \\
 smoothing spline & time & 1, 3, 4, 5, 6, 7, 7.7, 8, 9, 10, 12, 30, 100,
-NA \\
+5\% of the data \\
 
 \end{longtable}
+
+Table~\ref{tbl-humidity-temperature-decisions} presents the
+parameter-related decisions extracted for spline methods (natural and
+smoothing spline) applied to variable time, humidity and temperature.
+These decisions concern the number of knots or degree of freedom, with
+all values standardized to a \emph{per year} scale for consistency. The
+selection of knot for natural spline has less variation than the degree
+of freedom choices for smoothing spline. Choices for temperature and
+humidity are generally similar, given they are both weather related
+variables, whereas choices for time are more varied. This tabulation
+provides a reference set for common parameter choices for future studies
+and help to identify anomalies and special treatment in practice. For
+example, the choice of 7.7 degree of freedom reported in
+\citet{castillejos2000} may prompt analysts to seek further
+justification. By cross comparing with other reporting, some decisions
+appear ambiguous. For example, in \citet{moolgavkar2000} and
+\citet{moolgavkar2003}, the reported value of 30 and 100 degrees of
+freedom for time may be understandable for experienced domain
+researcher, it could be unclear for junior analysts as to whether they
+apply to the full 9 year period or on a per-year basis. We also observe
+a different report style from \citet{schwartz2000}, where smoothing
+spline parameters are expressed as a proportion of the data (``5\% of
+the data'' and ``5\% of the data'') rather than fixed numerical value.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2278}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1519}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6203}}@{}}
+
+\caption{\label{tbl-temporal-decisions}Options captured for temporal lag
+choices for PM, temperature, and humidity variables in the
+Gemini-extracted decisions. Both single-day lags and multi-day average
+lags are commonly used, generally considering up to five days prior (lag
+5).}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Lag type
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Decision
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+multi-day average & PM & lag 0-1, 0-2, 0-3, 0-4, 0-5, 0-6 \\
+multi-day average & humidity & lag 0-1, 0-2, 0-3, 0-5, 1-5, 2-4 \\
+multi-day average & temperature & lag 0-1, 0-2, 0-3, 0-5, 2-4 \\
+single-day lag & PM & lag 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+13 \\
+single-day lag & humidity & lag 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+12, 13 \\
+single-day lag & temperature & lag 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+12, 13 \\
+
+\end{longtable}
+
+Similarly, Table~\ref{tbl-temporal-decisions} summarizes the temporal
+lag choices for PM, temperature, and humidity. For single-day lags, the
+lags are considered up to 13 days (approximately two weeks). For
+multi-day averages, 3-day and 5-day averages are most common, although
+other choices such as 2-4 day average are also observed as in
+\citet{lópez-villarrubia2010}:
+
+\begin{quote}
+In particular, lags 0 to 1 and lags 2 to 4 averages of temperature,
+relative humidity, and barometric pressure were considered as
+meteorological variables.
+\end{quote}
+
+\subsection{Paper similarity and
+clustering}\label{paper-similarity-and-clustering}
 
 \begin{figure}
 
@@ -987,9 +1048,6 @@ modelling strategies differ in the European and U.S. studies, documented
 in ALPHENA.}
 
 \end{figure}%
-
-\subsection{Paper similarity and
-clustering}\label{paper-similarity-and-clustering}
 
 For computing the decision similarity score, we include the first 6 most
 common variable-type decisions as suggested in
@@ -1229,6 +1287,15 @@ drawn around each method group.}
 \end{figure}%
 
 \subsection{Others}\label{others}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{TODO} something about result validation of LLM output: We also
+  observe data quality with the extraction: for example in
+  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
+  Authors are unclear about the delivery
+\end{itemize}
 
 There are other decisions in an analysis that are worth comparing and
 documenting. For example data pre-processing decisions, e.g.~how
