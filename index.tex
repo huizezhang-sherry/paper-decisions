@@ -1088,39 +1088,35 @@ Figure~\ref{fig-mds} are consistent with the analysis by
 \citet{peng2006} and \citet{touloumi2006} that compares different
 smoothing methods and rationale for selecting smoothing parameters.
 
-\section{Discussion}\label{sec-discussion}
+\subsection{Sensitivity analysis}\label{sensitivity-analysis}
 
-Prompt engineering: these models may paraphrase or hallucinate unless
-explicitly told not to since it is generative in nature based on the
-predicted probability of the next word from the text and the
-instruction.
+A series of sensitivity analysis has been conducted to explore the
+reproducibility for using LLMs for text extraction tasks
+(Section~\ref{sec-llm-reproducibility}), discrepancies in decision
+extraction between different LLM models: Gemini
+(\texttt{gemini-2.0-flash}) and Claude
+(\texttt{claude-3-7-sonnet-latest}) (Section~\ref{sec-llm-models}), and
+the sensitivity of text model for computing the semantic decision
+similarity (Section~\ref{sec-text-model}).
 
-In this section, we examine the reproducibility for using LLMs for text
-extraction tasks in Section~\ref{sec-llm-reproducibility}, discrepancies
-between different LLM models: Gemini (\texttt{gemini-2.0-flash}) and
-Claude (\texttt{claude-3-7-sonnet-latest}) in
-Section~\ref{sec-llm-models}, and the sensitivity of our paper
-similarity calculation pipeline to the choice of text model used for
-computing decision similarity scores in Section~\ref{sec-text-model}.
+\subsubsection{LLM reproducibility}\label{sec-llm-reproducibility}
 
-\subsection{LLM reproducibility}\label{sec-llm-reproducibility}
-
-For our text extraction task, we test the reproducibility of Gemini
-(\texttt{gemini-2.0-flash}) by repeating the text extraction task 5
-times for each of the 56 papers. For each of the 31 papers, five runs
-yield \(5 \times 4 /2 = 10\) pairwise comparisons per field and
-including both the ``reason'' and ``decision'' fields results in a total
-of \(31 \times 10 \times 2 = 620\) pairs. We exclude the pairs that have
-different number of decisions since it would require manually align the
-decision to compare and this left us with 449 out of 620 (72\%) pairwise
-comparisons. Table~\ref{tbl-gemini-1} shows an example of such
-comparison in \citet{andersen2008}, where all the four reasons are
-identical among the two runs, hence a zero number of difference.
+We assess the reproducibility of Gemini's text extraction
+(\texttt{gemini-2.0-flash}) by repeating the task five times for each of
+the 62 papers and perform pairwise comparison between runs. This
+generates \(5 \times 4 /2 \times 62 = 620\) possible comparisons for
+both ``reason'' and ``decisions'' fields. Comparisons where the runs
+produced a different number of decisions were excluded, as this would
+require manual alignment. After filtering, 449 out of 620 (72\%)
+remained. Table~\ref{tbl-gemini-1} prints the decisions in
+\citet{andersen2008} across two runs and all the four decisions are
+identical with no difference.
 
 \begin{longtable}[]{@{}lll@{}}
 
-\caption{\label{tbl-gemini-1}An example of comparing the text extraction
-in decisions in Andersen 2008.}
+\caption{\label{tbl-gemini-1}Example comparing Gemini's text extraction
+for \citet{andersen2008} across two runs. The extracted decisions are
+identical in both runs.}
 
 \tabularnewline
 
@@ -1136,32 +1132,6 @@ dew-point temperature & 4 or 5 df & 4 or 5 df \\
 temperature & 4 or 5 df & 4 or 5 df \\
 
 \end{longtable}
-
-Table~\ref{tbl-gemini-2} summarizes the number of differences observed
-in each pairwise comparison. Among all comparisons, 80\% produce the
-identical text in reason and decision. The discrepancies come from the
-following reasons:
-
-\begin{itemize}
-\tightlist
-\item
-  Gemini extracted different length for the same decision, e.g.~in
-  \citet{kan2007}, some runs may extract ``singleday lag models
-  underestimate the cumulative effect of pollutants on mortality 2day
-  moving average \textbf{of current and previous day concentrations}
-  (lag=01)'', while others extract ``singleday lag models underestimate
-  the cumulative effect of pollutants on mortality 2day moving average
-  (lag=01)''. Similarity, for decisions, some runs may yield ``10 df for
-  total mortality'', while other runs yield ``10 df''. Similar
-  extraction appears in \citet{breitner2009}.
-\item
-  Gemini fails to extract reasons in some runs but not others, e.g.~in
-  \citet{burnett1998}, the first run generates NAs in the reasons, but
-  the remaining four runs are identical. In \citet{ueda2009} and
-  \citet{castillejos2000} , runs 1 and 5 fail to extract the reasons and
-  produce the same incomplete version, whereas runs 2, 3, and 4 produce
-  accurate versions with reasons populated.
-\end{itemize}
 
 \begin{longtable}[]{@{}lrr@{}}
 
@@ -1193,129 +1163,127 @@ Total & 449 & 100.00 \\
 
 \end{longtable}
 
-\subsection{LLM models}\label{sec-llm-models}
+Table~\ref{tbl-gemini-2} summarizes the number of differences observed
+in each pairwise comparison. Among all comparisons, 80\% produce the
+identical text in reason and decision. The discrepancies come from the
+following two reasons: 1) Gemini extracted different length for the same
+decision, e.g.~in \citet{kan2007}, some runs may extract ``singleday lag
+models underestimate the cumulative effect of pollutants on mortality
+2day moving average \textbf{of current and previous day concentrations}
+(lag=01)'', while others extract ``singleday lag models underestimate
+the cumulative effect of pollutants on mortality 2day moving average
+(lag=01)''. Similarity, for decisions, some runs yield ``10 df for total
+mortality'', while other runs yield ``10 df''. 2) Gemini fails to
+extract reasons in some runs but not others, e.g.~in
+\citet{burnett1998}, the first run generates NAs in the reasons, but the
+remaining four runs are identical. In \citet{ueda2009} and
+\citet{castillejos2000} , runs 1 and 5 fail to extract the reasons and
+produce the same incomplete version, whereas runs 2, 3, and 4 produce
+accurate versions with reasons populated.
+
+\subsubsection{LLM models}\label{sec-llm-models}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-claude-gemini-1.pdf}}
+
+}
+
+\caption{\label{fig-claude-gemini}Comparison of decisions extracted by
+Claude and Gemini. Each point represents a paper, with the x- and y-axes
+showing the number of decisions extracted by Claude and Gemini,
+respectively. The dashed 1:1 line marks where both models extract the
+same number of decisions. More points fall below this line, suggesting
+Claude extracts more decisions -- often including noise from data
+pre-processing or secondary data analysis steps -- which requires
+additional manual validation.}
+
+\end{figure}%
 
 Reading text from PDF document requires Optical Character Recognition
 (OCR) to convert images into machine-readable text, which currently is
 only supported by Antropic Claude (\texttt{claude-3-7-sonnet-latest})
-and Google Gemini (\texttt{gemini-2.0-flash}).
-
-We compare the number of decisions extracted by Claude and Gemini across
-all 56 papers in \textbf{?@fig-claude-gemini}. Each point represents a
-paper, with the x- and y-axes showing the number of decisions extracted
-by Claude and Gemini, respectively. The dashed 1:1 line marks where both
-models extract the same number of decisions. Most points fall below this
-line, indicating that Claude extracts more decisions -- often from data
-pre-processing or secondary data analysis steps requiring more manual
-validation -- whereas Gemini focuses more on modelling choices relevant
-to our analysis. Some of these decisions captured by Claude are
-
-\begin{itemize}
-\tightlist
-\item
-  the definition of ``cold day'' and ``hot day'' indicators in
-  \citet{dockery1992} (``defined at the 5th/ 95th percentile''),
-\item
-  the choice to summarize \(\text{NO}_2\), \(\text{O}_3\), and
-  \(\text{SO}_2\) using a ``24 hr average on variable'' in
-  \citet{huang2009}, and
-\item
-  the definition of black smoke and in \citet{katsouyanni2001} for
-  secondary analysis (``restrict to days with BS concentrations below
-  150 \(\mu g/m^2\)'').
-\end{itemize}
-
-Gemini sometimes also include irrelevant decisions, such as in
-\citet{mar2000}, where secondary analysis choices like ``0-4 lag days''
-for air pollution exposure variables (CO, EC, \(\text{K}_S\),
-\(\text{NO}_2\), \(\text{O}_3\), OC, Pb, S, \(\text{SO}_2\), TC, Zn) are
-captured. However, these cases are less frequent, resulting in outputs
-with less noise overall.
+and Google Gemini (\texttt{gemini-2.0-flash}). We compare the number of
+decisions extracted by Claude and Gemini across all 62 papers in
+Figure~\ref{fig-claude-gemini}. Each point represents a paper, with the
+x- and y-axes showing the number of decisions extracted by Claude and
+Gemini, respectively. The dashed 1:1 line marks where both models
+extract the same number of decisions. While both models extract
+decisions irrelevant to our analysis, such as sensitivity analyses and
+secondary analyses, Claude's extractions tend to include more of these
+irrelevant decisions, examples of these include 1) the definition of
+``cold day'' and ``hot day'' indicators in \citet{dockery1992}
+(``defined at the 5th/ 95th percentile''), 2) decisions relate to other
+pollutants: \(\text{NO}_2\), \(\text{O}_3\), and \(\text{SO}_2\) using a
+``24 hr average on variable'' in \citet{huang2009}, and 3) the
+definition of black smoke and in \citet{katsouyanni2001} for secondary
+analysis (``restrict to days with BS concentrations below 150
+\(\mu g/m^2\)''). While Gemini also capture these irrelevant decisions,
+such as ``0-4 lag days'' for air pollution exposure variables (CO, EC,
+\(\text{K}_S\), \(\text{NO}_2\), \(\text{O}_3\), OC, Pb, S,
+\(\text{SO}_2\), TC, Zn) in \citet{mar2000}. However, these cases are
+less frequent than Claude's extraction and has been validated and
+standardized in Section~\ref{sec-res-validation}.
 
 For both Claude and Gemini, we find they fail to link the general term
-``weather variables'' to the specific weather variables. For example
-Gemini misses this link in \citet{dockery1992} and \citet{burnett2004},
-while Claude does so in \citet{dockery1992} and \citet{katsouyanni2001}.
-Although our prompt specified that some decisions may require linking
-information across sentences and paragraphs to identify the correct
-variable, this instruction doesn't appear to be applied consistently.
+``weather variables'' to the specific weather variables (e.g.
+\citet{dockery1992} and \citet{burnett2004} for Gemini and
+\citet{dockery1992} and \citet{katsouyanni2001} for Claude). Although
+our prompt specified that some decisions may require linking information
+across sentences and paragraphs to identify the correct variable, this
+instruction doesn't appear to be applied consistently.
 
-\subsection{Text model}\label{sec-text-model}
+\subsubsection{Text model}\label{sec-text-model}
 
 We have conducted sensitivity analysis on the text model for obtaining
 the decision similarity score from the Gemini outputs. The tested
-language models tested include
+language models tested include 1) BERT by Google \citep{devlin2019}, 2)
+RoBERTa by Facebook AI \citep{liu}, trained on a larger dataset (160GB
+v.s. BERT's 15GB), 3) XLNnet by Google Brain \citep{yang}, and two
+domain-trained BERT models: 4) sciBERT \citep{beltagy2019}, trained on
+scientific literature, and 5) bioBERT \citep{lee2020}, trained on PubMed
+and PMC data.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\tightlist
-\item
-  BERT by Google \citep{devlin2019},
-\item
-  RoBERTa by Facebook AI \citep{liu}, trained on a larger dataset (160GB
-  v.s. BERT's 15GB),
-\item
-  XLNnet by Google Brain \citep{yang}, and
-\end{enumerate}
-
-two domain-trained BERT models:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\setcounter{enumi}{3}
-\tightlist
-\item
-  sciBERT \citep{beltagy2019}, trained on scientific literature, and
-\item
-  bioBERT \citep{lee2020}, trained on PubMed and PMC data.
-\end{enumerate}
-
-Figure~\ref{fig-text-density} presents the distribution of the decision
-similarity (left) and paper similarity (right) for each text model. At
-decision level, the BERT model produces the widest variation across all
-five models, while the similarity scores from XLNet are all close to 1.
-These scores are not comparable across models since the difference of
-the underlying transformer architecture. However, the paper similarity
-scores from each model are comparable and Figure~\ref{fig-text-mds}
-shows the multi-dimensional scaling (MDS) of the paper similarity scores
-from each text model: all showing a similar clustering pattern of the
-three main smoothing methods.
+Figure~\ref{fig-text-model} shows the distribution of the decision
+similarity and the corresponding multi-dimensional scaling
+visualization, where distance are calcualted from the paper similarity
+for each text model. At decision level, the BERT model produces the
+widest variation across all five models, while the similarity scores
+from XLNet are all close to 1. While the raw scores are not directly
+comparable across models due to the difference in the underlying
+transformer architecture, the multi-dimensional scaling (MDS) based on
+paper similarity scores shows a similar clustering pattern corresponding
+to the three main smoothing methods (LOESS, natural spline, and
+smoothing spline).
 
 \begin{figure}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-density-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-model-1.pdf}}
 
 }
 
-\caption{\label{fig-text-density}Distribution of decision similarity
-(left) and paper similarity (right) scores for five different text
-models (BERT, BioBERT, RoBERTa, SciBERT, and XLNet). The default
-language model, BERT, produces the widest variation across the five
-models, while the similarity scores form XLNet are all close to 1. The
-model BioBERT, RoBERTa, and SciBERT yield decision similar scores mostly
-between 0.7 to 1.}
+\caption{\label{fig-text-model}Distribution of decision similarity
+(left) and multi-dimensional scaling (MDS) of the paper similarity
+scores (right) computed for five different text models (BERT, BioBERT,
+RoBERTa, SciBERT, and XLNet). The default language model, BERT, produces
+the widest variation across the five models, while the similarity scores
+form XLNet are all close to 1. The model BioBERT, RoBERTa, and SciBERT
+yield decision similar scores mostly between 0.7 to 1. All the text
+models shows a similar clustering structure based on the three main
+smoothing methods (LOESS, natural spline and smoothing spline).}
 
 \end{figure}%
 
-\begin{figure}
+\section{Discussion}\label{sec-discussion}
 
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-mds-1.pdf}}
-
-}
-
-\caption{\label{fig-text-mds}The multi-dimensional scaling (MDS) of the
-paper similarity scores from each text model: all showing a similar
-clustering pattern of the three main smoothing methods. The points are
-colored by the most common method used in the paper, and the hulls are
-drawn around each method group.}
-
-\end{figure}%
-
-\subsection{Others}\label{others}
+Prompt engineering: these models may paraphrase or hallucinate unless
+explicitly told not to since it is generative in nature based on the
+predicted probability of the next word from the text and the
+instruction.
 
 \begin{itemize}
 \tightlist
