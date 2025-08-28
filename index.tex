@@ -1237,6 +1237,26 @@ instruction doesn't appear to be applied consistently.
 
 \subsubsection{Text model}\label{sec-text-model}
 
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-model-1.pdf}}
+
+}
+
+\caption{\label{fig-text-model}Distribution of decision similarity
+(left) and multi-dimensional scaling (MDS) of the paper similarity
+scores (right) computed for five different text models (BERT, BioBERT,
+RoBERTa, SciBERT, and XLNet). The default language model, BERT, produces
+the widest variation across the five models, while the similarity scores
+form XLNet are all close to 1. The model BioBERT, RoBERTa, and SciBERT
+yield decision similar scores mostly between 0.7 to 1. All the text
+models shows a similar clustering structure based on the three main
+smoothing methods (LOESS, natural spline and smoothing spline).}
+
+\end{figure}%
+
 We have conducted sensitivity analysis on the text model for obtaining
 the decision similarity score from the Gemini outputs. The tested
 language models tested include 1) BERT by Google \citep{devlin2019}, 2)
@@ -1258,97 +1278,64 @@ paper similarity scores shows a similar clustering pattern corresponding
 to the three main smoothing methods (LOESS, natural spline, and
 smoothing spline).
 
-\begin{figure}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-text-model-1.pdf}}
-
-}
-
-\caption{\label{fig-text-model}Distribution of decision similarity
-(left) and multi-dimensional scaling (MDS) of the paper similarity
-scores (right) computed for five different text models (BERT, BioBERT,
-RoBERTa, SciBERT, and XLNet). The default language model, BERT, produces
-the widest variation across the five models, while the similarity scores
-form XLNet are all close to 1. The model BioBERT, RoBERTa, and SciBERT
-yield decision similar scores mostly between 0.7 to 1. All the text
-models shows a similar clustering structure based on the three main
-smoothing methods (LOESS, natural spline and smoothing spline).}
-
-\end{figure}%
-
 \section{Discussion}\label{sec-discussion}
 
-Prompt engineering: these models may paraphrase or hallucinate unless
-explicitly told not to since it is generative in nature based on the
-predicted probability of the next word from the text and the
-instruction.
+While the extraction of decisions from literature could be largely
+automated with LLMs, manual validations remains essential to ensure the
+quality of the extracted decisions for further analysis. The quality
+from the LLM ouput directly affects the amount of manual effort needed
+for validation and standardization. Using a default temperature of 1 and
+instructing the model to extract original text rather than paraphrase,
+we find hallucination is not a major issue with Claude and Gemini for
+this application. While prompt engineering is used in this work to
+optimize the prompt for decision extraction, an alternative is to
+fine-tune a local model to improve LLM performance. Such approach could
+be beneficial for a systematic literature review, although it would
+require a labelled decision dataset for training and significantly more
+training efforts.
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{TODO} something about result validation of LLM output: We also
-  observe data quality with the extraction: for example in
-  \citet{lee2006}, the variable recorded is ``smoothing parameter''.
-  Authors are unclear about the delivery
-\end{itemize}
-
-There are other decisions in an analysis that are worth comparing and
-documenting. For example data pre-processing decisions, e.g.~how
-pollutant series are defined and collected, treatment on missing values,
-etc. Again, for a complete review of the field, these decisions ideally
-would be included, but for our demonstration of idea, we focus on the
-modelling decisions. Spatial decisions are generally not well captured
-because it often conducted uniformly as estimating the city individually
-to accommodate city heterogeneity. Some papers only consider a handful
-of cities, while in larger studies the individual city effects are then
-pooled together using random effect.
-
-The variation in the choice of parameters degree of freedom or knot for
-smoothing can motivate separate investigation on the sensitivity
-analysis. For instance, parameters that exhibit a wide range of choices
-across studies may indicate areas of uncertainty or debate within the
-field, suggesting that further investigation is needed to assess their
-impact on study outcomes \citep{peng2006, touloumi2006}.
-
-With LLMs, the extraction of decisions from literature could be largely
-automated, but manual review is still needed to ensure the quality of
-the extracted decisions. We also find secondary LLMs can be used to
-standardize the extracted decisions, such as for temporal lag choices
-from text expressing this decision in various ways. In this work, we use
-prompt engineering to optimize the prompt for extracting decisions from
-general LLMs (Claude and Gemini). Fine-tuning a local model is an
-alternative approach for a locally-trained model. While it could
-potentially yield more accurate extraction and hence less manual review,
-for a systematic literature review, it would require substantially more
-training efforts and a labelled decision dataset. We also find sometimes
-the prompt is not fully followed throughout the extraction (example).
-Claude and Gemini\ldots{}
-
-Currently, only one model per paper - some have comparison of GLM and
-GAM, compare different pollutants, stratify by \ldots.
+As a demonstration, we focus on the modelling decision for the baseline
+model in the air pollution epidemiology literature. Analyses in this
+fields often fit multiple models for different health outcomes. Other
+models, such as distributed lag models and multi-pollutant models are
+also commonly used to estimate relative risks and the interaction among
+pollutants. These factors increase the complexity of the decision
+extraction for LLM, as for additional models,authors often describe only
+the differences from the baseline model specification, assuming other
+decisions remain unchanged. The LLMs will need to be able to link the
+decisions across different models and identify the full set of decision
+for each model for cross-comparison among papers. Apart from modelling
+choices, other decisions in data pre-processing are also worth
+comparing. This would include how variables are defined and computed
+from the raw data.
 
 With the advocacy for reproducibility in science, it is expected that
-more papers will share their code and data. The availability of the code
-could be a supplementary source for understanding the decisions made in
-the analysis and cross comparison of the manuscript with the code.
-However, given the lack of comments in the current practice, we are not
-there to extract reasons for the decisions encoded in the script.
+more papers will share their code and data. Code availability can serve
+as a supplementary source for understanding the choices made in the
+analysis and cross-check against the description in the manuscript.
+However, decision choices could be extracted from the scripts, but the
+rationale behind these choices may not be easily discernible given the
+lack of comments in the current practice.
 
 \section{Conclusion}\label{sec-conclusion}
 
-In this paper, {[}we study how decisions are made in practical data
-analysis{]}. We developed a pipeline for automatically extracting
-decisions using LLMs (Claude and Gemini) and introduced a method for
-calculating paper similarity through decision similarity. This
-similarity metric enables us to cluster papers by their decision choices
-and visualization through hierarchical clustering and multidimensional
-scaling. We applied this pipeline to mortality/ hospital admission -- PM
-modelling literature and extracted key modelling decisions, such as the
-choice of smoothing methods and parameters for time, temperature, and
-humidity, and revealed paper clusters that correspond to different
-modelling strategies, as documented in the APHENA project.
+In this paper, we aim to study how analysts make decisions in their data
+analysis practice. While classic interviews are often conducted in small
+scale with toy examples, we developed a pipeline for automatically
+extracting decisions using LLMs (Claude and Gemini) from scientific
+literature. We also introduced a method for calculating paper similarity
+through comparing the similarities among decisions and the similarity
+metric can be used as a distance to cluster papers by their decision
+choices and visualization with dimension reduction algorithms, such as
+multidimensional scaling. We applied this pipeline to a set of air
+pollution modelling literature that associates daily particulate matter
+and daily mortality and hospital admission. From the extracted modelling
+decisions, we identify the most common decision choices in this type of
+analysis and the paper similarity score calculation revealed the three
+clusters of paper corresponding to different modelling strategies. These
+findings are all consistent with the general understanding of the field,
+as documented in the APHENA project \citep{APHENA} and other
+methodological comparison studies \citep{peng2006, touloumi2006}.
 
 While sensitivity analyses are commonly used to assess the robustness of
 findings to different analytical choices, the set of choices tested is
