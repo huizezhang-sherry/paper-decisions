@@ -3,7 +3,7 @@ format: acm-pdf
 keep-tex: true
 pdf-engine: pdflatex
 bibliography: references.bib
-title: "Dossier: visualizing/ understanding decision choices in data analysis via decision similarity"
+title: "A LLM-based pipeline for understanding decision choices in data analysis from published literature"
 abstract: "Decision choices made during data analysis, along with the reasons motivating them, are center to how results are interpreted and to comparisons across similar studies. However, such decisions -- such as selecting the degree of freedom for a smoothing spline and the rationalebehind them -- are rarely studied, since it is impractical to interview authors for all the alternatives and their motivations or to rerun the analysis under different options. In this work, we propose a workflow to automatically extract analytic decisions from the published literature and organize them into structured data using Large Language Models (Claude and Gemini). The pipeline then calculates paper similarity based on the semantic similarity of these extracted decisions and their reasons, and visualizes the results using clustering algorithms. We apply this workflow to a set of studies on the effect of particulate matter on mortality and hospital admission, conducted by researchers worldwide, which naturally provide alteranative analyses of the same question. Our approach offers an efficient way to study decision-making practices and robustness in data analysis compared with traditional interviews or author-focused sensitivity or multiverse analyses."
 notebook-links: false
 author:
