@@ -364,7 +364,8 @@ common choices in this type of analysis (number of knots or degree of
 freedom for smoothing methods for time, temperature and humidity) and
 find three distinct clusters corresponding to different smoothing
 methods (LOESS, natural spline, and smoothing spline) used in European
-and U.S. studies, consistent with findings from the APHENA project.
+and U.S. studies, consistent with findings from the APHENA project
+\citep{APHENA}.
 
 In summary, the contribution of this work includes:
 
@@ -675,18 +676,20 @@ final decisions are made in the analysis, whereas a similar reason
 reflects a shared rationale or justification for the choice, even when
 the choices themselves differ, potentially due to differences in the
 underlying data. To assign numerical value for measuring the similarity,
-we use the semantic similarity from text model (default to BERT). For
-parameter type decisions, the statistical method used also contributes
-to the similarity of the decision. Since semantic similarity cannot
-fully capture the difference betweenit statistical methods (the
-difference between smoothing spline and natural spline is not well
-represented by the textual difference of ``smoothing'' and ``natural''),
-method similarity is encoded as binary: 1 if the two papers used the
-same method, and 0 otherwise. The paper similarity is then computed as
-the average similarity across all the matched methods, decisions, and
-reasons. The resulting paper similarity metric can be interpreted as a
-distance measure to cluster and visualize papers based on their decision
-choices.
+we use the semantic similarity from text model, using the \texttt{text}
+package \citep{text}. We first obtain the text embedding for all the
+reason and decisions and calculate the cosine similarity between the
+matched reason and decisions. For parameter type decisions, the
+statistical method used also contributes to the similarity of the
+decision. Since semantic similarity cannot fully capture the difference
+betweenit statistical methods (the difference between smoothing spline
+and natural spline is not well represented by the textual difference of
+``smoothing'' and ``natural''), method similarity is encoded as binary:
+1 if the two papers used the same method, and 0 otherwise. The paper
+similarity is then computed as the average similarity across all the
+matched methods, decisions, and reasons. The resulting paper similarity
+metric can be interpreted as a distance measure to cluster and visualize
+papers based on their decision choices.
 
 Because analyses vary in the decisions they report, the number of
 matched decisions differs across paper pairs. In practice, some studies
@@ -1017,17 +1020,12 @@ clustering}\label{paper-similarity-and-clustering}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-cluster-paper-1-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-hc-1.pdf}}
 
 }
 
-\caption{\label{fig-cluster-paper-1}The dendrogram (left) and
-multi-dimensional scaling (MDS) (right) based on paper similarity
-distance for 62 air pollution mortality modelling literature. The papers
-are colored by the most common smoothing method used. The MDS reveals
-the three distinct groups of papers. This grouping corresponds to the
-modelling strategies differ in the European and U.S. studies, documented
-in ALPHENA.}
+\caption{\label{fig-hc}Maybe we don't need teh hierarchical clustering
+plot because it has the same information as the next MDS one???}
 
 \end{figure}%
 
@@ -1035,29 +1033,60 @@ in ALPHENA.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-cluster-paper-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-mds-1.pdf}}
 
 }
 
-\caption{\label{fig-cluster-paper}The dendrogram (left) and
-multi-dimensional scaling (MDS) (right) based on paper similarity
-distance for 62 air pollution mortality modelling literature. The papers
-are colored by the most common smoothing method used. The MDS reveals
-the three distinct groups of papers. This grouping corresponds to the
-modelling strategies differ in the European and U.S. studies, documented
-in ALPHENA.}
+\caption{\label{fig-mds}The multi-dimensional scaling (MDS) based on
+paper similarity distance for \texttt{length(good\_pp)} air pollution
+mortality modelling papers, colored by the smoothing method used. The
+MDS reveals the three distinct groups of papers, corresponds to LOESS,
+natural spline, and smoothing spline. These groups corresponds to the
+different modelling strategies debated in the European and U.S. studies,
+as documented in the APHENA project \citep{APHENA}.}
 
 \end{figure}%
 
-For computing the decision similarity score, we include the first 6 most
-common variable-type decisions as suggested in
-Table~\ref{tbl-most-common-decisions}. Figure~\ref{fig-cluster-paper}
-shows the clustering of the 48 papers based on the decision similarity
-scores. The dendrogram is generated using hierarchical clustering, and
-the labels are colored according to the most common smoothing method
-used in each paper. The clustering reveals three distinct groups of
-papers, which reflect the modelling strategies differ in the European
-(LOESS) and U.S. (\ldots) studies {[}more on the APHENA{]}.
+Given the number of decisions reported in
+Table~\ref{tbl-most-common-decisions}, we focus on the six most common
+variable-type decisions for calculating paper similarity: parameter
+choices for time, temperature, and humidity, and temporal lag choices
+for PM, temperature, and humidity. We also restrict our analysis to
+papers that report at least three of these six decisions, resulting in
+48 papers for the similarity analysis. This ensures that the paper
+similarity metric is based on a sufficient number of comparable
+decisions. We use the default text embedding model (BERT) in the
+\texttt{text} package and cosine similarity to compute the similarity
+score. Sensitivity analysis on different text embedding model is checked
+in Section~\ref{sec-text-model}. Paper similarity is then calculated as
+the average of decision similarity for each paper pair. The resulting
+distance matrix is then used for hierarchical clustering in
+Figure~\ref{fig-hc} and multi-dimensional scaling (MDS) in
+Figure~\ref{fig-mds}. The two MDS dimension reveals three clusters
+correspond to the three smoothing methods used in these analyses: LOESS,
+natural spline, and smoothing spline. This grouping aligns with the
+modelling strategies seen in large-scale analysis, such as the U.S.
+NMMAPS study \citep{samet2000} and the European APHEA
+\citep{katsouyanni1996} and APHEA2 \citep{katsouyanni2001} project.
+
+To reconcile these differences, the APHENA project \citep{APHENA} was
+launched with the aim to ``assess the consistency across Europe and
+North America when estimated using a common analytic protocol and to
+explore possible explanations for any remaining variation''. While
+multi-dimensional scaling in Figure~\ref{fig-mds} shows the match of
+three clusters with three smoothing methods, this is not inconsistent
+with the APHENA project \citep{APHENA} that the amount of smoothing to
+have a more important role than the method of smoothing for estimating
+the effect of PM on public health variables. The similarity metric we
+proposed focuses on the variation of choices across analyses, without
+directly assessing how those choices influence results. By pooling
+decision choices from multiple studies with LLMs, it becomes much easier
+to reveal common practices and difference in research practices,
+highlighting decisions that require further sensitivity analyses to
+assess their impact. The different smoothing methods revealed in
+Figure~\ref{fig-mds} are consistent with the analysis by
+\citet{peng2006} and \citet{touloumi2006} that compares different
+smoothing methods and rationale for selecting smoothing parameters.
 
 \section{Discussion}\label{sec-discussion}
 
