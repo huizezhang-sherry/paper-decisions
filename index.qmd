@@ -4,7 +4,7 @@ keep-tex: true
 pdf-engine: pdflatex
 bibliography: references.bib
 title: "A LLM-based pipeline for understanding decision choices in data analysis from published literature"
-abstract: "Decision choices made during data analysis, along with the reasons motivating them, are center to how results are interpreted and to comparisons across similar studies. However, such decisions -- such as selecting the degree of freedom for a smoothing spline and the rationalebehind them -- are rarely studied, since it is impractical to interview authors for all the alternatives and their motivations or to rerun the analysis under different options. In this work, we propose a workflow to automatically extract analytic decisions from the published literature and organize them into structured data using Large Language Models (Claude and Gemini). The pipeline then calculates paper similarity based on the semantic similarity of these extracted decisions and their reasons, and visualizes the results using clustering algorithms. We apply this workflow to a set of studies on the effect of particulate matter on mortality and hospital admission, conducted by researchers worldwide, which naturally provide alteranative analyses of the same question. Our approach offers an efficient way to study decision-making practices and robustness in data analysis compared with traditional interviews or author-focused sensitivity or multiverse analyses."
+abstract: "Decision choices, such as selecting the degree of freedom for a smoothing spline and the rationale behind them, are essential for interpreting results and understanding how uncertainty propagates through an analysis. Understanding how such choices are made and identifying common patterns in decisions can help junior researchers learn the field, while offering domain researchers a survey-like overview of current analysis practices. However, these decisions are rarely studied, as it is impractical to interview authors about all the alternatives considered during the work or to rerun the analysis under different options. In this work, We propose a workflow to automatically extract analytic decisions and their stated reasons from published literature using Large Language Models (Claude and Gemini). The pipeline also contributes to the calculation of paper similarity based on the semantic similarity of these extracted decisions and their reasons, and the visualization of papers using clustering algorithms. We apply this workflow to a set of studies on the effect of particulate matter on mortality and hospital admission, conducted by researchers worldwide, which naturally provide alteranative analyses of the same question. This approach enables large-scale, automated studies of decision-making practices in data analysis, providing an alternative to existing manual interview-based studies and small-scale 'many analysts experiments'."
 notebook-links: false
 author:
   - name: H. Sherry Zhang
@@ -104,9 +104,11 @@ In summary, the contribution of this work includes:
 
 -   A new approach to study data analysis decision choices through automatic extraction of decisions from scientific literature using LLMs,
 
--   A dataset of decisions and rationale, along with metadata, compiled from 62 studies in air pollution mortality modelling, and
+-   A method to construct paper similarities based on the decisions and the semantic similarity of their rationale, 
 
--   A method to construct paper similarities based on the decisions and the semantic similarity of their rationale.
+-  A shiny GUI tool for validation LLM outputs in this context, and
+
+-   A dataset of decisions and rationale, along with metadata, compiled from 62 studies in air pollution mortality modelling.
 
 <!-- The rest of the paper is organized as follows. In @sec-background, we review the background on data analysis decisions. @sec-extract-decisions describes the data structure for recording decisions, the use of large language models to process research papers, and the validation of LLM outputs. In @sec-paper-similarity, we present the method for calculating paper similarity based on decision similarities. @sec-result reports the finding of our analysis, including the clustering of papers according to similarity scores and sensitivity analyses related to LLM providers, prompt engineering, and LLM parameters. Finally, @sec-discussion discusses the implications of our study. -->
 
