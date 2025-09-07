@@ -396,14 +396,17 @@ In summary, the contribution of this work includes:
 
 \begin{itemize}
 \item
-  A new approach to study data analysis decision choices through
-  automatic extraction of decisions from scientific literature using
-  LLMs,
+  A scalable and automated approach to study data analysis decision
+  choices through extracting of decisions from published scientific
+  literature using LLMs,
 \item
-  A new method to construct paper similarities based on the decisions
-  and the semantic similarity of their rationale,
+  A new method to construct paper similarities based on the decision and
+  the semantic similarity of their rationale,
 \item
-  A shiny GUI tool for validation LLM outputs in this context, and
+  A data schema for summarizing decisions made in applied studies in a
+  tidy format,
+\item
+  A shiny GUI tool for validating LLM outputs for editing tables, and
 \item
   A dataset of decisions and rationale, along with metadata, compiled
   from 62 studies in air pollution mortality modelling.
@@ -456,6 +459,9 @@ automatically extract structured information from unstructured text.
 This could provide a scalable way to study decision-making practices in
 data analysis.
 
+\subsection{Uncertainty in data
+analysis}\label{uncertainty-in-data-analysis}
+
 On top of qualitative studies, software tools have also developed to
 incorporate potential alternatives in the analysis workflow. The
 \texttt{DeclareDesign} package \citep{blair2019} introduces the MIDA
@@ -467,6 +473,9 @@ has been applied in the randomized controlled trial study
 conduct multiverse analysis to systematically explore how different
 choices affect results and to report the range of plausible outcomes
 that arise from alternative analytic paths.
+
+\subsection{Automatic information extraction with
+LLMs}\label{automatic-information-extraction-with-llms}
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
@@ -500,26 +509,8 @@ describe the data structure for recording decisions, followed by the
 four main steps: 1) automatic extraction from literature with LLMs, 2)
 validation and standardization of LLM outputs, 3) calculation of paper
 similarity, and 4) visualization paper similarity using clustering or
-dimension reduction methods. An overview of the workflow is illustrated
-in Figure~\ref{fig-workflow}.
-
-\begin{figure}
-
-\centering{
-
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/workflow.png}
-
-}
-
-\caption{\label{fig-workflow}The workflow for extracting decisions from
-published literature using Large Language Models (LLMs) and analyzing
-the extracted decisions. The workflow consists of four main steps: (1)
-Extract decisions automatically from literature with LLMs, (2) Validate
-and standardize LLM outputs, (3) Calculate paper similarity and
-visualization, and (4) visualization with clustering or dimension
-reduction methods.}
-
-\end{figure}%
+dimension reduction methods. The section concludes with an illustration
+summarizing the workflow.
 
 \subsection{Record decisions in data analysis}\label{sec-decisions}
 
@@ -768,6 +759,38 @@ the paper similarity may be overly influenced by one or two decisions.
 To address this, users may focus on a set of decisions shared across
 papers and on papers that report a minimal number of these decisions
 when calculating paper similarity.
+
+\subsection{Summary}\label{summary}
+
+Figure~\ref{fig-workflow} summarises the entire workflow for extracting
+decisions from published literature using Large Language Models (LLMs)
+and analyzing the extracted decisions. Once researchers have identified
+a set of literature of interest and a prompt to instruct LLMs to extract
+decisions from the literature. The outputs from LLM need to be validated
+and standardized before further analysis due to authors' varied writing
+styles. The validated data can then be used to conduct exploratory
+analysis of decision choices and one task is to calculate paper
+similarity based on the decision similarity. This paper similarity
+measure can be seen as a distance metric among papers, which can be used
+for clustering and dimension reduction for visualizing papers.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/workflow.png}
+
+}
+
+\caption{\label{fig-workflow}The workflow for extracting decisions from
+published literature using Large Language Models (LLMs) and analyzing
+the extracted decisions. The workflow consists of four main steps: (1)
+Extract decisions automatically from literature with LLMs, (2) Validate
+and standardize LLM outputs, (3) Calculate paper similarity and
+visualization, and (4) visualization with clustering or dimension
+reduction methods.}
+
+\end{figure}%
 
 \section{Results}\label{sec-result}
 
@@ -1099,8 +1122,7 @@ decisions. We use the default text embedding model (BERT) in the
 score. Sensitivity analysis on different text embedding model is checked
 in Section~\ref{sec-text-model}. Paper similarity is then calculated as
 the average of decision similarity for each paper pair. The resulting
-distance matrix is then used for hierarchical clustering in
-\textbf{?@fig-hc} and multi-dimensional scaling (MDS) in
+distance matrix is then used for multi-dimensional scaling (MDS) in
 Figure~\ref{fig-mds}. The two MDS dimension reveals three clusters
 correspond to the three smoothing methods used in these analyses: LOESS,
 natural spline, and smoothing spline. This grouping aligns with the
@@ -1319,6 +1341,9 @@ smoothing spline).
 
 \section{Discussion}\label{sec-discussion}
 
+\subsection{Quality of LLM extraction and
+validation}\label{quality-of-llm-extraction-and-validation}
+
 While the extraction of decisions from literature could be largely
 automated with LLMs, manual validations remains essential to ensure the
 quality of the extracted decisions for further analysis. The quality
@@ -1333,6 +1358,9 @@ be beneficial for a systematic literature review, although it would
 require a labelled decision dataset for training and significantly more
 training efforts.
 
+\subsection{Extracting other types of
+decisions}\label{extracting-other-types-of-decisions}
+
 As a demonstration, we focus on the modelling decision for the baseline
 model in the air pollution epidemiology literature. Analyses in this
 fields often fit multiple models for different health outcomes. Other
@@ -1343,10 +1371,18 @@ extraction for LLM, as for additional models,authors often describe only
 the differences from the baseline model specification, assuming other
 decisions remain unchanged. The LLMs will need to be able to link the
 decisions across different models and identify the full set of decision
-for each model for cross-comparison among papers. Apart from modelling
-choices, other decisions in data pre-processing are also worth
-comparing. This would include how variables are defined and computed
-from the raw data.
+for each model for cross-comparison among papers.
+
+Apart from modelling choices, decisions in data pre-processing are also
+interesting to compare. For example, in \citet{braga2001}, air pollution
+measures are aggregated from multiple PM10 monitors within the same
+location into a single value. Different decisions on how values are
+extracted, imputed, and aggregated are also shown to affect the results.
+However, these decisions are often not well documented in the literature
+than the modelling decisions, making it difficult for LLMs to extract
+them. Proper documentation and reporting of these decisions in future
+research are needed before our workflow could be applied to
+pre-processing decisions.
 
 With the advocacy for reproducibility in science, it is expected that
 more papers will share their code and data. Code availability can serve
@@ -1355,6 +1391,9 @@ analysis and cross-check against the description in the manuscript.
 However, decision choices could be extracted from the scripts, but the
 rationale behind these choices may not be easily discernible given the
 lack of comments in the current practice.
+
+\subsection{Generalizability of the
+workflow}\label{generalizability-of-the-workflow}
 
 \section{Conclusion}\label{sec-conclusion}
 

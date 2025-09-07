@@ -112,11 +112,13 @@ In this workflow, we also provide detailed documentation on the validation and s
 
 In summary, the contribution of this work includes:
 
--   A new approach to study data analysis decision choices through automatic extraction of decisions from scientific literature using LLMs,
+-   A scalable and automated approach to study data analysis decision choices through extracting of decisions from published scientific literature using LLMs,
 
--   A new method to construct paper similarities based on the decisions and the semantic similarity of their rationale, 
+-   A new method to construct paper similarities based on the decision and the semantic similarity of their rationale,
 
--  A shiny GUI tool for validation LLM outputs in this context, and
+-   A data schema for summarizing decisions made in applied studies in a tidy format,
+
+-   A shiny GUI tool for validating LLM outputs for editing tables, and
 
 -   A dataset of decisions and rationale, along with metadata, compiled from 62 studies in air pollution mortality modelling.
 
@@ -130,7 +132,11 @@ Data analysis involves making choices at every step, from initial data collectio
 
 Examples like above have rendered decision-making in data analysis as a subject to study in human computer interaction. To understand how analysts making decisions during data analysis and navigating the garden of forking path, researchers have conducted qualitative interviews with analysts on data analysis practices [@kale2019; @alspaugh2019; @liu_understanding_2020]. Visualization tools have also been explored to communicate the decision process through analytic decision graphics (ADG) [@liu2020]. In fairness machine learning literature, @simson2025 contributed a reusable workflow that supports participatory input to democratize decisions in machine learning algorithms related to fairness, privacy, interpretability and performance. Conducting qualitative studies through interviews to study how assumptions and decisions are made in data analysis practices takes a significant amount of time and effort, and the findings may not generalize to other contexts. While published research papers may not provide a complete picture of the decision-making process, they do contain valuable information about the choices made by analysts and the rationale behind them. With recent advances in Large Language Models (LLMs), it has become possible to automatically extract structured information from unstructured text. This could provide a scalable way to study decision-making practices in data analysis.
 
+## Uncertainty in data analysis
+
 On top of qualitative studies, software tools have also developed to incorporate potential alternatives in the analysis workflow. The `DeclareDesign` package [@blair2019] introduces the MIDA framework for researchers to declare, diagnose, and redesign their analyses to produce a distribution of the statistic of interest, which has been applied in the randomized controlled trial study [@bishop2024]. The `multiverse` package [@multiverse; @liu2021] provides a framework for researchers to conduct multiverse analysis to systematically explore how different choices affect results and to report the range of plausible outcomes that arise from alternative analytic paths.
+
+## Automatic information extraction with LLMs
 
 ## Visualization on scientific literature
 
@@ -138,15 +144,7 @@ With the growing volume of scientific publications and the difficulty of navigat
 
 # Methods {#sec-extract-decisions}
 
-In this section, we present the workflow for extracting decisions from published literature using Large Language Models (LLMs). We first describe the data structure for recording decisions, followed by the four main steps: 1) automatic extraction from literature with LLMs, 2) validation and standardization of LLM outputs, 3) calculation of paper similarity, and 4) visualization paper similarity using clustering or dimension reduction methods. An overview of the workflow is illustrated in @fig-workflow. 
-
-```{r}
-#| label: fig-workflow
-#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions automatically from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Calculate paper similarity and visualization, and (4) visualization with clustering or dimension reduction methods."
-#| out.width: "100%"
-knitr::include_graphics(here::here("figures/workflow.png"))
-```
-
+In this section, we present the workflow for extracting decisions from published literature using Large Language Models (LLMs). We first describe the data structure for recording decisions, followed by the four main steps: 1) automatic extraction from literature with LLMs, 2) validation and standardization of LLM outputs, 3) calculation of paper similarity, and 4) visualization paper similarity using clustering or dimension reduction methods. The section concludes with an illustration summarizing the workflow.
 
 ## Record decisions in data analysis {#sec-decisions}
 
@@ -207,6 +205,17 @@ Once the output has been extracted and validated, the decisions can be treated a
 For each paper pair, a decision is considered comparable if the papers share the same variable and decision type, for example, a parameter decision on temperature or the temporal decision on humidity. For two decisions to be considered similar, both the decision choice and the rationale are taken into account. A similar choice indicates a similar final decisions are made in the analysis, whereas a similar reason reflects a shared rationale or justification for the choice, even when the choices themselves differ, potentially due to differences in the underlying data. To assign numerical value for measuring the similarity, we use the semantic similarity from text model, using the `text` package [@text]. We first obtain the text embedding for all the reason and decisions and calculate the cosine similarity between the matched reason and decisions. For parameter type decisions, the statistical method used also contributes to the similarity of the decision. Since semantic similarity cannot fully capture the difference betweenit statistical methods (the difference between smoothing spline and natural spline is not well represented by the textual difference of "smoothing" and "natural"), method similarity is encoded as binary: 1 if the two papers used the same method, and 0 otherwise. The paper similarity is then computed as the average similarity across all the matched methods, decisions, and reasons. The resulting paper similarity metric can be interpreted as a distance measure to cluster and visualize papers based on their decision choices.
 
 Because analyses vary in the decisions they report, the number of matched decisions differs across paper pairs. In practice, some studies may not fully report the decision and reason for every choice made, leading to missing data for the matched decisions. Although paper similarity can be calculated based on all available matched decisions, cares should be taken for pairs with only a small number of matches, as the paper similarity may be overly influenced by one or two decisions. To address this, users may focus on a set of decisions shared across papers and on papers that report a minimal number of these decisions when calculating paper similarity.
+
+## Summary
+
+@fig-workflow summarises the entire workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. Once researchers have identified a set of literature of interest and a prompt to instruct LLMs to extract decisions from the literature. The outputs from LLM need to be validated and standardized before further analysis due to authors' varied writing styles. The validated data can then be used to conduct exploratory analysis of decision choices and one task is to calculate paper similarity based on the decision similarity. This paper similarity measure can be seen as a distance metric among papers, which can be used for clustering and dimension reduction for visualizing papers.
+
+```{r}
+#| label: fig-workflow
+#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions automatically from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Calculate paper similarity and visualization, and (4) visualization with clustering or dimension reduction methods."
+#| out.width: "100%"
+knitr::include_graphics(here::here("figures/workflow.png"))
+```
 
 # Results {#sec-result}
 
@@ -452,7 +461,7 @@ p2
 p3  
 ```
 
-Given the number of decisions reported in @tbl-most-common-decisions, we focus on the six most common variable-type decisions for calculating paper similarity: parameter choices for time, temperature, and humidity, and temporal lag choices for PM, temperature, and humidity. We also restrict our analysis to papers that report at least three of these six decisions, resulting in `r length(good_pp)` papers for the similarity analysis. This ensures that the paper similarity metric is based on a sufficient number of comparable decisions. We use the default text embedding model (BERT) in the `text` package and cosine similarity to compute the similarity score. Sensitivity analysis on different text embedding model is checked in @sec-text-model. Paper similarity is then calculated as the average of decision similarity for each paper pair. The resulting distance matrix is then used for hierarchical clustering in @fig-hc and multi-dimensional scaling (MDS) in @fig-mds. The two MDS dimension reveals three clusters correspond to the three smoothing methods used in these analyses: LOESS, natural spline, and smoothing spline. This grouping aligns with the modelling strategies seen in large-scale analysis, such as the U.S. NMMAPS study [@samet2000] and the European APHEA [@katsouyanni1996] and APHEA2 [@katsouyanni2001] project. 
+Given the number of decisions reported in @tbl-most-common-decisions, we focus on the six most common variable-type decisions for calculating paper similarity: parameter choices for time, temperature, and humidity, and temporal lag choices for PM, temperature, and humidity. We also restrict our analysis to papers that report at least three of these six decisions, resulting in `r length(good_pp)` papers for the similarity analysis. This ensures that the paper similarity metric is based on a sufficient number of comparable decisions. We use the default text embedding model (BERT) in the `text` package and cosine similarity to compute the similarity score. Sensitivity analysis on different text embedding model is checked in @sec-text-model. Paper similarity is then calculated as the average of decision similarity for each paper pair. The resulting distance matrix is then used for multi-dimensional scaling (MDS) in @fig-mds. The two MDS dimension reveals three clusters correspond to the three smoothing methods used in these analyses: LOESS, natural spline, and smoothing spline. This grouping aligns with the modelling strategies seen in large-scale analysis, such as the U.S. NMMAPS study [@samet2000] and the European APHEA [@katsouyanni1996] and APHEA2 [@katsouyanni2001] project.
 
 To reconcile these differences, the APHENA project [@APHENA] was launched with the aim to "assess the consistency across Europe and North America when estimated using a common analytic protocol and to explore possible explanations for any remaining variation". While multi-dimensional scaling in @fig-mds shows the match of three clusters with three smoothing methods, this is not inconsistent with the APHENA project [@APHENA] that the amount of smoothing to have a more important role than the method of smoothing for estimating the effect of PM on public health variables. The similarity metric we proposed focuses on the variation of choices across analyses, without directly assessing how those choices influence results. By pooling decision choices from multiple studies with LLMs, it becomes much easier to reveal common practices and difference in research practices, highlighting decisions that require further sensitivity analyses to assess their impact. The different smoothing methods revealed in @fig-mds are consistent with the analysis by @peng2006 and @touloumi2006 that compares different smoothing methods and rationale for selecting smoothing parameters.
 
@@ -559,7 +568,6 @@ tibble(Variable = res[[2]]$variable,
   knitr::kable()
 ```
 
-
 ```{r}
 #| label: tbl-gemini-2
 #| tbl-cap: "Number of differences in the reason and decision fields across Gemini runs for papers with consistent number of decisions across runs."
@@ -573,7 +581,6 @@ tibble(n_diff = 0:11) |>
 ```
 
 @tbl-gemini-2 summarizes the number of differences observed in each pairwise comparison. Among all comparisons, `r scales::label_percent()(tbl$prop[[1]] / 100)` produce the identical text in reason and decision. The discrepancies come from the following two reasons: 1) Gemini extracted different length for the same decision, e.g. in @kan2007, some runs may extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average **of current and previous day concentrations** (lag=01)", while others extract "singleday lag models underestimate the cumulative effect of pollutants on mortality 2day moving average (lag=01)". Similarity, for decisions, some runs yield "10 df for total mortality", while other runs yield "10 df". 2) Gemini fails to extract reasons in some runs but not others, e.g. in @burnett1998, the first run generates NAs in the reasons, but the remaining four runs are identical. In @ueda2009 and @castillejos2000 , runs 1 and 5 fail to extract the reasons and produce the same incomplete version, whereas runs 2, 3, and 4 produce accurate versions with reasons populated.
-
 
 ### LLM models {#sec-llm-models}
 
@@ -614,7 +621,7 @@ claude_gemini |>
 
 Reading text from PDF document requires Optical Character Recognition (OCR) to convert images into machine-readable text, which currently is only supported by Antropic Claude (`claude-3-7-sonnet-latest`) and Google Gemini (`gemini-2.0-flash`). We compare the number of decisions extracted by Claude and Gemini across all `r  length(unique(all_geminis$paper |> str_remove("-gemini-[0-9]")))` papers in @fig-claude-gemini. Each point represents a paper, with the x- and y-axes showing the number of decisions extracted by Claude and Gemini, respectively. The dashed 1:1 line marks where both models extract the same number of decisions. While both models extract decisions irrelevant to our analysis, such as sensitivity analyses and secondary analyses, Claude's extractions tend to include more of these irrelevant decisions, examples of these include 1) the definition of "cold day" and "hot day" indicators in @dockery1992 ("defined at the 5th/ 95th percentile"), 2) decisions relate to other pollutants: $\text{NO}_2$, $\text{O}_3$, and $\text{SO}_2$ using a "24 hr average on variable" in @huang2009, and 3) the definition of black smoke and in @katsouyanni2001 for secondary analysis ("restrict to days with BS concentrations below 150 $\mu g/m^2$"). While Gemini also capture these irrelevant decisions, such as "0-4 lag days" for air pollution exposure variables (CO, EC, $\text{K}_S$, $\text{NO}_2$, $\text{O}_3$, OC, Pb, S, $\text{SO}_2$, TC, Zn) in @mar2000. However, these cases are less frequent than Claude's extraction and has been validated and standardized in @sec-res-validation.
 
-For both Claude and Gemini, we find they fail to link the general term "weather variables" to the specific weather variables (e.g. @dockery1992 and @burnett2004 for Gemini and  @dockery1992 and @katsouyanni2001 for Claude). Although our prompt specified that some decisions may require linking information across sentences and paragraphs to identify the correct variable, this instruction doesn't appear to be applied consistently.
+For both Claude and Gemini, we find they fail to link the general term "weather variables" to the specific weather variables (e.g. @dockery1992 and @burnett2004 for Gemini and @dockery1992 and @katsouyanni2001 for Claude). Although our prompt specified that some decisions may require linking information across sentences and paragraphs to identify the correct variable, this instruction doesn't appear to be applied consistently.
 
 ### Text model {#sec-text-model}
 
@@ -692,21 +699,31 @@ p3 <- mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
   theme(legend.position = 'bottom')
 ```
 
-We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include 1) BERT by Google [@devlin2019], 2) RoBERTa by Facebook AI [@liu], trained on a larger dataset (160GB v.s. BERT's 15GB), 3)  XLNnet by Google Brain [@yang], and two domain-trained BERT models: 4) sciBERT [@beltagy2019], trained on scientific literature, and 5) bioBERT [@lee2020], trained on PubMed and PMC data. 
+We have conducted sensitivity analysis on the text model for obtaining the decision similarity score from the Gemini outputs. The tested language models tested include 1) BERT by Google [@devlin2019], 2) RoBERTa by Facebook AI [@liu], trained on a larger dataset (160GB v.s. BERT's 15GB), 3) XLNnet by Google Brain [@yang], and two domain-trained BERT models: 4) sciBERT [@beltagy2019], trained on scientific literature, and 5) bioBERT [@lee2020], trained on PubMed and PMC data.
 
 @fig-text-model shows the distribution of the decision similarity and the corresponding multi-dimensional scaling visualization, where distance are calcualted from the paper similarity for each text model. At decision level, the BERT model produces the widest variation across all five models, while the similarity scores from XLNet are all close to 1. While the raw scores are not directly comparable across models due to the difference in the underlying transformer architecture, the multi-dimensional scaling (MDS) based on paper similarity scores shows a similar clustering pattern corresponding to the three main smoothing methods (LOESS, natural spline, and smoothing spline).
 
-
 # Discussion {#sec-discussion}
+
+## Quality of LLM extraction and validation
 
 While the extraction of decisions from literature could be largely automated with LLMs, manual validations remains essential to ensure the quality of the extracted decisions for further analysis. The quality from the LLM ouput directly affects the amount of manual effort needed for validation and standardization. Using a default temperature of 1 and instructing the model to extract original text rather than paraphrase, we find hallucination is not a major issue with Claude and Gemini for this application. While prompt engineering is used in this work to optimize the prompt for decision extraction, an alternative is to fine-tune a local model to improve LLM performance. Such approach could be beneficial for a systematic literature review, although it would require a labelled decision dataset for training and significantly more training efforts.
 
-As a demonstration, we focus on the modelling decision for the baseline model in the air pollution epidemiology literature. Analyses in this fields often fit multiple models for different health outcomes. Other models, such as distributed lag models and multi-pollutant models are also commonly used to estimate relative risks and the interaction among pollutants. These factors increase the complexity of the decision extraction for LLM, as for additional models,authors often describe only the differences from the baseline model specification, assuming other decisions remain unchanged. The LLMs will need to be able to link the decisions across different models and identify the full set of decision for each model for cross-comparison among papers. Apart from modelling choices, other decisions in data pre-processing are also worth comparing. This would include how variables are defined and computed from the raw data. 
+## Extracting other types of decisions
+
+As a demonstration, we focus on the modelling decision for the baseline model in the air pollution epidemiology literature. Analyses in this fields often fit multiple models for different health outcomes. Other models, such as distributed lag models and multi-pollutant models are also commonly used to estimate relative risks and the interaction among pollutants. These factors increase the complexity of the decision extraction for LLM, as for additional models,authors often describe only the differences from the baseline model specification, assuming other decisions remain unchanged. The LLMs will need to be able to link the decisions across different models and identify the full set of decision for each model for cross-comparison among papers. 
+
+Apart from modelling choices, decisions in data pre-processing are also interesting to compare. For example, in @braga2001, air pollution measures are aggregated from multiple PM10 monitors within the same location into a single value. Different decisions on how values are extracted, imputed, and aggregated are also shown to affect the results. However, these decisions are often not well documented in the literature than the modelling decisions, making it difficult for LLMs to extract them. Proper documentation and reporting of these decisions in future research are needed before our workflow could be applied to pre-processing decisions.
+
+With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. Code availability can serve as a supplementary source for understanding the choices made in the analysis and cross-check against the description in the manuscript. However, decision choices could be extracted from the scripts, but the rationale behind these choices may not be easily discernible given the lack of comments in the current practice.
 
 <!-- Spatial decisions are generally not well captured because it often conducted uniformly as estimating the city individually to accommodate city heterogeneity. Some papers only consider a handful of cities, while in larger studies the individual city effects are then pooled together using random effect. -->
 
+## Generalizability of the workflow
 
-With the advocacy for reproducibility in science, it is expected that more papers will share their code and data. Code availability can serve as a supplementary source for understanding the choices made in the analysis and cross-check against the description in the manuscript. However, decision choices could be extracted from the scripts, but the rationale behind these choices may not be easily discernible given the lack of comments in the current practice.
+
+
+
 
 # Conclusion {#sec-conclusion}
 
