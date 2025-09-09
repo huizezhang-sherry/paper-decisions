@@ -414,65 +414,78 @@ In summary, the contribution of this work includes:
 
 \section{Related work}\label{sec-background}
 
-\subsection{Decision-making in data
-analysis}\label{decision-making-in-data-analysis}
+\subsection{Analytic decision making in data
+analysis}\label{analytic-decision-making-in-data-analysis}
 
-Data analysis involves making choices at every step, from initial data
-collection, data pre-processing to model specification, and
-post-processing. Each decision represents a branching point where
-analysts choose a specific path to follow, and the vast number of
-possible choices analysts can take forms what \citet{gelman2014}
-describe as the ``garden of forking paths''. While researchers may hope
-their inferential results are robust to the specific path taken through
-the garden, in practice, different choices can lead to substantially
-different conclusions. This has been empirically demonstrated through
-``many analyst experiments'', where independent research groups analyze
-the same dataset to address the same research questions with their own
-chosen analytic approach. A classic example is \citet{silberzahn2018},
-where researchers reported an odds ratio from 0.89 to 2.93 for the
-effect of soccer players' skin tone on the number of red cards awarded
-by referees. Similar variability has been observed in structural
-equation modeling \citep{sarstedt2024}, applied microeconomics
-\citep{huntington-klein2021}, neuroimaging \citep{botvinik-nezer2020},
-and ecology and evolutionary biology \citep{gould2025}.
+Data analysis is a complex and iterative process
+\citep{jun2022, jun2022hypothesis, jun2019} that involves multiple
+stages, including data collection, cleaning, visualization, modeling,
+and communication. At each stage, analysts make decisions informed by
+domain practices, statistical knowledge, and feedback from the data.
+These decisions, such as which variables to include in a model, how to
+handle missing data, and which statistical methods to use, act as
+branching points in the analysis workflow. The full set of possible
+paths through these branching points form what \citet{gelman2014}
+describe as the ``garden of forking paths''. While one might expect
+well-trained researchers will often converge to similar decision
+choices, empirical evidence suggests otherwise. ``Many analyst
+experiments'' show that independent research groups analyze the same
+dataset to address the same research questions can arrive at widely
+different conclusions. For example \citet{silberzahn2018} asks 29 groups
+of analysts to conduct an analysis to address the same research
+questions \emph{whether soccer players with dark skin tone are more
+likely than those with light skin tone to receive red cards from
+referees}. Researchers reported an estimated effect size from 0.89 to
+2.93 in odds ratio, 70\% of the teams found a statistically significant
+positive effect while others don't, and 21 unique combinations of
+covariates are used by 29 different analyses. Similar experiements has
+been observed in structural equation modeling \citep{sarstedt2024},
+applied microeconomics \citep{huntington-klein2021}, neuroimaging
+\citep{botvinik-nezer2020}, and ecology and evolutionary biology
+\citep{gould2025}.
 
-Examples like above have rendered decision-making in data analysis as a
-subject to study in human computer interaction. To understand how
-analysts making decisions during data analysis and navigating the garden
-of forking path, researchers have conducted qualitative interviews with
-analysts on data analysis practices
-\citep{kale2019, alspaugh2019, liu_understanding_2020}. Visualization
-tools have also been explored to communicate the decision process
-through analytic decision graphics (ADG) \citep{liu2020}. In fairness
-machine learning literature, \citet{simson2025} contributed a reusable
-workflow that supports participatory input to democratize decisions in
-machine learning algorithms related to fairness, privacy,
-interpretability and performance. Conducting qualitative studies through
-interviews to study how assumptions and decisions are made in data
-analysis practices takes a significant amount of time and effort, and
-the findings may not generalize to other contexts. While published
-research papers may not provide a complete picture of the
-decision-making process, they do contain valuable information about the
-choices made by analysts and the rationale behind them. With recent
-advances in Large Language Models (LLMs), it has become possible to
-automatically extract structured information from unstructured text.
-This could provide a scalable way to study decision-making practices in
-data analysis.
+Examples like the above illustrate how analytical decisions introduce
+uncertainty into data analysis. These uncertainties have been widely
+discussed for policy recommendation \citep{APHENA} and their
+applications in health, finance, and other domains. To help researchers
+avoid misusing their ``researcher degree of freedom'', guidelines and
+checklists have been developed, informed by demonstrations of how such
+misuse can lead to p-hacking and inflated effect size
+\citep{wicherts2016, simmons2011}. Pre-registration is a common practice
+in medicine and biostatistics, yet \citet{pang2022} found that this is
+not well-adopted among HCI researchers. Given the nuanced nature of data
+analysis, more work have examined how analysts make decisions in
+practice, through interviews in both academia and industry. These
+studies include qualitative analysis of analytical decisions
+\citep{kale2019}, interviews with data analysts about exploratory data
+analysis practice in industry \citep{alspaugh2019, kandel2012},
+interviews with data workers on how they consider alternatives in data
+analysis \citep{liu_understanding_2020}, and interviews researchers
+about their analysis decisions in published studies \citep{liu2020}.
+Participatory studies, like in the many analyst experiments, are also
+used to support participatory input to democratize decisions in fairness
+machine learning \citep{simson2025}.
 
-\subsection{Uncertainty in data
-analysis}\label{uncertainty-in-data-analysis}
-
-On top of qualitative studies, software tools have also developed to
-incorporate potential alternatives in the analysis workflow. The
-\texttt{DeclareDesign} package \citep{blair2019} introduces the MIDA
-framework for researchers to declare, diagnose, and redesign their
-analyses to produce a distribution of the statistic of interest, which
-has been applied in the randomized controlled trial study
-\citep{bishop2024}. The \texttt{multiverse} package
-\citep{multiverse, liu2021} provides a framework for researchers to
-conduct multiverse analysis to systematically explore how different
-choices affect results and to report the range of plausible outcomes
-that arise from alternative analytic paths.
+In addition to qualitative studies, software tools have developed to
+help researchers account for alternatives and uncertainties in the
+analysis workflow and make informed analytical decisions. Examples
+include \texttt{Tea} \citep{jun2019}, which support general statistical
+analysis; \texttt{Tisane} \citep{jun2022}, which guides choices in
+generalized linear mixed-effects models (GLMMs); and
+\texttt{MetaExplore} \citep{kale2023}, which allows for meta-analysis to
+account for decision uncertainty (epistemic uncertainty) during the
+studies. The \texttt{DeclareDesign} package \citep{blair2019} in R
+introduces the MIDA framework for researchers to declare, diagnose, and
+redesign their analyses to produce a distribution of the statistic of
+interest, which has been applied in the randomized controlled trial
+study \citep{bishop2024}. Multiverse analysis provides a framework for
+researchers to conduct multiverse analysis to systematically explore how
+different choices affect results and to report the range of plausible
+outcomes that arise from alternative analytic paths. Downstream works
+expand on how to author and visualize multiverse analysis
+\citep{liu2021}, create R software for multiverse analysis using
+tidyverse syntax \citep{multiverse, götz2024}, and debugging tools
+\citep{gu2023}.
 
 \subsection{Automatic information extraction with
 LLMs}\label{automatic-information-extraction-with-llms}
@@ -1343,6 +1356,12 @@ smoothing spline).
 
 \subsection{Quality of LLM extraction and
 validation}\label{quality-of-llm-extraction-and-validation}
+
+Numerous studies have demonstrate the capability of LLMs in various text
+extraction tasks, but validation is still needed to ensure the quality
+of the extracted information. Most application tends to focus on
+comparing with human annotated samples and compute F1 scores from
+precision and recall.
 
 While the extraction of decisions from literature could be largely
 automated with LLMs, manual validations remains essential to ensure the
