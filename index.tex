@@ -490,6 +490,32 @@ tidyverse syntax \citep{multiverse, götz2024}, and debugging tools
 \subsection{Automatic information extraction with
 LLMs}\label{automatic-information-extraction-with-llms}
 
+In natural language processing, information extraction is a task focus
+on extracting structured information from unstructured text. A common
+sub-task is named entity recognition (NER), like identifying person
+names, locations, and organizations in text \citep{nadeau2007}. Earlier
+approaches relied on rule-based systems and regular expressions to
+extract information. More recent advances, including conditional random
+fields \citep{lafferty}, word embeddings such as word2vec
+\citep{mikolov2013}, and transformer-based architectures like BERT
+\citep{devlin2019}, have led to modern information extraction methods
+that use large language models with prompting. {[}TODO: something about
+prompt engineering{]}
+
+Using LLMs to extract unstructured text offers the advantage of
+automating the process at scale. Applications have been seen in
+epidemiology data \citep{harrod2024}, scientific literature
+\citep{katz2024}, clinical data
+\citep{farzi2024, hu2024, sciannameo2024, gu2025}, chemistry knowledge
+\citep{schilling-wilhelmi2025}, and polymer science \citep{gupta2024},
+climate extreme impact \citep{li2024}, phenotypes \citep{baddour2024},
+and material properties \citep{polak2024}. Unlike classic NER tasks,
+such as extracting clinical data, which typically involves short spans
+of 1-4 tokens, extracting decision choices and their rationales from
+published literature often requires handling longer spans. These
+decisions are inherently less structured and more context-dependent than
+standard entities, making LLM-based extraction relevant and suitable.
+
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
 
@@ -1354,28 +1380,60 @@ smoothing spline).
 
 \section{Discussion}\label{sec-discussion}
 
-\subsection{Quality of LLM extraction and
-validation}\label{quality-of-llm-extraction-and-validation}
+\subsection{Large-language models for information
+extraction}\label{large-language-models-for-information-extraction}
 
-Numerous studies have demonstrate the capability of LLMs in various text
-extraction tasks, but validation is still needed to ensure the quality
-of the extracted information. Most application tends to focus on
-comparing with human annotated samples and compute F1 scores from
-precision and recall.
+Numerous studies have demonstrate the capability of LLMs in various
+information extraction tasks
+\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}.
+Our work adds to this growing body of evidence by showcasing the
+effectiveness of LLMs information extraction task, specifically for
+extracting analytic decisions in scientific literature. While some of
+the information extraction tasks has a short span of 1-4 tokens, for
+example in clinical data, our task involves extracting more complex
+decisions and justification for such analytical decisions, where the
+justification can span a full sentence. This changes the nature of
+specific named entity recognition (NER) tasks to a more general
+information extraction task. Our task also require LLMs to link
+information across sentences and paragraphs to correctly identify the
+variable associated with each decision and use reasoning to identify
+whether a justification provided is indeed a reason specific to the
+choice of the decision.
 
 While the extraction of decisions from literature could be largely
 automated with LLMs, manual validations remains essential to ensure the
-quality of the extracted decisions for further analysis. The quality
-from the LLM ouput directly affects the amount of manual effort needed
-for validation and standardization. Using a default temperature of 1 and
-instructing the model to extract original text rather than paraphrase,
-we find hallucination is not a major issue with Claude and Gemini for
-this application. While prompt engineering is used in this work to
-optimize the prompt for decision extraction, an alternative is to
-fine-tune a local model to improve LLM performance. Such approach could
-be beneficial for a systematic literature review, although it would
-require a labelled decision dataset for training and significantly more
-training efforts.
+quality of the extracted decisions for further analysis. Most existing
+applications compares the LLM outputs with human-annotated samples to
+demonstrate the effectiveness of LLM extraction through the F1 score
+from precision and recall. However, this approach requires a labelled
+dataset for training and testing, which may not be feasible for many
+applications. In our application, we do not have a labelled decision
+dataset for training and testing. Instead, we focus on validating the
+LLM outputs through an interactive shiny application that allows users
+to review and validate each extracted decision. We also use a secondary
+LLM (Claude) to standardize the temporal lag choices into two
+categories: multi-day average and single-day lags, to standardize
+authors use different expressions to describe temporal lag choices.
+While the effectiveness with LLM to automate information extraction, it
+is still an open question on how to validate its output in the absence
+of a labelled dataset.
+
+Using a default temperature of 1 and instructing the model to extract
+original text rather than paraphrase, we find hallucination is not a
+major issue with Claude and Gemini for this application. Given the
+probabilistic nature of LLM outputs, we also conduct sensitivity
+analysis on the reproducibility of the outputs and variation among
+different model providers (Claude and Gemini). We find that our
+information extraction task in general is stable across multiple runs
+with the same model and different models perform similarly in terms of
+the number of decisions extracted, although the specific decisions
+extracted may differ.
+
+While prompt engineering is used in this work to optimize the prompt for
+decision extraction, an alternative is to fine-tune a local model to
+improve LLM performance. Such approach could be beneficial for a
+systematic literature review, although it would require a labelled
+decision dataset for training and significantly more training efforts.
 
 \subsection{Extracting other types of
 decisions}\label{extracting-other-types-of-decisions}
@@ -1413,6 +1471,37 @@ lack of comments in the current practice.
 
 \subsection{Generalizability of the
 workflow}\label{generalizability-of-the-workflow}
+
+Our workflow is scalable and generalizable. In principle, one can take a
+random set of applied papers for our workflow. However, insights about
+the data analysis practices are more likely to be learnt when papers
+share some similarities, for example literature on teh same topic but
+from different researchers can compare practices, papers use the same
+methodology but from different fields enables us to compare practices
+across fields, or even paper with the same variables used and how they
+are used in different fields.
+
+The prompt for LLMs to extract decisions will need to be customized for
+individual application of our workflow. The general LLM prompt structure
+of separating task and rules can be retained and the data structure for
+recording decisions can be retained. Users may want to further customize
+the examples throughout the prompt to suit their specific applications.
+The shiny application for interactively validating and standardizing
+decisions can be reused for different applications. Calculation of paper
+similarity requires comparing decisions of the same variable and type
+among paper pairs. For papers with different levels of similarities, the
+number of comparable decisions may be limited and diagnostic functions
+in the \texttt{R} package can be used to view the decision between paper
+pair side by side or provide summary statistics on the number of
+decisions available for calculating the paper similarities. Uncertainty
+visualization could be used to highlight the confidence in the
+similarity metric based on the number of comparable decisions.
+
+As a new method to collect analytic decision data from literature, our
+work can connect to meta-analysis to assess how different decisions
+affect the results and also in general literature search and
+recommendation applications to find similar papers based on the
+decisions made in the analysis.
 
 \section{Conclusion}\label{sec-conclusion}
 
