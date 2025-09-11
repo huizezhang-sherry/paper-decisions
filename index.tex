@@ -320,7 +320,7 @@ analysis, document similarity}
 TODO: need references
 
 Decisions are made at every stage of data analysis, from initial data
-collection and preprocessing to modeling. One might expect well-trained
+collection, pre-processing to modeling. One might expect well-trained
 researchers to make similar choices when faced with the same analytical
 task, yet evidence suggests otherwise. Many-analyst experiments show
 that independent analysts often arrive at markedly different
@@ -333,84 +333,80 @@ across studies. For junior researchers who lack guidance, this
 variability may lead to over reliance on default statistical software
 settings or arbitrary choices made without clear justification.
 
-A common approach to investigate uncertainty in decision choices is
+A common approach to investigate uncertainty in analytical decisions is
 sensitivity analysis, where researchers systematically vary key
 decisions in their analysis to assess the robustness of their findings.
 Multiverse analysis extends this idea by evaluating \emph{all} plausible
-combinations of analytical choices to examine how results vary across
-the full decision space \citep{multiverse, blair2019}. However, what an
-analyst consider ``reasonable'' is subjective and may not reflect the
-full range of options commonly used in practice. Even when a reasonable
-set of alternatives is tested, the sensitivity analysis may be of
-limited interest to other researchers facing a similar problem, who are
-seeking evidence to inform comparable decision choices and their
-rationale. Ideally, decision-making in applied research would be studied
+combinations of decision choices to examine how results vary across the
+full decision space \citep{multiverse, blair2019}. However, what an
+analyst consider reasonable may not reflect the full range of options
+used in practice. Even when a reasonable set of alternatives is tested,
+the sensitivity analysis may be of limited interest to other researchers
+facing a similar problem, who are seeking evidence to inform comparable
+decision. Ideally, decision-making in applied research would be studied
 by following experienced analysts throughout the entire analysis process
 to capture their reasoning. In reality, this is rarely feasible and not
-scalable.
+scalable. While individual studies may not capture the full range of
+decision choices used in practice, crowdsourcing decisions from a
+collection of studies on a shared theme creates a ``many-analyst''
+setting that reveals how analysts make choices and justify them in
+practice. Classic research training typically involves reading through
+the literature to learn the common choices and to understand how
+decisions are made. This process now has the possibility to be automated
+at scale given recent advance in information extraction with Large
+Language Models' (LLMs)
+\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}.
 
-While individual studies may not capture the full range of reasonable
-decision options, crowdsourcing decisions from a collection of studies
-on a shared theme creates a ``many-analyst'' setting that reveals how
-analysts make choices and justify them in practice. Classic research
-training typically involves reading through the literature to understand
-how decisions are made and to learn the common choices. This process now
-has the possibility to be automated at scale given recent LLMs' ability
-to follow instructions to extract structured information from
-unstructured text. In this work, we propose a new approach for studying
-data analysis decision choices by automatically extracting decisions
-from scientific literature using Large Language Models (LLMs). We
-develop a tabular schema to record decisions, automate the extraction
-process with LLMs, and introduce a new paper similarity measure based on
-decision similarity, which serves as a distance metric for dimension
-reduction methods to visualize papers group according to their decision
-patterns.
-
-We apply this workflow to a set of 56 air pollution modelling studies
-estimating the effect of particulate matter (PM2.5 or PM10) on mortality
-and hospital admissions. This type of studies is typically analyzed
-using Poisson generalized linear models (GLMs) or generalized additive
-models (GAMs). Analysis of the extracted decisions reveals common
-choices for decisions considered in this type of studies such as the
-number of knots or degree of freedom for smoothing methods and the
-temporal lags for time and weather variables. Multi-dimensional scaling
-on the paper similarity distance finds three distinct clusters
-corresponding to different smoothing methods -- LOESS, natural spline,
-and smoothing spline -- used in European and U.S. studies. These
-findings align with the APHENA project \citep{APHENA}, which synthesizes
-research from multiple studies in Europe and North America by expert
-investigators.
+In this work, we propose a new approach for studying data analysis
+decisions by automatically extracting decisions from scientific
+literature using LLMs. We develop a tabular schema to record decisions,
+automate the extraction process with LLMs, and introduce a new paper
+similarity measure based on decision similarity. This similarity measure
+can serves as a distance metric in dimension reduction methods to
+visualize papers according to their decisions. We apply this workflow to
+a set of 56 air pollution modelling studies that estimate the effect of
+particulate matter (PM2.5 or PM10) on mortality and hospital admissions.
+This type of studies is typically analyzed using Poisson generalized
+linear models (GLMs) or generalized additive models (GAMs). Analysis of
+the extracted decisions reveals common choices in this class of studies,
+such as the number of knots or degree of freedom for smoothing methods
+and the temporal lags for time and weather variables. Multi-dimensional
+scaling on the paper similarity distance finds three distinct clusters
+corresponding to different smoothing methods: LOESS, natural spline, and
+smoothing spline. These findings align with the APHENA project
+\citep{APHENA}, which synthesizes research from multiple studies in
+Europe and North America led by expert investigators.
 
 In this workflow, we also provide detailed documentation on the
-validation and standardization of LLM outputs. Because LLMs generate
-results probabilistically, it is not yet clear how these outputs should
-be validated for downstream analysis in practice. We outline the
-validation and standardization process, including the use of a developed
-Shiny application in R for reviewing decisions, the types of edits made
-through validation, and secondary standardization of decisions.
-Additionally, we conduct sensitivity across different LLM providers and
-assess the reproducibility of the text extraction from single LLM
-models. We aim to offer guidance for future studies seeking to extract
-structured information from unstructured text using LLMs.
+validation and standardization of LLM outputs. We outline the validation
+and standardization process, including the use of a developed Shiny
+application in R for reviewing decisions and the types of edits made
+through validation. We also use a secondary LLM to standardize reported
+choices of temporal lag decisions. Additionally, we conduct sensitivity
+analysis on reproducibility across runs and model providers. future
+studies for information extraction task with LLMs.
 
 In summary, the contribution of this work includes:
 
 \begin{itemize}
 \item
-  A scalable and automated approach to study data analysis decision
-  choices through extracting of decisions from published scientific
-  literature using LLMs,
+  A scalable and automated approach to study data analysis decisions
+  through extracting of decisions from published scientific literature
+  using LLMs,
 \item
-  A new method to construct paper similarities based on the decision and
-  the semantic similarity of their rationale,
+  A new method to construct paper similarities based on decision choices
+  and the semantic similarity of their rationales,
 \item
-  A data schema for summarizing decisions made in applied studies in a
-  tidy format,
+  Practices for validating and standardizing LLM outputs, including a
+  shiny GUI tool for editing outputs, the use of secondary LLM for
+  standardizing unstructured response, and sensitivity analysis on
+  reproducibility across runs and model providers,
 \item
-  A shiny GUI tool for validating LLM outputs for editing tables, and
+  A data schema for recording decisions in data analysis in a tidy
+  format, and
 \item
-  A dataset of decisions and rationale, along with metadata, compiled
-  from 62 studies in air pollution mortality modelling.
+  A dataset of decisions, along with metadata, compiled from 56 studies
+  in air pollution mortality modelling literature.
 \end{itemize}
 
 \section{Related work}\label{sec-background}
@@ -420,126 +416,119 @@ analysis}\label{analytic-decision-making-in-data-analysis}
 
 Data analysis is a complex and iterative process
 \citep{jun2022, jun2022hypothesis, jun2019} that involves multiple
-stages, including data collection, cleaning, visualization, modeling,
-and communication. At each stage, analysts make decisions informed by
-domain practices, statistical knowledge, and feedback from the data.
-These decisions, such as which variables to include in a model, how to
-handle missing data, and which statistical methods to use, act as
-branching points in the analysis workflow. The full set of possible
+stages, including data collection, data cleaning, visualization,
+modeling, and communication. At each stage, analysts make decisions
+informed by domain practices, statistical knowledge, and the data. These
+decisions, such as which variables to include in a model, how to handle
+missing data, and how hyper-parameters are chosen, act as branching
+points in the analysis workflow. {[}TODO{]}The full set of possible
 paths through these branching points form what \citet{gelman2014}
 describe as the ``garden of forking paths''. While one might expect
-well-trained researchers will often converge to similar decision
-choices, empirical evidence suggests otherwise. ``Many analyst
-experiments'' show that independent research groups analyze the same
+well-trained researchers to make similar choices when facing similar
+decisions, empirical evidence suggests otherwise. ``Many analyst
+experiments'' show that independent research groups analyzing the same
 dataset to address the same research questions can arrive at widely
-different conclusions. For example \citet{silberzahn2018} asks 29 groups
-of analysts to conduct an analysis to address the same research
+different conclusions. For example, \citet{silberzahn2018} asks 29
+groups of analysts to conduct an analysis to address the same research
 questions \emph{whether soccer players with dark skin tone are more
 likely than those with light skin tone to receive red cards from
 referees}. Researchers reported an estimated effect size from 0.89 to
-2.93 in odds ratio, 70\% of the teams found a statistically significant
-positive effect while others don't, and 21 unique combinations of
-covariates are used by 29 different analyses. Similar experiements has
-been observed in structural equation modeling \citep{sarstedt2024},
-applied microeconomics \citep{huntington-klein2021}, neuroimaging
-\citep{botvinik-nezer2020}, and ecology and evolutionary biology
-\citep{gould2025}.
+2.93 in odds ratio with 21 unique combinations of covariates are used
+among all 29 analyses. 70\% of the teams found a statistically
+significant positive effect while others don't. This great discrepancy
+among researchers when performing data analysis task is also observed in
+other domains, for example, structural equation modeling
+\citep{sarstedt2024}, applied microeconomics
+\citep{huntington-klein2021}, neuroimaging \citep{botvinik-nezer2020},
+and ecology and evolutionary biology \citep{gould2025}.
 
 Examples like the above illustrate how analytical decisions introduce
 uncertainty into data analysis. These uncertainties have been widely
-discussed for policy recommendation \citep{APHENA} and their
-applications in health, finance, and other domains. To help researchers
-avoid misusing their ``researcher degree of freedom'', guidelines and
-checklists have been developed, informed by demonstrations of how such
-misuse can lead to p-hacking and inflated effect size
-\citep{wicherts2016, simmons2011}. Pre-registration is a common practice
-in medicine and biostatistics, yet \citet{pang2022} found that this is
-not well-adopted among HCI researchers. Given the nuanced nature of data
-analysis, more work have examined how analysts make decisions in
-practice, through interviews in both academia and industry. These
-studies include qualitative analysis of analytical decisions
-\citep{kale2019}, interviews with data analysts about exploratory data
-analysis practice in industry \citep{alspaugh2019, kandel2012},
-interviews with data workers on how they consider alternatives in data
-analysis \citep{liu_understanding_2020}, and interviews researchers
-about their analysis decisions in published studies \citep{liu2020}.
-Participatory studies, like in the many analyst experiments, are also
-used to support participatory input to democratize decisions in fairness
-machine learning \citep{simson2025}.
+discussed in the literature given their impact for policy recommendation
+\citep{APHENA} and {[}TODO{]} applications in health, finance, fairness
+machine learning \citep{simson2025}. Through experiments, research has
+shown that analysts' decisions can lead to p-hacking and inflated effect
+size, when not properly used \citep{wicherts2016, simmons2011}. Hence,
+guidelines and checklists have been developed to recommend the best
+practice to guide statistical analysis. In medicine and biostatistics,
+pre-registration is a common practice to regulate analysts making
+decisions after seeing the data \citep{van2015}. Given the nuanced
+nature of data analysis, more work have examined how analysts make
+decisions in practice through interviews in both academia and industry.
+These studies include qualitative analysis of the decisions made
+\citep{kale2019, liu2020}, interviews with data analysts about
+exploratory data analysis practice in industry
+\citep{alspaugh2019, kandel2012} and about how they consider
+alternatives in data analysis \citep{liu_understanding_2020}.
 
 In addition to qualitative studies, software tools have developed to
-help researchers account for alternatives and uncertainties in the
-analysis workflow and make informed analytical decisions. Examples
-include \texttt{Tea} \citep{jun2019}, which support general statistical
-analysis; \texttt{Tisane} \citep{jun2022}, which guides choices in
-generalized linear mixed-effects models (GLMMs); and
-\texttt{MetaExplore} \citep{kale2023}, which allows for meta-analysis to
-account for decision uncertainty (epistemic uncertainty) during the
-studies. The \texttt{DeclareDesign} package \citep{blair2019} in R
-introduces the MIDA framework for researchers to declare, diagnose, and
-redesign their analyses to produce a distribution of the statistic of
-interest, which has been applied in the randomized controlled trial
-study \citep{bishop2024}. Multiverse analysis provides a framework for
-researchers to conduct multiverse analysis to systematically explore how
-different choices affect results and to report the range of plausible
-outcomes that arise from alternative analytic paths. Downstream works
-expand on how to author and visualize multiverse analysis
-\citep{liu2021}, create R software for multiverse analysis using
-tidyverse syntax \citep{multiverse, götz2024}, and debugging tools
-\citep{gu2023}.
+help researchers account for alternatives and uncertainties and make
+informed decisions in data analysis. Examples include \texttt{Tea}
+\citep{jun2019}, which support general statistical analysis;
+\texttt{Tisane} \citep{jun2022}, which guides choices in generalized
+linear mixed-effects models (GLMMs); and \texttt{MetaExplore}
+\citep{kale2023}, which account for epistemic uncertainty (decision
+uncertainty) in meta-analysis. The \texttt{DeclareDesign} package
+\citep{blair2019} proposes the MIDA framework for researchers to
+declare, diagnose, and redesign their analyses with account for
+uncertainties of reporting the statistic of interest. Multiverse
+analysis proposes a different method to allow researchers to evaluate
+\emph{all} plausible combinations of decision choices to examine how
+results vary in the full decision space. Work has been done on the
+software tools to support multiverse analysis
+\citep{multiverse, götz2024} and visualization of multiverse results
+\citep{liu2021}, and debugging tools \citep{gu2023}.
 
 \subsection{Automatic information extraction with
 LLMs}\label{automatic-information-extraction-with-llms}
 
 In natural language processing, information extraction is a task focus
-on extracting structured information from unstructured text. A common
-sub-task is named entity recognition (NER), like identifying person
-names, locations, and organizations in text \citep{nadeau2007}. Earlier
-approaches relied on rule-based systems and regular expressions to
-extract information. More recent advances, including conditional random
-fields \citep{lafferty}, word embeddings such as word2vec
+on extracting structured information from unstructured text. Earlier
+approaches in information extraction tasks relied on rule-based systems
+and regular expressions. More recent advances, including conditional
+random fields \citep{lafferty}, word embeddings such as word2vec
 \citep{mikolov2013}, and transformer-based architectures like BERT
-\citep{devlin2019}, have led to modern information extraction methods
-that use large language models with prompting. {[}TODO: something about
-prompt engineering{]}
-
-Using LLMs to extract unstructured text offers the advantage of
-automating the process at scale. Applications have been seen in
-epidemiology data \citep{harrod2024}, scientific literature
+\citep{devlin2019}, have led to the current use of LLM to extract
+information with prompts. Using LLMs to extract unstructured text offers
+the advantage of automating the process at scale. Applications have been
+seen in epidemiology data \citep{harrod2024}, scientific literature
 \citep{katz2024}, clinical data
 \citep{farzi2024, hu2024, sciannameo2024, gu2025}, chemistry knowledge
 \citep{schilling-wilhelmi2025}, and polymer science \citep{gupta2024},
 climate extreme impact \citep{li2024}, phenotypes \citep{baddour2024},
-and material properties \citep{polak2024}. Unlike classic NER tasks,
-such as extracting clinical data, which typically involves short spans
-of 1-4 tokens, extracting decision choices and their rationales from
-published literature often requires handling longer spans. These
-decisions are inherently less structured and more context-dependent than
-standard entities, making LLM-based extraction relevant and suitable.
+and material properties \citep{polak2024}. An easier task in information
+extraction is called Named Entity Recognition (NER) to identify short
+span information (1-4 tokens) like person names and locations from
+unstructured text \citep{nadeau2007}. An example of this is extracting
+patient's information and vitals in clinical data. Extracting decisions
+from published literature is a more general task than NER, since
+justification of a decision typically spans more than just a few words.
+Our task also requires linking information across sentences, sometimes
+sections, to correctly identify the variables a decision refers to.
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
 
 With the growing volume of scientific publications and the difficulty of
-navigating the literature to stay informed, there is increasing interest
-in developing tools to visualize and recommend scientific papers. These
-systems link papers based on their similarity and relevance, typically
-determined by keywords \citep{isenberg2017}, citation information
-(e.g.~citation list, co-citation) \citep{chen2006}, or combinations with
-other relevant paper metadata (e.g.~author, title)
-\citep{bethard2010, chou2011, dörk2012, heimerl2016}. Recent approaches
-incorporate text-based information using topic modelling
-\citep{alexander2014}, argumentation-based information retrieval
-\citep{tbahriti2006}, and text embedding \citep{narechania2022}. While
-metadata and high-level text-based information are useful for finding
-relevant papers, researchers also need tools that help them \emph{make
-sense} of the literature rather than simply \emph{locating} it. In
-applied data analysis, one interest is to understand how studies differ
-or align in their analytical approaches. Capturing the decisions and
-reasoning expressed in analyses on a shared theme enables the
-calculation of similarity metrics based on these choice and their
-underlying rationale, which supports clustering and visualizing paper to
-identify common practices in the field.
+navigating the literature, there is an increasing interest in developing
+systems to visualize and recommend scientific papers. These systems link
+papers based on their similarity and relevance, typically determined by
+keywords \citep{isenberg2017}, citation information \citep{chen2006},
+e.g.~citation list and co-citation, or combinations with other relevant
+paper metadata \citep{bethard2010, chou2011, dörk2012, heimerl2016},
+e.g.~author and title. Recent approaches incorporate text-based
+information using topic modelling \citep{alexander2014},
+argumentation-based information retrieval \citep{tbahriti2006}, and text
+embedding \citep{narechania2022}. While metadata and high-level
+text-based information are useful for finding relevant papers,
+researchers also need tools that help them \emph{make sense} of the
+literature rather than simply \emph{locating} it. In applied data
+analysis, one interest is to understand how studies differ or align in
+their decision choices. Capturing the decision choices and reasons that
+justify the choices from analyses enables the calculation of similarity
+among papers and can pipe into dimension reduction methods and
+visualization for a global view of analysis practice in the field or
+recommend similar papers based on decision similarities.
 
 \section{Methods}\label{sec-extract-decisions}
 
@@ -1402,9 +1391,9 @@ quality of the extracted decisions for downstream analysis. Most
 existing applications evaluate LLMs by comparing their outputs to
 human-annotated datasets, reporting metrics such as precision, recall,
 and F1 score. Because this approach depends on labeled data, which is
-not yet fully automated, the challenge of validating LLM outputs still
-an open question for information extraction tasks. In our work, we
-automate some of the manual validation with a secondary LLM (Claude) to
+not yet fully automated, it is not yet clear how these outputs should be
+validated for downstream analysis in practice. In our work, we automate
+some of the manual validation with a secondary LLM (Claude) to
 standardize the temporal lag choices into two categories: multi-day
 averages and single-day lags.
 
