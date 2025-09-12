@@ -1322,51 +1322,38 @@ clustering pattern corresponding to the three main smoothing methods
 
 \section{Discussion}\label{sec-discussion}
 
-The similarity metric we proposed focuses on the variation of choices
-across analyses, without directly assessing how those choices influence
-results. By pooling decision choices from multiple studies with LLMs, it
-becomes much easier to reveal common practices and difference in
-research practices, highlighting decisions that require further
-sensitivity analyses to assess their impact. The different smoothing
-methods revealed in Figure~\ref{fig-mds} are consistent with the
-analysis by \citet{peng2006} and \citet{touloumi2006} that compares
-different smoothing methods and rationale for selecting smoothing
-parameters.
-
 \subsection{Large-language models for information
 extraction}\label{large-language-models-for-information-extraction}
 
-Numerous studies have demonstrated the capability of LLMs in information
-extraction across domains
-\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}.
-Our work applies the LLMs to extract analytic decisions in scientific
-literature, providing further evidence of their effectiveness for
-information extraction task. Unlike named entity recognition (NER) in
-clinical data, our task requires capturing more complex analytical
-decisions and their justifications, which typically span more than just
-a few tokens. This also requires linking information across sentences
-and sometimes sections to correctly identify the variables (e.g.,
-linking ``weather'' to ``temperature'' and ``humidity'').
-
-While the extraction of decisions from literature could be largely
-automated with LLMs, manual validations remains essential to ensure the
-quality of the extracted decisions for downstream analysis. Most
-existing applications evaluate LLMs by comparing their outputs to
-human-annotated datasets, reporting metrics such as precision, recall,
-and F1 score. Because this approach depends on labeled data, which is
-not yet fully automated, it is not yet clear how these outputs should be
-validated for downstream analysis in practice. In our work, we automate
-some of the manual validation with a secondary LLM (Claude) to
-standardize the temporal lag choices into two categories: multi-day
-averages and single-day lags.
+Numerous studies
+\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}
+have demonstrated the capability of LLMs for information extraction
+task. Our work applies the LLMs to extract analytic decisions in
+scientific literature, providing further evidence of their effectiveness
+for information extraction task. Our task requires capturing more
+complex analytical decisions and their justifications, which typically
+span more than just a few tokens like in named entity recognition. Our
+task also requires linking information across sentences and sometimes
+sections to correctly identify the variables of a decision (e.g.,
+linking ``weather'' to ``temperature'' and ``humidity''). While LLM has
+performed well on extracting decisions from the literature, manual
+validations are still required to ensure the quality of the extracted
+decisions for downstream analysis. Most existing applications evaluate
+LLMs by comparing their outputs to human-annotated datasets, reporting
+metrics such as precision, recall, and F1 score. Because this approach
+depends on labeled data and it is not yet clear how these outputs should
+be validated for downstream analysis in practice. In our work, we
+automate some of the manual validation with a secondary LLM (Claude) to
+standardize the temporal lag choices in different expression into two
+categories.
 
 With a default temperature of one and the prompt to instruct the model
 to extract the original text rather than paraphrase, we find that
 hallucination is not a major issue with Claude and Gemini in this
-application. Because LLM outputs are inherently probabilistic, we also
+application. Since LLM outputs are inherently probabilistic, we also
 conduct sensitivity analyses on reproducibility across runs and model
 providers. The output is generally stable: repeated runs with the Gemini
-produces consistent results, and different models extracted a similar
+produce consistent results, and different models extracted a similar
 number of decisions.
 
 While we optimize the prompt for decision extraction in this work, an
@@ -1379,59 +1366,60 @@ it would require greater model training efforts with labeled data.
 decisions}\label{extracting-other-types-of-decisions}
 
 In this work, we focus on modeling decisions for the baseline model in
-the air pollution epidemiology literature. Analyses in this fields often
-fit multiple models for different health outcomes and secondary models,
-such as distributed lag models and multi-pollutant models, are also
-commonly used to estimate relative risks and multi-pollutants
-interactions. These increase the complexity of decision extraction with
-LLMs because authors often only describe the differences from the
-baseline specification, implicitly assuming other decisions remain
-unchanged. Hence, LLMs will need to link the decisions across different
-models and reconstruct the complete set of decisions for each model.
+the air pollution epidemiology literature. Analyses in this field often
+fit multiple models for different health outcomes and use secondary
+models, such as distributed lag models and multi-pollutant models, to
+estimate relative risks and multi-pollutants interactions. These
+increase the complexity of decision extraction with LLMs because authors
+often only describe the differences from the baseline specification,
+implicitly assuming other decisions remain unchanged. Hence, LLMs will
+need to link the decisions across different models and reconstruct the
+complete set of decisions for each model.
 
 Beyond modeling choices, decisions in data pre-processing are also
 interesting to compare. For example, \citet{braga2001} aggregated air
 pollution measures from multiple PM10 monitors within the same location
-into a single value. Choices about data source, aggregation, imputation,
-among others, could also have impact on uncertainty of the estimation.
-However, these decisions are often less well-documented in the
-literature than the modeling decisions, hence cannot be extracted by
-LLMs. Proper documentation and reporting of these decisions in future
-research are needed before our workflow could be applied to
-pre-processing decisions.
+into a single value. Pre-processing choices such as data source,
+aggregation method, imputation, also have impact on uncertainty of the
+estimated effect size of particulate matters. However, these decisions
+are often not properly and adequately described in the manuscript,
+making it impossible to extract by LLMs. Proper documentation and
+reporting standard of in pre-processing decisions are needed before our
+workflow could be applied to pre-processing decisions.
 
 With growing advocacy for reproducibility, papers nowadays are expected
 to share code and data, if applicable. Code availability provides a
-useful supplementary source for identifying decisions and cross-checking
-them against manuscript description. However, while script may reveal
-what choices were made, the rationale behind these choices is often not
-documented under the current practice.
+useful supplementary source for identifying decision choices and
+cross-checking them against descriptions in the manuscript. However,
+while script may reveal what choices were made, the rationale behind
+these choices are often not documented under the current practice.
 
 \subsection{Generalizability of the
 workflow}\label{generalizability-of-the-workflow}
 
 In principle, our workflow is scalable and generalizable to a random set
 of applied papers. However, insights about the data analysis practices
-are more likely to emerge when papers share certain similarities. For
-example literature on the same topic but authored by different
-researchers enables comparisons of practices within a field; literature
-that use the same methodology across disciplines allow comparisons
-across fields; and literature that considers the same variables can show
-how those variables are used in different domains.
+are more likely to be reveals when papers share certain similarities.
+For example literature on the same topic but different authors allows
+for understanding of common practices within a field, literature using
+the same methodology across different disciplines allow comparisons of
+the same statistical method across fields; and literature that considers
+the same variables can show how those variables are used in different
+domains.
 
-The LLM prompt for extracting decisions will need to be customized for
-each application of the workflow. The general LLM prompt structure and
-the data schema for recording decisions can be retained, while examples
-within the prompt may be adapted to suit the specific application. The
-shiny application for interactively validating and standardizing
-decisions can be reused across applications. Calculating paper
-similarity requires comparing decisions on the same variable and type
-across paper pairs. For papers with limited similarities, the number of
-comparable decisions may be limited. Diagnostic functions are available
-to display decisions side by side or provide summary statistics on the
-number of comparable decisions. Uncertainty visualization could be used
-to highlight the confidence in the similarity metric based on the number
-of comparable decisions.
+Our LLM prompt for extracting decisions will need to be customized for
+each application of the workflow. The general prompt structure and the
+data schema for recording decisions can be reused, while examples within
+the prompt may be adapted to suit the specific application. The shiny
+application for interactively validating and standardizing decisions can
+be reused across applications. Calculating paper similarity requires
+comparing decisions on the same variable and type across paper pairs.
+For papers with limited similarities, the number of comparable decisions
+may be limited. Diagnostic functions are available to display decisions
+side by side or provide summary statistics on the number of comparable
+decisions. Uncertainty visualization on the paper similarity score can
+be used to highlight the confidence with respect to the number of
+comparable decisions.
 
 As a new method for collecting analytic decision data from literature,
 our workflow can be connected to meta-analysis to assess how different
@@ -1441,12 +1429,11 @@ based on the analytic decisions they employ.
 
 \section{Conclusion}\label{sec-conclusion}
 
-In this paper, we aim to study how analysts make decisions in their data
-analysis practice. While classic interviews are often conducted in small
-scale with toy examples, we developed a pipeline for automatically
-extracting decisions using LLMs (Claude and Gemini) from scientific
-literature. We also introduced a method for calculating paper similarity
-through comparing the similarities among decisions and the similarity
+In this paper, we developed a scalable and generalizable pipeline for
+automatically extracting analytical decisions using LLMs from scientific
+literature to study how analysts make decisions in data analysis. We
+also introduced a method for calculating paper similarity through
+comparing the similarities among decision choices and the similarity
 metric can be used as a distance to cluster papers by their decision
 choices and visualization with dimension reduction algorithms, such as
 multidimensional scaling. We applied this pipeline to a set of air
@@ -1454,19 +1441,22 @@ pollution modeling literature that associates daily particulate matter
 and daily mortality and hospital admission. From the extracted modeling
 decisions, we identify the most common decision choices in this type of
 analysis and the paper similarity score calculation revealed the three
-clusters of paper corresponding to different modeling strategies. These
-findings are all consistent with the general understanding of the field,
-as documented in the APHENA project \citep{APHENA} and other
-methodological comparison studies \citep{peng2006, touloumi2006}.
+clusters of paper corresponding to different smoothing methods.
 
-While sensitivity analyses are commonly used to assess the robustness of
-findings to different analytical choices, the set of choices tested is
-often limited and selected subjectively by the authors. Our approach
-offers a new perspective by pooling decisions made in analyses across
-studies in the fields. This allows for a holistic account on the
-alternatives in the field and identification of both consensus and
-divergence within the field, providing insights for future research and
-methodological development.
+Many work on studying decision-making in data analysis conduct
+qualitative interviews with a small number of analysts to understand
+their decision-making process. ``many-analysts'' studies gather together
+analysts in a controlled experiment to observe analysts conduct the
+analysis. Our approach is also observational in nature, but we
+``observe'' analysts in real world problems with real data that have
+policy implication, while being scalable and cost-effective to a broader
+exploration of decision-making practices in different contexts and
+disciplines. Compared to sensitivity analysis or multiverse analysis,
+our approach offers a different perspective by pooling together
+decisions made in analyses across the field to reveal the options
+considered to highlight uncertainty in decisions that require further
+sensitivity analyses to assess their impact
+\citep{peng2006, touloumi2006}.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references.bib}
