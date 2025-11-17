@@ -1,12 +1,6 @@
 ---
-title: Appendix to "Dossier: visualizing/ understanding decision choices in data analysis via decision similarity"
-authors:
-  - name: H. Sherry Zhang
-    affiliation: University of Texas at Austin
-    corresponding: true
-  - name: Roger D. Peng
-    affiliation: University of Texas at Austin
-output: pdf
+title: Appendix to "An LLM-based pipeline for understanding decision choices in data analysis from published literature"
+output: pdf_document
 ---
 
 

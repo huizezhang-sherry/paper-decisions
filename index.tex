@@ -1,11 +1,35 @@
-\documentclass[manuscript,screen,review,anonymous]{acmart}
-
-
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{interact}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \IfFileExists{microtype.sty}{% use microtype if available
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -16,54 +40,30 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
 
-%%
-%% This is file `sample-manuscript.tex',
-%% generated with the docstrip utility.
-%%
-%% The original source files were:
-%%
-%% samples.dtx  (with options: `manuscript')
-%% 
-%% IMPORTANT NOTICE:
-%% 
-%% For the copyright see the source file.
-%% 
-%% Any modified versions of this file must be renamed
-%% with new filenames distinct from sample-manuscript.tex.
-%% 
-%% For distribution of the original source see the terms
-%% for copying and modification in the file samples.dtx.
-%% 
-%% This generated file may be distributed as long as the
-%% original source files, as listed above, are part of the
-%% same distribution. (The sources need not necessarily be
-%% in the same archive or directory.)
-%%
-%%
-%% Commands for TeXCount
-%TC:macro \cite [option:text,text]
-%TC:macro \citep [option:text,text]
-%TC:macro \citet [option:text,text]
-%TC:envir table 0 1
-%TC:envir table* 0 1
-%TC:envir tabular [ignore] word
-%TC:envir displaymath 0 word
-%TC:envir math 0 word
-%TC:envir comment 0 0
-%%
-%%
-%% The first command in your LaTeX source must be the \documentclass command.
-
-
-% Options for packages loaded elsewhere
-\PassOptionsToPackage{unicode}{hyperref}
-\PassOptionsToPackage{hyphens}{url}
-\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
-
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
-
-%% PANDOC PREAMBLE BEGINS
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -92,6 +92,39 @@
 \makeatother
 
 
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
@@ -103,11 +136,9 @@
 
 
  
-\usepackage[]{natbib}
-\bibliographystyle{plainnat}
 
 
-\definecolor{mypink}{RGB}{219, 48, 122}
+\usepackage{orcidlink}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -149,117 +180,32 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-%% PANDOC PREAMBLE ENDS
-
-\setlength{\parindent}{10pt}
-\setlength{\parskip}{0pt}
-
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
 \hypersetup{
-  pdftitle={An LLM-based pipeline for understanding decision choices in data analysis from published literature},
+  pdftitle={An LLM-based Pipeline for Understanding Decision Choices in Data Analysis from Published Literature},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
+  pdfkeywords={decision choice, data analysis, Large Language Models},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
   citecolor={Blue},
-  urlcolor={red},
-  pdfcreator={LaTeX via pandoc, via quarto}}
-
-%% \BibTeX command to typeset BibTeX logo in the docs
-\AtBeginDocument{%
-  \providecommand\BibTeX{{%
-    Bib\TeX}}}
-
-%% Rights management information.  This information is sent to you
-%% when you complete the rights form.  These commands have SAMPLE
-%% values in them; it is your responsibility as an author to replace
-%% the commands and values with those provided to you when you
-%% complete the rights form.
-\setcopyright{acmcopyright}
-\copyrightyear{2025}
-\acmYear{2025}
-\acmDOI{XXXXXXX.XXXXXXX}
-
-%% These commands are for a PROCEEDINGS abstract or paper.
-\acmConference[CHI'26]{CHI Conference on Human Factors in Computing
-Systems}{Apr 13--17, 2026}{Barcelona, Spain}
-\acmPrice{}
-\acmISBN{978-1-4503-XXXX-X/18/06}
-
-%% Submission ID.
-%% Use this when submitting an article to a sponsored event. You'll
-%% receive a unique submission ID from the organizers
-%% of the event, and this ID should be used as the parameter to this command.
-%%\acmSubmissionID{123-A56-BU3}
-
-%%
-%% For managing citations, it is recommended to use bibliography
-%% files in BibTeX format.
-%%
-%% You can then either use BibTeX with the ACM-Reference-Format style,
-%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
-%% support for advanced citation of software artefact from the
-%% biblatex-software package, also separately available on CTAN.
-%%
-%% Look at the sample-*-biblatex.tex files for templates showcasing
-%% the biblatex styles.
-%%
-
-%%
-%% The majority of ACM publications use numbered citations and
-%% references.  The command \citestyle{authoryear} switches to the
-%% "author year" style.
-%%
-%% If you are preparing content for an event
-%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
-%% citations and references.
-%% Uncommenting
-%% the next command will enable that style.
-%%\citestyle{acmauthoryear}
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
 
 
-%% end of the preamble, start of the body of the document source.
+\title{An LLM-based Pipeline for Understanding Decision Choices in Data
+Analysis from Published Literature}
+\author{H. Sherry Zhang$\textsuperscript{1}$, Roger D.
+Peng$\textsuperscript{1}$}
+
+\thanks{CONTACT: H. Sherry
+Zhang. Email: \href{mailto:hsherryzhang@utexas.edu}{\nolinkurl{hsherryzhang@utexas.edu}}. }
 \begin{document}
-
-
-%%
-%% The "title" command has an optional parameter,
-%% allowing the author to define a "short title" to be used in page headers.
-\title{An LLM-based pipeline for understanding decision choices in data
-analysis from published literature}
-
-%%
-%% The "author" command and its associated commands are used to define
-%% the authors and their affiliations.
-%% Of note is the shared affiliation of the first two authors, and the
-%% "authornote" and "authornotemark" commands
-%% used to denote shared contribution to the research.
-
-
-  \author{H. Sherry Zhang}
-  
-            \affiliation{%
-                  \institution{University of Texas at Austin}
-                                  \city{Austin}
-                                  \country{USA}
-                      }
-        \author{Roger D. Peng}
-  
-            \affiliation{%
-                  \institution{University of Texas at Austin}
-                                  \city{Austin}
-                                  \country{USA}
-                      }
-      
-
-%% By default, the full list of authors will be used in the page
-%% headers. Often, this list is too long, and will overlap
-%% other information printed in the page headers. This command allows
-%% the author to define a more concise list
-%% of authors' names for this purpose.
-%\renewcommand{\shortauthors}{Trovato et al.}
-%%  
-%% The abstract is a short summary of the work to be presented in the
-%% article.
+\captionsetup{labelsep=space}
+\maketitle
+\textsuperscript{1}  University of Texas at Austin, Austin, USA
 \begin{abstract}
 Decision choices, such as those made when building regression models,
 and their rationale are essential for interpreting results and
@@ -276,45 +222,16 @@ visualization methods using clustering algorithms. As an example, this
 workflow is applied to analyses studying the effect of particulate
 matter on mortality. This approach enables scalable and automated
 studies of decision choices in applied data analysis, providing an
-alternative to existing qualitative and interview-based studies.    
+alternative to existing qualitative and interview-based studies.
 \end{abstract}
-
-%%
-%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
-%% Please copy and paste the code instead of the example below.
-%%
-\begin{CCSXML}
-<ccs2012>
- <ceval: <concept>
-   <ceval: <concept_id>10003120.10003121</concept_id>
-   <ceval: <concept_desc>Human-centered computing~Human computer interaction (HCI)</concept_desc>
-   <ceval: <concept_significance>500</concept_significance>
- </eval: </concept>
- <concept>
-   <concept_id>10002951.10003317</concept_id>
-   <concept_desc>Information systems~Information retrieval</concept_desc>
-   <concept_significance>500</concept_significance>
-   </concept>
- </eval: </ccs2012>
-\end{CCSXML}
-
-\ccsdesc[500]{Human-centered computing~Human computer interaction (HCI)}
-\ccsdesc[500]{Information systems~Information retrieval}
-
-%%
-%% Keywords. The author(s) should pick words that accurately describe
-%% the work being presented. Separate the keywords with commas.
-\keywords{large language models, analytic decision making in data
-analysis, document similarity}
+\begin{keywords}
+\def\sep{;\ }
+decision choice, data analysis, Large Language Models\sep 
+decision choice, data analysis, Large Language Models
+\end{keywords}
 
 
-%%
-%% This command processes the author and affiliation and title
-%% information and builds the first part of the formatted document.
-\maketitle
-
-\setlength{\parskip}{-0.1pt}
-
+\setstretch{2}
 \section{Introduction}\label{introduction}
 
 Data analysis is a complex and iterative process, and decisions are made
@@ -324,23 +241,24 @@ to make similar choices when faced with the same analytical task, yet
 evidence suggests otherwise. ``Many-analyst'' experiments show that
 independent analysts often arrive at markedly different conclusions,
 even when analyzing the same dataset to answer the same research
-question \citep{silberzahn2018, botvinik-nezer2020, gould2025}. This
-variation in analytical decision-making, described by \citet{gelman2014}
-as the ``garden of forking paths,'' can undermine the quality and
-credibility of reported results and raise uncertainty in the findings.
+question (Silberzahn et al. 2018; Botvinik-Nezer et al. 2020; Gould et
+al. 2025). This variation in analytical decision-making, described by
+Gelman and Loken (2014) as the ``garden of forking paths,'' can
+undermine the quality and credibility of reported results and raise
+uncertainty in the findings.
 
 A common approach to investigate uncertainty in data analysis decisions
 is sensitivity analysis, where researchers systematically vary key
 decisions in their analysis to assess the robustness of their findings.
 Multiverse analysis extends this idea by evaluating \emph{all} plausible
 combinations of decision choices to examine how results vary across the
-full decision space \citep{multiverse, blair2019}. However, what an
-analyst considers reasonable may not reflect the full range of options
-used in practice. Even when a reasonable set of alternatives is tested,
-the stability shown by sensitivity analysis may be less relevant to
-other researchers with similar problems, who are often more interested
-in understanding the rationale behind decision choices. Ideally,
-decision-making in applied research can be studied by following
+full decision space (Sarma et al. 2021; Blair et al. 2019). However,
+what an analyst considers reasonable may not reflect the full range of
+options used in practice. Even when a reasonable set of alternatives is
+tested, the stability shown by sensitivity analysis may be less relevant
+to other researchers with similar problems, who are often more
+interested in understanding the rationale behind decision choices.
+Ideally, decision-making in applied research can be studied by following
 experienced analysts throughout the entire analysis process to capture
 their reasoning. In reality, this is rarely feasible and not scalable.
 While individual studies may not capture the full range of decision
@@ -349,7 +267,10 @@ studies on a shared theme creates a ``many-analyst'' setting that
 reveals how analysts make choices and justify them in practice. This
 process now has the possibility to be automated at scale, given recent
 advances in information extraction with Large Language Models (LLMs)
-\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}.
+(Harrod, Bhandari, and Anastasopoulos 2024; Katz, Levy, and Goldberg
+2024; Farzi et al. 2024; Hu et al. 2024; Sciannameo et al. 2024; B. Gu
+et al. 2025; Schilling-Wilhelmi et al. 2025; Gupta et al. 2024; Li et
+al. 2024; Baddour et al. 2024; Polak and Morgan 2024).
 
 In this work, we propose a new approach to studying data analysis
 decisions by automatically extracting decisions from scientific
@@ -367,11 +288,11 @@ smoothing methods on PM and weather variables and the temporal lags for
 time and weather variables. Multi-dimensional scaling on the paper
 similarity distance finds three distinct clusters corresponding to
 different smoothing methods: LOESS, natural spline, and smoothing
-spline. These findings align with the APHENA project \citep{APHENA},
-which synthesizes research from multiple studies in Europe and North
-America led by expert investigators. In this workflow, we also provide
-detailed documentation on the validation and standardization of LLM
-outputs. We outline the validation and standardization process,
+spline. These findings align with the APHENA project (Klea Katsouyanni
+et al. 2009), which synthesizes research from multiple studies in Europe
+and North America led by expert investigators. In this workflow, we also
+provide detailed documentation on the validation and standardization of
+LLM outputs. We outline the validation and standardization process,
 including the use of a developed Shiny application in R for reviewing
 decisions and the types of edits made through validation, the use of a
 secondary LLM to standardize reported choices of temporal lag decisions,
@@ -406,21 +327,21 @@ In summary, the contribution of this work includes:
 \subsection{Analytic decision making in data
 analysis}\label{analytic-decision-making-in-data-analysis}
 
-Data analysis is a complex and iterative process
-\citep{jun2022, jun2022hypothesis, jun2019} that involves multiple
+Data analysis is a complex and iterative process (Jun, Seo, et al. 2022;
+Jun, Birchfield, et al. 2022; Jun et al. 2019) that involves multiple
 stages, including data collection, data cleaning, visualization,
 modeling, and communication. At each stage, analysts make decisions
 informed by domain practices, statistical knowledge, and the data. These
 decisions, such as which variables to include in a model, how to handle
 missing data, and how hyper-parameters are chosen, act as branching
 points in the analysis workflow. The full set of possible paths through
-these branching points forms what \citet{gelman2014} describes as the
-``garden of forking paths''. While one might expect well-trained
+these branching points forms what Gelman and Loken (2014) describes as
+the ``garden of forking paths''. While one might expect well-trained
 researchers to make similar choices when facing similar decisions,
 empirical evidence suggests otherwise. ``Many analyst experiments'' show
 that independent research groups analyzing the same dataset to address
 the same research questions can arrive at widely different conclusions.
-For example, \citet{silberzahn2018} asks 29 groups of analysts to
+For example, Silberzahn et al. (2018) asks 29 groups of analysts to
 conduct an analysis to address the same research questions \emph{whether
 soccer players with dark skin tone are more likely than those with light
 skin tone to receive red cards from referees}. Researchers reported an
@@ -429,45 +350,48 @@ combinations of covariates used among all 29 analyses. 70\% of the teams
 found a statistically significant positive effect, while others didn't.
 This great discrepancy among researchers when performing data analysis
 tasks is also observed in other domains, for example, structural
-equation modeling \citep{sarstedt2024}, applied microeconomics
-\citep{huntington-klein2021}, neuroimaging \citep{botvinik-nezer2020},
-and ecology and evolutionary biology \citep{gould2025}.
+equation modeling (Sarstedt et al. 2024), applied microeconomics
+(Huntington-Klein et al. 2021), neuroimaging (Botvinik-Nezer et al.
+2020), and ecology and evolutionary biology (Gould et al. 2025).
 
 Examples like the above illustrate how analytical decisions introduce
 uncertainty into data analysis. These uncertainties have been widely
 discussed in the literature, given their impact for policy
-recommendation \citep{APHENA} and domain applications e.g., fairness
-machine learning \citep{simson2025}. Through experiments, research has
-shown that analysts' decisions can lead to p-hacking and inflated effect
-size when not properly used \citep{wicherts2016, simmons2011}. Hence,
-guidelines and checklists have been developed to recommend the best
-practices to guide statistical analysis. In medicine and biostatistics,
-pre-registration is a common practice to regulate analysts making
-decisions after seeing the data. Given the nuanced nature of data
-analysis, more work has examined how analysts make decisions in practice
-through interviews in both academia and industry. These studies include
-qualitative analysis of the decisions made \citep{kale2019, liu2020},
-interviews with data analysts about exploratory data analysis practice
-in industry \citep{alspaugh2019, kandel2012}, and about how they
-consider alternatives in data analysis \citep{liu_understanding_2020}.
+recommendation (Klea Katsouyanni et al. 2009) and domain applications
+e.g., fairness machine learning (Simson et al. 2025). Through
+experiments, research has shown that analysts' decisions can lead to
+p-hacking and inflated effect size when not properly used (Wicherts et
+al. 2016; Simmons, Nelson, and Simonsohn 2011). Hence, guidelines and
+checklists have been developed to recommend the best practices to guide
+statistical analysis. In medicine and biostatistics, pre-registration is
+a common practice to regulate analysts making decisions after seeing the
+data. Given the nuanced nature of data analysis, more work has examined
+how analysts make decisions in practice through interviews in both
+academia and industry. These studies include qualitative analysis of the
+decisions made (Kale, Kay, and Hullman 2019; Yang Liu, Althoff, and Heer
+2020), interviews with data analysts about exploratory data analysis
+practice in industry (Alspaugh et al. 2019; Kandel et al. 2012), and
+about how they consider alternatives in data analysis (J. Liu,
+Boukhelifa, and Eagan 2020).
 
 In addition to qualitative studies, software tools have been developed
 to help researchers account for alternatives and uncertainties and make
-informed decisions in data analysis. Examples include \texttt{Tea}
-\citep{jun2019}, which supports general statistical analysis;
-\texttt{Tisane} \citep{jun2022}, which guides choices in generalized
-linear mixed-effects models (GLMMs); and \texttt{MetaExplore}
-\citep{kale2023}, which accounts for epistemic uncertainty (decision
-uncertainty) in meta-analysis. The \texttt{DeclareDesign} package
-\citep{blair2019} proposes the MIDA framework for researchers to
-declare, diagnose, and redesign their analyses to account for
-uncertainties of reporting the statistic of interest. Multiverse
-analysis proposes a different method to allow researchers to evaluate
-\emph{all} plausible combinations of decision choices to examine how
-results vary in the full decision space. Work has been done on the
-software tools to support multiverse analysis
-\citep{multiverse, götz2024} and visualization of multiverse results
-\citep{liu2021}, and debugging tools \citep{gu2023}.
+informed decisions in data analysis. Examples include \texttt{Tea} (Jun
+et al. 2019), which supports general statistical analysis;
+\texttt{Tisane} (Jun, Seo, et al. 2022), which guides choices in
+generalized linear mixed-effects models (GLMMs); and
+\texttt{MetaExplore} (Kale et al. 2023), which accounts for epistemic
+uncertainty (decision uncertainty) in meta-analysis. The
+\texttt{DeclareDesign} package (Blair et al. 2019) proposes the MIDA
+framework for researchers to declare, diagnose, and redesign their
+analyses to account for uncertainties of reporting the statistic of
+interest. Multiverse analysis proposes a different method to allow
+researchers to evaluate \emph{all} plausible combinations of decision
+choices to examine how results vary in the full decision space. Work has
+been done on the software tools to support multiverse analysis (Sarma et
+al. 2021; Götz, Sarma, and O'Boyle 2024) and visualization of multiverse
+results (Yang Liu et al. 2021), and debugging tools (K. Gu, Jun, and
+Althoff 2023).
 
 \subsection{Automatic information extraction with
 LLMs}\label{automatic-information-extraction-with-llms}
@@ -476,25 +400,27 @@ In natural language processing, information extraction is a task focused
 on extracting structured information from unstructured text. Earlier
 approaches in information extraction tasks relied on rule-based systems
 and regular expressions. More recent advances, including conditional
-random fields \citep{lafferty}, word embeddings such as word2vec
-\citep{mikolov2013}, and transformer-based architectures like BERT
-\citep{devlin2019}, have led to the current use of LLM to extract
-information with prompts. Using LLMs to extract unstructured text offers
-the advantage of automating the process at scale. Applications have been
-seen in epidemiology data \citep{harrod2024}, scientific literature
-\citep{katz2024}, clinical data
-\citep{farzi2024, hu2024, sciannameo2024, gu2025}, chemistry knowledge
-\citep{schilling-wilhelmi2025}, and polymer science \citep{gupta2024},
-climate extreme impact \citep{li2024}, phenotypes \citep{baddour2024},
-and material properties \citep{polak2024}. An easier task in information
-extraction is called Named Entity Recognition (NER) to identify short
-span information (1-4 tokens) like person names and locations from
-unstructured text \citep{nadeau2007}. An example of this is extracting
-patients' information and vitals in clinical data. Extracting decisions
-from published literature is a more general task than NER, since
-justification of a decision typically spans more than just a few words.
-Our task also requires linking information across sentences, sometimes
-sections, to correctly identify the variables a decision refers to.
+random fields (Lafferty, McCallum, and Pereira, n.d.), word embeddings
+such as word2vec (Mikolov et al. 2013), and transformer-based
+architectures like BERT (Devlin et al. 2019), have led to the current
+use of LLM to extract information with prompts. Using LLMs to extract
+unstructured text offers the advantage of automating the process at
+scale. Applications have been seen in epidemiology data (Harrod,
+Bhandari, and Anastasopoulos 2024), scientific literature (Katz, Levy,
+and Goldberg 2024), clinical data (Farzi et al. 2024; Hu et al. 2024;
+Sciannameo et al. 2024; B. Gu et al. 2025), chemistry knowledge
+(Schilling-Wilhelmi et al. 2025), and polymer science (Gupta et al.
+2024), climate extreme impact (Li et al. 2024), phenotypes (Baddour et
+al. 2024), and material properties (Polak and Morgan 2024). An easier
+task in information extraction is called Named Entity Recognition (NER)
+to identify short span information (1-4 tokens) like person names and
+locations from unstructured text (Nadeau and Sekine 2007). An example of
+this is extracting patients' information and vitals in clinical data.
+Extracting decisions from published literature is a more general task
+than NER, since justification of a decision typically spans more than
+just a few words. Our task also requires linking information across
+sentences, sometimes sections, to correctly identify the variables a
+decision refers to.
 
 \subsection{Visualization on scientific
 literature}\label{visualization-on-scientific-literature}
@@ -503,22 +429,23 @@ With the growing volume of scientific publications and the difficulty of
 navigating the literature, there is an increasing interest in developing
 systems to visualize and recommend scientific papers. These systems link
 papers based on their similarity and relevance, typically determined by
-keywords \citep{isenberg2017}, citation information \citep{chen2006},
+keywords (Isenberg et al. 2017), citation information (C. Chen 2006),
 e.g., citation list and co-citation, or combinations with other relevant
-paper metadata \citep{bethard2010, chou2011, dörk2012, heimerl2016},
-e.g., author and title. Recent approaches incorporate text-based
-information using topic modeling \citep{alexander2014},
-argumentation-based information retrieval \citep{tbahriti2006}, and text
-embedding \citep{narechania2022}. While metadata and high-level
-text-based information are useful for finding relevant papers,
-researchers also need tools that help them \emph{make sense} of the
-literature rather than simply \emph{locating} it. In applied data
-analysis, one interest is to understand how studies differ or align in
-their decision choices. Capturing the decision choices and reasons that
-justify the choices from analyses enables the calculation of similarity
-among papers and can be piped into dimension reduction methods and
-visualization for a global view of analysis practice in the field or
-recommend similar papers based on decision similarities.
+paper metadata (Bethard and Jurafsky 2010; Chou and Yang 2011; Dörk et
+al. 2012; Heimerl et al. 2016), e.g., author and title. Recent
+approaches incorporate text-based information using topic modeling
+(Alexander et al. 2014), argumentation-based information retrieval
+(Tbahriti et al. 2006), and text embedding (Narechania et al. 2022).
+While metadata and high-level text-based information are useful for
+finding relevant papers, researchers also need tools that help them
+\emph{make sense} of the literature rather than simply \emph{locating}
+it. In applied data analysis, one interest is to understand how studies
+differ or align in their decision choices. Capturing the decision
+choices and reasons that justify the choices from analyses enables the
+calculation of similarity among papers and can be piped into dimension
+reduction methods and visualization for a global view of analysis
+practice in the field or recommend similar papers based on decision
+similarities.
 
 \section{Methods}\label{sec-extract-decisions}
 
@@ -547,7 +474,7 @@ city or region before pooling the results with random effect. This
 naturally forms a ``many-analyst'' experiment setting to analyze
 decisions in air pollution mortality modelling.
 
-Consider the following excerpt from \citet{ostro2006} modeling the
+Consider the following excerpt from Ostro et al. (2006) modeling the
 association between daily counts of mortality and ambient particulate
 matter (PM10):
 
@@ -579,22 +506,22 @@ This sentence encodes the following components of a decision:
 \end{itemize}
 
 This decision can be recorded in a tabular format following the tidy
-data principle \citep{wickham2014}, which states that each variable
-forms a column and each observation forms a row. For our purpose, each
-row represents a decision made in a paper, and an analysis often
-includes multiple decisions. We extract the original text in the paper,
-without paraphrasing or summary. The decision above is a parameter
-choice of a statistical method applied to the variable \emph{time}. A
-data analysis may also include other types of decisions, such as
-temporal or spatial ones, for example, the choice of lagged exposure for
-certain variables or whether the model is estimated collectively or
-separated for individual locations. These decisions don't have a
-specific method or parameter fields, but should still include variable,
-type (spatial or temporal), reason, and decision fields.
+data principle (Wickham 2014), which states that each variable forms a
+column and each observation forms a row. For our purpose, each row
+represents a decision made in a paper, and an analysis often includes
+multiple decisions. We extract the original text in the paper, without
+paraphrasing or summary. The decision above is a parameter choice of a
+statistical method applied to the variable \emph{time}. A data analysis
+may also include other types of decisions, such as temporal or spatial
+ones, for example, the choice of lagged exposure for certain variables
+or whether the model is estimated collectively or separated for
+individual locations. These decisions don't have a specific method or
+parameter fields, but should still include variable, type (spatial or
+temporal), reason, and decision fields.
 
 Given the writing style of authors, multiple decisions may be combined
 in one sentence, and certain fields may be omitted. Consider a different
-excerpt from \citet{ostro2006}:
+excerpt from Ostro et al. (2006):
 
 \begin{quote}
 Other covariates, such as day of the week and smoothing splines of 1-day
@@ -653,8 +580,8 @@ with air pollution levels'') only supports the general inclusion of
 temporal lags but does not justify the specific choice of 1-day lag over
 other alternatives, e.g., 2-day average of lags 0 and 1 or single-day
 lag of 2 days. Similar scenarios can happen when a direct decision
-choice is missing, but a reason is provided, as in
-\citet{katsouyanni2001}:
+choice is missing, but a reason is provided, as in Klea Katsouyanni et
+al. (2001):
 
 \begin{quote}
 The inclusion of lagged weather variables and the choice of smoothing
@@ -677,10 +604,10 @@ format described in Section~\ref{sec-decisions} and write the output in
 a JSON block in a markdown file. We also provide a set of instructions
 and examples on the possibility of missing reason and decision fields as
 discussed in Section~\ref{sec-decisions}. Prompt engineering techniques
-\citep{chen2025, xu} are used to optimize the prompt, and the full
-prompt used in this work is provided in the Appendix. We use the
-\texttt{chat\_PROVIDER()} functions from the \texttt{ellmer} package
-\citep{ellmer} in R to obtain the output.
+(B. Chen et al. 2025; Xu et al., n.d.) are used to optimize the prompt,
+and the full prompt used in this work is provided in the Appendix. We
+use the \texttt{chat\_PROVIDER()} functions from the \texttt{ellmer}
+package (Wickham, Cheng, and Jacobs 2025) in R to obtain the output.
 
 \subsection{Validate and standardize LLM
 outputs}\label{validate-and-standardize-llm-outputs}
@@ -707,7 +634,7 @@ interactively on the right panel. The user can then specify the variable
 to overwrite and the new value. The corresponding cells on the right
 panel will be updated. This change needs to be confirmed by pressing the
 ``Apply changes'' button to update to the full dataset. The
-corresponding \texttt{tidyverse} \citep{tidyverse} code will then be
+corresponding \texttt{tidyverse} (Wickham et al. 2019) code will then be
 generated on the left panel to be included in an R script, and the
 edited table can be downloaded for future analysis.
 
@@ -751,12 +678,12 @@ choice, even when the choices themselves may differ due to differences
 in the underlying data. For reasons and choices, we first obtain the
 text embedding for all the choices and reasons, and calculate the cosine
 similarity between the matched reason and decisions from the language
-model \texttt{BERT} using the \texttt{text} package \citep{text} in
-\texttt{R}. For methods, we encode them as a binary variable: 1 if the
-two papers used the same method, and 0 otherwise, because semantic
-similarity cannot fully capture the difference between statistical
-methods, e.g., the difference between smoothing spline and natural
-spline is not well represented by the textual difference of
+model \texttt{BERT} using the \texttt{text} package (Kjell, Giorgi, and
+Schwartz 2023) in \texttt{R}. For methods, we encode them as a binary
+variable: 1 if the two papers used the same method, and 0 otherwise,
+because semantic similarity cannot fully capture the difference between
+statistical methods, e.g., the difference between smoothing spline and
+natural spline is not well represented by the textual difference of
 ``smoothing'' and ``natural''. The paper similarity is then computed as
 the average decision similarity scores across all the matched methods,
 decisions, and reasons.
@@ -977,6 +904,8 @@ smoothing parameter used for time, temperature, and humidity in the
 smoothing method (natural spline and smoothing spline) and temporal lag
 choices for PM, temperature, and humidity.
 
+\newpage
+
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1889}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1333}}
@@ -1025,18 +954,17 @@ they are both weather-related variables, whereas choices for time are
 more varied. This tabulation provides a reference set for common
 parameter choices for future studies and helps to identify anomalies and
 special treatment in practice. For example, the choice of 7.7 degree of
-freedom reported in \citet{castillejos2000} may prompt analysts to seek
-further justification for its use. By cross-comparing with other
-reporting, some decisions appear ambiguous. For example, in
-\citet{moolgavkar2000} and \citet{moolgavkar2003}, the reported value of
-30 and 100 degrees of freedom for time may be understandable for
-experienced domain researchers, but it can be unclear for junior
-analysts as to whether they refer to the parameter used for the full
-study period or on a per-year basis, which is often clear in other
-papers. We also observe a different report style from
-\citet{schwartz2000}, where smoothing spline parameters are expressed as
-a proportion of the data (``5\% of the data'' and ``5\% of the data''),
-rather than a fixed numerical value.
+freedom reported in Castillejos et al. (2000) may prompt analysts to
+seek further justification for its use. By cross-comparing with other
+reporting, some decisions appear ambiguous. For example, in Moolgavkar
+(2000) and Moolgavkar (2003), the reported value of 30 and 100 degrees
+of freedom for time may be understandable for experienced domain
+researchers, but it can be unclear for junior analysts as to whether
+they refer to the parameter used for the full study period or on a
+per-year basis, which is often clear in other papers. We also observe a
+different report style from Schwartz (2000), where smoothing spline
+parameters are expressed as a proportion of the data (``5\% of the
+data'' and ``5\% of the data''), rather than a fixed numerical value.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2278}}
@@ -1080,7 +1008,7 @@ lag choices for \texttt{PM}, \texttt{temperature}, and
 \texttt{humidity.} For single-day lags, the lags are considered up to 13
 days (approximately two weeks) while for multi-day averages, 3-day and
 5-day averages are the most common, although other choices such as 2-4
-day average are also observed \citep{lópez-villarrubia2010}.
+day average are also observed (López-Villarrubia et al. 2010).
 
 \subsection{Paper similarity calculation, clustering analysis, and
 visualization}\label{paper-similarity-calculation-clustering-analysis-and-visualization}
@@ -1099,7 +1027,7 @@ mortality modeling papers, colored by the smoothing method used. The MDS
 reveals the three distinct groups of papers, corresponds to LOESS,
 natural spline, and smoothing spline. These groups corresponds to the
 different modeling strategies debated in the European and U.S. studies,
-as documented in the APHENA project \citep{APHENA}.}
+as documented in the APHENA project (Klea Katsouyanni et al. 2009).}
 
 \end{figure}%
 
@@ -1121,10 +1049,10 @@ multi-dimensional scaling (MDS) and plotted in Figure~\ref{fig-mds}. The
 two MDS dimension axes reveal three clusters correspond to the three
 smoothing methods used in these analyses: LOESS, natural spline, and
 smoothing spline, where natural spline is commonly used in U.S. based
-studies suggested in the NMMAPS study \citep{samet2000}, while LOESS and
-smoothing spline are more often used in the European studies, as
-suggested in the APHEA \citep{katsouyanni1996} and APHEA2
-\citep{katsouyanni2001} project.
+studies suggested in the NMMAPS study (Samet et al. 2000), while LOESS
+and smoothing spline are more often used in the European studies, as
+suggested in the APHEA (K. Katsouyanni et al. 1996) and APHEA2 (Klea
+Katsouyanni et al. 2001) project.
 
 \subsection{Sensitivity analysis}\label{sensitivity-analysis}
 
@@ -1139,7 +1067,7 @@ text model for computing the semantic decision similarity
 \begin{longtable}[]{@{}lll@{}}
 
 \caption{\label{tbl-gemini-1}Example comparing Gemini's text extraction
-for \citet{andersen2008} across two runs. The extracted decisions are
+for Andersen et al. (2008) across two runs. The extracted decisions are
 identical in both runs.}
 
 \tabularnewline
@@ -1195,8 +1123,8 @@ comparisons for both ``reason'' and ``decisions'' fields. Comparisons
 are excluded when two runs produced a different number of decisions,
 since this would require manual alignment. This leaves 449 out of 620
 (72\%) extractions to compare. Table~\ref{tbl-gemini-1} prints a
-comparison of decisions in \citet{andersen2008} across two runs, and all
-four decisions are identical with no difference.
+comparison of decisions in Andersen et al. (2008) across two runs, and
+all four decisions are identical with no difference.
 Table~\ref{tbl-gemini-2} summarizes the number of differences observed
 in each pairwise comparison. Among all comparisons, 80\% produces the
 identical text in reason and decision. The discrepancies mainly come
@@ -1206,7 +1134,7 @@ from the following two reasons:
 \def\labelenumi{\arabic{enumi})}
 \item
   Gemini extracted the same decision in different lengths. For example,
-  in \citet{kan2007}, some runs may extract ``singleday lag models
+  in Kan et al. (2007), some runs may extract ``singleday lag models
   underestimate the cumulative effect of pollutants on mortality 2day
   moving average \textbf{of current and previous day concentrations}
   (lag=01)'', while others extract ``singleday lag models underestimate
@@ -1214,10 +1142,10 @@ from the following two reasons:
   (lag=01)''.
 \item
   Gemini fails to extract reasons in some runs but not others. For
-  example, in \citet{burnett1998}, the first run generates \texttt{NA}
+  example, in Burnett et al. (1998), the first run generates \texttt{NA}
   in the reason, but the remaining four runs are identical, with the
-  reason populated. In \citet{ueda2009} and \citet{castillejos2000} ,
-  runs 1 and 5 fail to extract the reason and produce the same
+  reason populated. In Ueda et al. (2009) and Castillejos et al. (2000)
+  , runs 1 and 5 fail to extract the reason and produce the same
   incomplete version, whereas runs 2, 3, and 4 produce accurate versions
   with reason populated.
 \end{enumerate}
@@ -1255,16 +1183,17 @@ extract the same number of decisions. In general, the two models produce
 a similar number of decisions. However, more points fall below this
 line, suggesting Claude extracts more decisions, often including noise
 from data pre-processing or secondary data analysis steps. Examples of
-papers with large discrepancies include \citet{mar2000} (Claude: 10
-vs.~Gemini: 28), \citet{ito2006} (Claude: 25 vs.~Gemini: 19),
-\citet{ko2007} (Claude: 8 vs.~Gemini: 16), among others. For both Claude
-and Gemini, we find they sometimes fail to link the general term
-``weather variables'' to the specific weather variables (e.g.,
-\citet{dockery1992} and \citet{burnett2004} for Gemini and
-\citet{dockery1992} and \citet{katsouyanni2001} for Claude). Although
-our prompt specified that some decisions may require linking information
-across sentences and paragraphs to identify the correct variable, this
-instruction doesn't appear to be applied consistently.
+papers with large discrepancies include Mar et al. (2000) (Claude: 10
+vs.~Gemini: 28), Ito et al. (2006) (Claude: 25 vs.~Gemini: 19), Ko et
+al. (2007) (Claude: 8 vs.~Gemini: 16), among others. For both Claude and
+Gemini, we find they sometimes fail to link the general term ``weather
+variables'' to the specific weather variables (e.g., Dockery, Schwartz,
+and Spengler (1992) and Burnett et al. (2004) for Gemini and Dockery,
+Schwartz, and Spengler (1992) and Klea Katsouyanni et al. (2001) for
+Claude). Although our prompt specified that some decisions may require
+linking information across sentences and paragraphs to identify the
+correct variable, this instruction doesn't appear to be applied
+consistently.
 
 \subsubsection{Text model}\label{sec-text-model}
 
@@ -1290,12 +1219,12 @@ smoothing methods (LOESS, natural spline and smoothing spline).}
 
 We have conducted sensitivity analyses on the text model for calculating
 the decision similarity score from the Gemini outputs. The tested
-language models include 1) BERT \citep{devlin2019} by Google, 2) RoBERTa
-\citep{liu} by Facebook AI, trained on a larger dataset (160GB v.s.
-BERT's 15GB), 3) XLNnet \citep{yang} by Google Brain, and two
-domain-trained BERT models: 4) sciBERT \citep{beltagy2019}, trained on
-scientific literature, and 5) bioBERT \citep{lee2020}, trained on PubMed
-and PMC data.
+language models include 1) BERT (Devlin et al. 2019) by Google, 2)
+RoBERTa (Yinhan Liu et al., n.d.) by Facebook AI, trained on a larger
+dataset (160GB v.s. BERT's 15GB), 3) XLNnet (Yang et al., n.d.) by
+Google Brain, and two domain-trained BERT models: 4) sciBERT (Beltagy,
+Lo, and Cohan 2019), trained on scientific literature, and 5) bioBERT
+(Lee et al. 2020), trained on PubMed and PMC data.
 
 Figure~\ref{fig-text-model} shows the distribution of the decision
 similarity and the corresponding multi-dimensional scaling
@@ -1314,27 +1243,28 @@ clustering pattern corresponding to the three main smoothing methods
 \subsection{Large-language models for information
 extraction}\label{large-language-models-for-information-extraction}
 
-Numerous studies
-\citep{harrod2024, katz2024, farzi2024, hu2024, sciannameo2024, gu2025, schilling-wilhelmi2025, gupta2024, li2024, baddour2024, polak2024}
-have demonstrated the capability of LLMs for information extraction
-tasks. Our work applies the LLMs to extract analytic decisions in
-scientific literature, providing further evidence of their
-effectiveness. Our task requires capturing more complex analytical
-decisions and their justifications, which typically span more than just
-a few tokens, like in named entity recognition. Our task also requires
-linking information across sentences and sometimes sections to correctly
-identify the variables of a decision (e.g., linking ``weather'' to
-``temperature'' and ``humidity''). While LLM has performed well on
-extracting decisions from the literature, manual validations are still
-required to ensure the quality of the extracted decisions for downstream
-analysis. Most existing applications evaluate LLMs by comparing their
-outputs to human-annotated datasets, reporting metrics such as
-precision, recall, and F1 score. Because this approach depends on
-labeled data, and it is not yet clear how these outputs should be
-validated for downstream analysis in practice. In our work, we automate
-some of the manual validation with a secondary LLM (Claude) to
-standardize the temporal lag choices in different expressions into two
-categories.
+Numerous studies (Harrod, Bhandari, and Anastasopoulos 2024; Katz, Levy,
+and Goldberg 2024; Farzi et al. 2024; Hu et al. 2024; Sciannameo et al.
+2024; B. Gu et al. 2025; Schilling-Wilhelmi et al. 2025; Gupta et al.
+2024; Li et al. 2024; Baddour et al. 2024; Polak and Morgan 2024) have
+demonstrated the capability of LLMs for information extraction tasks.
+Our work applies the LLMs to extract analytic decisions in scientific
+literature, providing further evidence of their effectiveness. Our task
+requires capturing more complex analytical decisions and their
+justifications, which typically span more than just a few tokens, like
+in named entity recognition. Our task also requires linking information
+across sentences and sometimes sections to correctly identify the
+variables of a decision (e.g., linking ``weather'' to ``temperature''
+and ``humidity''). While LLM has performed well on extracting decisions
+from the literature, manual validations are still required to ensure the
+quality of the extracted decisions for downstream analysis. Most
+existing applications evaluate LLMs by comparing their outputs to
+human-annotated datasets, reporting metrics such as precision, recall,
+and F1 score. Because this approach depends on labeled data, and it is
+not yet clear how these outputs should be validated for downstream
+analysis in practice. In our work, we automate some of the manual
+validation with a secondary LLM (Claude) to standardize the temporal lag
+choices in different expressions into two categories.
 
 With a default temperature of one and the prompt to instruct the model
 to extract the original text rather than paraphrase, we find that
@@ -1366,13 +1296,13 @@ need to link the decisions across different models and reconstruct the
 complete set of decisions for each model.
 
 Beyond modeling choices, decisions in data pre-processing are also
-interesting to compare. For example, \citet{braga2001} aggregated air
-pollution measures from multiple PM10 monitors within the same location
-into a single value. Pre-processing choices such as data source,
-aggregation method, imputation also have an impact on the uncertainty of
-the estimated effect size of particulate matter. However, these
-decisions are often not properly and adequately described in the
-manuscript, making it impossible to extract by LLMs. Proper
+interesting to compare. For example, Braga, Zanobetti, and Schwartz
+(2001) aggregated air pollution measures from multiple PM10 monitors
+within the same location into a single value. Pre-processing choices
+such as data source, aggregation method, imputation also have an impact
+on the uncertainty of the estimated effect size of particulate matter.
+However, these decisions are often not properly and adequately described
+in the manuscript, making it impossible to extract by LLMs. Proper
 documentation and reporting standards in pre-processing decisions are
 needed before our workflow could be applied to pre-processing decisions.
 
@@ -1445,22 +1375,545 @@ and disciplines. Compared to sensitivity analysis or multiverse
 analysis, our approach offers a different perspective by pooling
 together decisions made in analyses across the field to reveal the
 options considered to highlight uncertainty in decisions that require
-further sensitivity analyses to assess their impact
-\citep{peng2006, touloumi2006}.
+further sensitivity analyses to assess their impact (Peng, Dominici, and
+Louis 2006; Touloumi et al. 2006).
 
-\bibliographystyle{ACM-Reference-Format}
-\bibliography{references.bib}
+\section{Acknowledgement}\label{acknowledgement}
 
-%% begin pandoc before-bib
-%% end pandoc before-bib
-%% begin pandoc biblio
-%% end pandoc biblio
-%% begin pandoc include-after
-%% end pandoc include-after
-%% begin pandoc after-body
-%% end pandoc after-body
+The article has been created using Quarto
+(\textbf{Allaire\_Quarto\_2022?}) in R (\textbf{R?}). The source code
+for reproducing the work reported in this paper can be found at:
+\url{https://github.com/huizezhang-sherry/paper-decisions}.
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-alexander2014}
+Alexander, Eric, Joe Kohlmann, Robin Valenza, Michael Witmore, and
+Michael Gleicher. 2014. {``2014 IEEE Conference on Visual Analytics
+Science and Technology (VAST).''} In, 173--82.
+\url{https://doi.org/10.1109/VAST.2014.7042493}.
+
+\bibitem[\citeproctext]{ref-alspaugh2019}
+Alspaugh, Sara, Nava Zokaei, Andrea Liu, Cindy Jin, and Marti A. Hearst.
+2019. {``Futzing and Moseying: Interviews with Professional Data
+Analysts on Exploration Practices.''} \emph{IEEE Transactions on
+Visualization and Computer Graphics} 25 (1): 22--31.
+\url{https://doi.org/10.1109/TVCG.2018.2865040}.
+
+\bibitem[\citeproctext]{ref-andersen2008}
+Andersen, Z. J., P. Wahlin, O. Raaschou-Nielsen, M. Ketzel, T. Scheike,
+and S. Loft. 2008. {``Size Distribution and Total Number Concentration
+of Ultrafine and Accumulation Mode Particles and Hospital Admissions in
+Children and the Elderly in Copenhagen, Denmark.''} \emph{Occupational
+and Environmental Medicine} 65 (7): 458--66.
+\url{https://doi.org/10.1136/oem.2007.033290}.
+
+\bibitem[\citeproctext]{ref-baddour2024}
+Baddour, Moussa, Stéphane Paquelet, Paul Rollier, Marie De Tayrac,
+Olivier Dameron, and Thomas Labbe. 2024. {``2024 IEEE 12th International
+Conference on Intelligent Systems (IS).''} In, 1--8.
+\url{https://doi.org/10.1109/IS61756.2024.10705235}.
+
+\bibitem[\citeproctext]{ref-beltagy2019}
+Beltagy, Iz, Kyle Lo, and Arman Cohan. 2019. {``Proceedings of the 2019
+Conference on Empirical Methods in Natural Language Processing and the
+9th International Joint Conference on Natural Language Processing
+(EMNLP-IJCNLP).''} In, 3613--18. Hong Kong, China: Association for
+Computational Linguistics. \url{https://doi.org/10.18653/v1/D19-1371}.
+
+\bibitem[\citeproctext]{ref-bethard2010}
+Bethard, Steven, and Dan Jurafsky. 2010. {``CIKM '10: International
+Conference on Information and Knowledge Management.''} In, 609--18.
+Toronto ON Canada: ACM. \url{https://doi.org/10.1145/1871437.1871517}.
+
+\bibitem[\citeproctext]{ref-blair2019}
+Blair, Graeme, Jasper Cooper, Alexander Coppock, and Macartan Humphreys.
+2019. {``Declaring and Diagnosing Research Designs.''} \emph{American
+Political Science Review} 113 (3): 838--59.
+\url{https://doi.org/10.1017/S0003055419000194}.
+
+\bibitem[\citeproctext]{ref-botvinik-nezer2020}
+Botvinik-Nezer, Rotem, Felix Holzmeister, Colin F. Camerer, Anna Dreber,
+Juergen Huber, Magnus Johannesson, Michael Kirchler, et al. 2020.
+{``Variability in the Analysis of a Single Neuroimaging Dataset by Many
+Teams.''} \emph{Nature} 582 (7810): 84--88.
+\url{https://doi.org/10.1038/s41586-020-2314-9}.
+
+\bibitem[\citeproctext]{ref-braga2001}
+Braga, Alfésio Luís Ferreira, Antonella Zanobetti, and Joel Schwartz.
+2001. {``The Lag Structure Between Particulate Air Pollution and
+Respiratory and Cardiovascular Deaths in 10 US Cities.''} \emph{Journal
+of Occupational and Environmental Medicine} 43 (11): 927.
+\url{https://journals.lww.com/joem/fulltext/2001/11000/the_lag_structure_between_particulate_air.1.aspx}.
+
+\bibitem[\citeproctext]{ref-burnett1998}
+Burnett, Richard T., Sabit Cakmak, Mark E. Raizenne, David Stieb, Renaud
+Vincent, Daniel Krewski, Jeffrey R. Brook, Owen Philips, and Haluk
+Ozkaynak. 1998. {``The Association Between Ambient Carbon Monoxide
+Levels and Daily Mortality in Toronto, Canada.''} \emph{Journal of the
+Air \& Waste Management Association} 48 (8): 689--700.
+\url{https://doi.org/10.1080/10473289.1998.10463718}.
+
+\bibitem[\citeproctext]{ref-burnett2004}
+Burnett, Richard T., Stieb ,Dave, Brook ,Jeffrey R., Cakmak ,Sabit,
+Dales ,Robert, Raizenne ,Mark, Vincent ,Renaud, and Tom and Dann. 2004.
+{``Associations Between Short-Term Changes in Nitrogen Dioxide and
+Mortality in Canadian Cities.''} \emph{Archives of Environmental Health:
+An International Journal} 59 (5): 228--36.
+\url{https://doi.org/10.3200/AEOH.59.5.228-236}.
+
+\bibitem[\citeproctext]{ref-castillejos2000}
+Castillejos, Margarita, Borja-Aburto ,Victor H., Dockery ,Douglas W.,
+Gold ,Diane R., and Dana. and Loomis. 2000. {``Airborne Coarse Particles
+and Mortality.''} \emph{Inhalation Toxicology} 12 (sup1): 61--72.
+\url{https://doi.org/10.1080/0895-8378.1987.11463182}.
+
+\bibitem[\citeproctext]{ref-chen2025}
+Chen, Banghao, Zhaofeng Zhang, Nicolas Langrené, and Shengxin Zhu. 2025.
+{``Unleashing the Potential of Prompt Engineering for Large Language
+Models.''} \emph{Patterns} 6 (6): 101260.
+\url{https://doi.org/10.1016/j.patter.2025.101260}.
+
+\bibitem[\citeproctext]{ref-chen2006}
+Chen, Chaomei. 2006. {``CiteSpace II: Detecting and Visualizing Emerging
+Trends and Transient Patterns in Scientific Literature.''} \emph{Journal
+of the American Society for Information Science and Technology} 57 (3):
+359--77. \url{https://doi.org/10.1002/asi.20317}.
+
+\bibitem[\citeproctext]{ref-chou2011}
+Chou, J. -K., and C. -K. Yang. 2011. {``PaperVis: Literature Review Made
+Easy.''} \emph{Computer Graphics Forum} 30 (3): 721--30.
+\url{https://doi.org/10.1111/j.1467-8659.2011.01921.x}.
+
+\bibitem[\citeproctext]{ref-devlin2019}
+Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019.
+{``NAACL-HLT 2019.''} In, edited by Jill Burstein, Christy Doran, and
+Thamar Solorio, 41714186. Minneapolis, Minnesota: Association for
+Computational Linguistics. \url{https://doi.org/10.18653/v1/N19-1423}.
+
+\bibitem[\citeproctext]{ref-dockery1992}
+Dockery, Douglas W., Joel Schwartz, and John D. Spengler. 1992. {``Air
+Pollution and Daily Mortality: Associations with Particulates and Acid
+Aerosols.''} \emph{Environmental Research} 59 (2): 362--73.
+\url{https://doi.org/10.1016/S0013-9351(05)80042-8}.
+
+\bibitem[\citeproctext]{ref-duxf6rk2012}
+Dörk, Marian, Nathalie Henry Riche, Gonzalo Ramos, and Susan Dumais.
+2012. {``PivotPaths: Strolling Through Faceted Information Spaces.''}
+\emph{IEEE Transactions on Visualization and Computer Graphics} 18 (12):
+2709--18. \url{https://doi.org/10.1109/TVCG.2012.252}.
+
+\bibitem[\citeproctext]{ref-farzi2024}
+Farzi, Saeed, Soumitra Ghosh, Alberto Lavelli, and Bernardo Magnini.
+2024. {``Get the Best Out of 1B LLMs: Insights from Information
+Extraction on Clinical Documents.''} In, edited by Dina Demner-Fushman,
+Sophia Ananiadou, Makoto Miwa, Kirk Roberts, and Junichi Tsujii, 266276.
+Bangkok, Thailand: Association for Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2024.bionlp-1.21}.
+
+\bibitem[\citeproctext]{ref-gelman2014}
+Gelman, Andrew, and Eric Loken. 2014. {``The Statistical Crisis in
+Science.''} \emph{American Scientist} 102 (6): 460--65.
+\url{https://www.proquest.com/docview/1616141998/abstract/5E050DCE82414037PQ/1}.
+
+\bibitem[\citeproctext]{ref-guxf6tz2024}
+Götz, Martin, Abhraneel Sarma, and Ernest H. O'Boyle. 2024. {``The
+Multiverse of Universes: A Tutorial to Plan, Execute and Interpret
+Multiverses Analyses Using the R Package Multiverse.''}
+\emph{International Journal of Psychology} 59 (6): 1003--14.
+\url{https://doi.org/10.1002/ijop.13229}.
+
+\bibitem[\citeproctext]{ref-gould2025}
+Gould, Elliot, Hannah S. Fraser, Timothy H. Parker, Shinichi Nakagawa,
+Simon C. Griffith, Peter A. Vesk, Fiona Fidler, et al. 2025. {``Same
+Data, Different Analysts: Variation in Effect Sizes Due to Analytical
+Decisions in Ecology and Evolutionary Biology.''} \emph{BMC Biology} 23
+(1): 35. \url{https://doi.org/10.1186/s12915-024-02101-x}.
+
+\bibitem[\citeproctext]{ref-gu2025}
+Gu, Bowen, Vivian Shao, Ziqian Liao, Valentina Carducci, Santiago Romero
+Brufau, Jie Yang, and Rishi J. Desai. 2025. {``Scalable Information
+Extraction from Free Text Electronic Health Records Using Large Language
+Models.''} \emph{BMC Medical Research Methodology} 25 (1): 23.
+\url{https://doi.org/10.1186/s12874-025-02470-z}.
+
+\bibitem[\citeproctext]{ref-gu2023}
+Gu, Ken, Eunice Jun, and Tim Althoff. 2023. {``Understanding and
+Supporting Debugging Workflows in Multiverse Analysis.''} In, 119. CHI
+'23. New York, NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3544548.3581099}.
+
+\bibitem[\citeproctext]{ref-gupta2024}
+Gupta, Sonakshi, Akhlak Mahmood, Pranav Shetty, Aishat Adeboye, and
+Rampi Ramprasad. 2024. {``Data Extraction from Polymer Literature Using
+Large Language Models.''} \emph{Communications Materials} 5 (1): 269.
+\url{https://doi.org/10.1038/s43246-024-00708-9}.
+
+\bibitem[\citeproctext]{ref-harrod2024}
+Harrod, Karlyn K., Prabin Bhandari, and Antonios Anastasopoulos. 2024.
+{``From Text to Maps: LLM-Driven Extraction and Geotagging of
+Epidemiological Data.''} In, edited by Daryna Dementieva, Oana Ignat,
+Zhijing Jin, Rada Mihalcea, Giorgio Piatti, Joel Tetreault, Steven
+Wilson, and Jieyu Zhao, 258270. Miami, Florida, USA: Association for
+Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2024.nlp4pi-1.24}.
+
+\bibitem[\citeproctext]{ref-heimerl2016}
+Heimerl, Florian, Qi Han, Steffen Koch, and Thomas Ertl. 2016.
+{``CiteRivers: Visual Analytics of Citation Patterns.''} \emph{IEEE
+Transactions on Visualization and Computer Graphics} 22 (1): 190--99.
+\url{https://doi.org/10.1109/TVCG.2015.2467621}.
+
+\bibitem[\citeproctext]{ref-hu2024}
+Hu, Yan, Qingyu Chen, Jingcheng Du, Xueqing Peng, Vipina Kuttichi
+Keloth, Xu Zuo, Yujia Zhou, et al. 2024. {``Improving Large Language
+Models for Clinical Named Entity Recognition via Prompt Engineering.''}
+\emph{Journal of the American Medical Informatics Association} 31 (9):
+1812--20. \url{https://doi.org/10.1093/jamia/ocad259}.
+
+\bibitem[\citeproctext]{ref-huntington-klein2021}
+Huntington-Klein, Nick, Andreu Arenas, Emily Beam, Marco Bertoni,
+Jeffrey R. Bloem, Pralhad Burli, Naibin Chen, et al. 2021. {``The
+Influence of Hidden Researcher Decisions in Applied Microeconomics.''}
+\emph{Economic Inquiry} 59 (3): 944--60.
+\url{https://doi.org/10.1111/ecin.12992}.
+
+\bibitem[\citeproctext]{ref-isenberg2017}
+Isenberg, Petra, Tobias Isenberg, Michael Sedlmair, Jian Chen, and
+Torsten Möller. 2017. {``Visualization as Seen Through Its Research
+Paper Keywords.''} \emph{IEEE Transactions on Visualization and Computer
+Graphics} 23 (1): 771--80.
+\url{https://doi.org/10.1109/TVCG.2016.2598827}.
+
+\bibitem[\citeproctext]{ref-ito2006}
+Ito, Kazuhiko, William F. Christensen, Delbert J. Eatough, Ronald C.
+Henry, Eugene Kim, Francine Laden, Ramona Lall, et al. 2006. {``PM
+Source Apportionment and Health Effects: 2. An Investigation of
+Intermethod Variability in Associations Between Source-Apportioned Fine
+Particle Mass and Daily Mortality in Washington, DC.''} \emph{Journal of
+Exposure Science \& Environmental Epidemiology} 16 (4): 300--310.
+\url{https://doi.org/10.1038/sj.jea.7500464}.
+
+\bibitem[\citeproctext]{ref-jun2022hypothesis}
+Jun, Eunice, Melissa Birchfield, Nicole De Moura, Jeffrey Heer, and René
+Just. 2022. {``Hypothesis Formalization: Empirical Findings, Software
+Limitations, and Design Implications.''} \emph{ACM Transactions on
+Computer-Human Interaction (TOCHI)} 29 (1): 1--28.
+
+\bibitem[\citeproctext]{ref-jun2019}
+Jun, Eunice, Maureen Daum, Jared Roesch, Sarah Chasins, Emery Berger,
+Rene Just, and Katharina Reinecke. 2019. {``Tea: A High-Level Language
+and Runtime System for Automating Statistical Analysis.''} In, 591603.
+UIST '19. New York, NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3332165.3347940}.
+
+\bibitem[\citeproctext]{ref-jun2022}
+Jun, Eunice, Audrey Seo, Jeffrey Heer, and René Just. 2022. {``Tisane:
+Authoring Statistical Models via Formal Reasoning from Conceptual and
+Data Relationships.''} In, 116. CHI '22. New York, NY, USA: Association
+for Computing Machinery. \url{https://doi.org/10.1145/3491102.3501888}.
+
+\bibitem[\citeproctext]{ref-kale2019}
+Kale, Alex, Matthew Kay, and Jessica Hullman. 2019. {``Decision-Making
+Under Uncertainty in Research Synthesis: Designing for the Garden of
+Forking Paths.''} In, 114. CHI '19. New York, NY, USA: Association for
+Computing Machinery. \url{https://doi.org/10.1145/3290605.3300432}.
+
+\bibitem[\citeproctext]{ref-kale2023}
+Kale, Alex, Sarah Lee, Terrance Goan, Elizabeth Tipton, and Jessica
+Hullman. 2023. {``MetaExplorer : Facilitating Reasoning with Epistemic
+Uncertainty in Meta-Analysis.''} In, 114. CHI '23. New York, NY, USA:
+Association for Computing Machinery.
+\url{https://doi.org/10.1145/3544548.3580869}.
+
+\bibitem[\citeproctext]{ref-kan2007}
+Kan, Haidong, Stephanie J. London, Guohai Chen, Yunhui Zhang, Guixiang
+Song, Naiqing Zhao, Lili Jiang, and Bingheng Chen. 2007.
+{``Differentiating the Effects of Fine and Coarse Particles on Daily
+Mortality in Shanghai, China.''} \emph{Environment International} 33
+(3): 376--84. \url{https://doi.org/10.1016/j.envint.2006.12.001}.
+
+\bibitem[\citeproctext]{ref-kandel2012}
+Kandel, Sean, Andreas Paepcke, Joseph M. Hellerstein, and Jeffrey Heer.
+2012. {``Enterprise Data Analysis and Visualization: An Interview
+Study.''} \emph{IEEE Transactions on Visualization and Computer
+Graphics} 18 (12): 2917--26.
+\url{https://doi.org/10.1109/TVCG.2012.219}.
+
+\bibitem[\citeproctext]{ref-APHENA}
+Katsouyanni, Klea, Jonathan M. Samet, H. Ross Anderson, Richard
+Atkinson, Alain Le Tertre, Sylvia Medina, Evangelia Samoli, et al. 2009.
+{``Air Pollution and Health: {A} European and North American Approach
+(APHENA).''} Research Report 142. Boston, MA: Health Effects Institute.
+
+\bibitem[\citeproctext]{ref-katsouyanni2001}
+Katsouyanni, Klea, Giota Touloumi, Evangelia Samoli, Alexandros
+Gryparis, Alain Le Tertre, Yannis Monopolis, Giuseppe Rossi, et al.
+2001. {``Confounding and Effect Modification in the Short-Term Effects
+of Ambient Particles on Total Mortality: Results from 29 European Cities
+Within the APHEA2 Project.''} \emph{Epidemiology} 12 (5): 521.
+\url{https://journals.lww.com/epidem/fulltext/2001/09000/confounding_and_effect_modification_in_the.11.aspx}.
+
+\bibitem[\citeproctext]{ref-katsouyanni1996}
+Katsouyanni, K, J Schwartz, C Spix, G Touloumi, D Zmirou, A Zanobetti, B
+Wojtyniak, et al. 1996. {``Short Term Effects of Air Pollution on
+Health: A European Approach Using Epidemiologic Time Series Data: The
+APHEA Protocol.''} \emph{Journal of Epidemiology and Community Health}
+50 (Suppl 1): S12--18.
+\url{https://doi.org/10.1136/jech.50.suppl_1.s12}.
+
+\bibitem[\citeproctext]{ref-katz2024}
+Katz, Uri, Mosh Levy, and Yoav Goldberg. 2024. {``Findings of the
+Association for Computational Linguistics: EMNLP 2024.''} In, 8838--55.
+Miami, Florida, USA: Association for Computational Linguistics.
+\url{https://doi.org/10.18653/v1/2024.findings-emnlp.516}.
+
+\bibitem[\citeproctext]{ref-text}
+Kjell, Oscar, Salvatore Giorgi, and H. Andrew Schwartz. 2023. {``The
+Text-Package: An r-Package for Analyzing and Visualizing Human Language
+Using Natural Language Processing and Deep Learning.''}
+\emph{Psychological Methods}. \url{https://doi.org/10.1037/met0000542}.
+
+\bibitem[\citeproctext]{ref-ko2007}
+Ko, F. W. S., W. Tam, T. W. Wong, C. K. W. Lai, G. W. K. Wong, T.-F.
+Leung, S. S. S. Ng, and D. S. C. Hui. 2007. {``Effects of Air Pollution
+on Asthma Hospitalization Rates in Different Age Groups in Hong Kong.''}
+\emph{Clinical \& Experimental Allergy} 37 (9): 1312--19.
+\url{https://doi.org/10.1111/j.1365-2222.2007.02791.x}.
+
+\bibitem[\citeproctext]{ref-lafferty}
+Lafferty, John, Andrew McCallum, and Fernando Pereira. n.d.
+{``Conditional Random Fields: Probabilistic Models for Segmenting and
+Labeling Sequence Data.''}
+
+\bibitem[\citeproctext]{ref-lee2020}
+Lee, Jinhyuk, Wonjin Yoon, Sungdong Kim, Donghyeon Kim, Sunkyu Kim, Chan
+Ho So, and Jaewoo Kang. 2020. {``BioBERT: A Pre-Trained Biomedical
+Language Representation Model for Biomedical Text Mining.''} Edited by
+Jonathan Wren. \emph{Bioinformatics} 36 (4): 1234--40.
+\url{https://doi.org/10.1093/bioinformatics/btz682}.
+
+\bibitem[\citeproctext]{ref-li2024}
+Li, Ni, Shorouq Zahra, Mariana Brito, Clare Flynn, Olof Görnerup, Koffi
+Worou, Murathan Kurfali, et al. 2024. {``Proceedings of the 1st Workshop
+on Natural Language Processing Meets Climate Change (ClimateNLP
+2024).''} In, 93--110. Bangkok, Thailand: Association for Computational
+Linguistics. \url{https://doi.org/10.18653/v1/2024.climatenlp-1.7}.
+
+\bibitem[\citeproctext]{ref-liu_understanding_2020}
+Liu, Jiali, Nadia Boukhelifa, and James R. Eagan. 2020. {``Understanding
+the {Role} of {Alternatives} in {Data} {Analysis} {Practices}.''}
+\emph{IEEE Transactions on Visualization and Computer Graphics} 26 (1):
+66--76. \url{https://doi.org/10.1109/TVCG.2019.2934593}.
+
+\bibitem[\citeproctext]{ref-liu2020}
+Liu, Yang, Tim Althoff, and Jeffrey Heer. 2020. {``Paths Explored, Paths
+Omitted, Paths Obscured: Decision Points \& Selective Reporting in
+End-to-End Data Analysis.''} In, 114. CHI '20. New York, NY, USA:
+Association for Computing Machinery.
+\url{https://doi.org/10.1145/3313831.3376533}.
+
+\bibitem[\citeproctext]{ref-liu2021}
+Liu, Yang, Alex Kale, Tim Althoff, and Jeffrey Heer. 2021. {``Boba:
+Authoring and Visualizing Multiverse Analyses.''} \emph{IEEE
+Transactions on Visualization and Computer Graphics} 27 (2): 1753--63.
+\url{https://doi.org/10.1109/TVCG.2020.3028985}.
+
+\bibitem[\citeproctext]{ref-liu}
+Liu, Yinhan, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi
+Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov.
+n.d. {``RoBERTa: A Robustly Optimized BERT Pretraining Approach.''}
+\url{https://doi.org/10.48550/arXiv.1907.11692}.
+
+\bibitem[\citeproctext]{ref-luxf3pez-villarrubia2010}
+López-Villarrubia, Elena, Ferran Ballester, Carmen Iñiguez, and Nieves
+Peral. 2010. {``Air Pollution and Mortality in the Canary Islands: A
+Time-Series Analysis.''} \emph{Environmental Health} 9 (February): 8.
+\url{https://doi.org/10.1186/1476-069X-9-8}.
+
+\bibitem[\citeproctext]{ref-mar2000}
+Mar, T F, G A Norris, J Q Koenig, and T V Larson. 2000. {``Associations
+Between Air Pollution and Mortality in Phoenix, 1995-1997.''}
+\emph{Environmental Health Perspectives} 108 (4): 347--53.
+\url{https://doi.org/10.1289/ehp.00108347}.
+
+\bibitem[\citeproctext]{ref-mikolov2013}
+Mikolov, Tomas, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean.
+2013. {``Distributed Representations of Words and Phrases and Their
+Compositionality.''} In. Vol. 26. Curran Associates, Inc.
+\url{https://papers.nips.cc/paper_files/paper/2013/hash/9aa42b31882ec039965f3c4923ce901b-Abstract.html}.
+
+\bibitem[\citeproctext]{ref-moolgavkar2000}
+Moolgavkar, Suresh H. 2000. {``Air Pollution and Hospital Admissions for
+Diseases of the Circulatory System in Three u.s. Metropolitan Areas.''}
+\emph{Journal of the Air \& Waste Management Association} 50 (7):
+1199--1206. \url{https://doi.org/10.1080/10473289.2000.10464162}.
+
+\bibitem[\citeproctext]{ref-moolgavkar2003}
+---------. 2003. {``Air Pollution and Daily Mortality in Two u.s.
+Counties: Season-Specific Analyses and Exposure-Response
+Relationships.''} \emph{Inhalation Toxicology} 15 (9): 877--907.
+\url{https://doi.org/10.1080/08958370390215767}.
+
+\bibitem[\citeproctext]{ref-nadeau2007}
+Nadeau, David, and Satoshi Sekine. 2007. {``A Survey of Named Entity
+Recognition and Classification.''} \emph{Lingvisticæ Investigationes} 30
+(1): 3--26. \url{https://doi.org/10.1075/li.30.1.03nad}.
+
+\bibitem[\citeproctext]{ref-narechania2022}
+Narechania, Arpit, Alireza Karduni, Ryan Wesslen, and Emily Wall. 2022.
+{``VITALITY: Promoting Serendipitous Discovery of Academic Literature
+with Transformers \& Visual Analytics.''} \emph{IEEE Transactions on
+Visualization and Computer Graphics} 28 (1): 486--96.
+\url{https://doi.org/10.1109/TVCG.2021.3114820}.
+
+\bibitem[\citeproctext]{ref-ostro2006}
+Ostro, Bart, Rachel Broadwin, Shelley Green, Wen-Ying Feng, and Michael
+Lipsett. 2006. {``Fine Particulate Air Pollution and Mortality in Nine
+California Counties: Results from CALFINE.''} \emph{Environmental Health
+Perspectives} 114 (1): 29--33. \url{https://doi.org/10.1289/ehp.8335}.
+
+\bibitem[\citeproctext]{ref-peng2006}
+Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. {``Model
+Choice in Time Series Studies of Air Pollution and Mortality.''}
+\emph{Journal of the Royal Statistical Society Series A: Statistics in
+Society} 169 (2): 179--203.
+\url{https://doi.org/10.1111/j.1467-985X.2006.00410.x}.
+
+\bibitem[\citeproctext]{ref-polak2024}
+Polak, Maciej P., and Dane Morgan. 2024. {``Extracting Accurate
+Materials Data from Research Papers with Conversational Language Models
+and Prompt Engineering.''} \emph{Nature Communications} 15 (1): 1569.
+\url{https://doi.org/10.1038/s41467-024-45914-8}.
+
+\bibitem[\citeproctext]{ref-samet2000}
+Samet, Jonathan M., Francesca Dominici, Frank C. Curriero, Ivan Coursac,
+and Scott L. Zeger. 2000. {``Fine Particulate Air Pollution and
+Mortality in 20 u.s. Cities, 1987{\textendash}1994.''} \emph{New England
+Journal of Medicine} 343 (24): 1742--49.
+\url{https://doi.org/10.1056/NEJM200012143432401}.
+
+\bibitem[\citeproctext]{ref-multiverse}
+Sarma, Abhraneel, Alex Kale, Michael Moon, Nathan Taback, Fanny
+Chevalier, Jessica Hullman, and Matthew Kay. 2021. {``Multiverse:
+Multiplexing Alternative Data Analyses in r Notebooks (Version
+0.6.2).''} \emph{OSF Preprints}.
+\url{https://github.com/MUCollective/multiverse}.
+
+\bibitem[\citeproctext]{ref-sarstedt2024}
+Sarstedt, Marko, Susanne J. Adler, Christian M. Ringle, Gyeongcheol Cho,
+Adamantios Diamantopoulos, Heungsun Hwang, and Benjamin D. Liengaard.
+2024. {``Same Model, Same Data, but Different Outcomes: Evaluating the
+Impact of Method Choices in Structural Equation Modeling.''}
+\emph{Journal of Product Innovation Management} 41 (6): 1100--1117.
+\url{https://doi.org/10.1111/jpim.12738}.
+
+\bibitem[\citeproctext]{ref-schilling-wilhelmi2025}
+Schilling-Wilhelmi, Mara, Martiño Ríos-García, Sherjeel Shabih, María
+Victoria~Gil, Santiago Miret, Christoph T.~Koch, José A.~Márquez, and
+Kevin Maik~Jablonka. 2025. {``From Text to Insight: Large Language
+Models for Chemical Data Extraction.''} \emph{Chemical Society Reviews}
+54 (3): 1125--50. \url{https://doi.org/10.1039/D4CS00913D}.
+
+\bibitem[\citeproctext]{ref-schwartz2000}
+Schwartz, Joel. 2000. {``The Distributed Lag Between Air Pollution and
+Daily Deaths.''} \emph{Epidemiology} 11 (3): 320--26.
+\url{https://www.jstor.org/stable/3703220}.
+
+\bibitem[\citeproctext]{ref-sciannameo2024}
+Sciannameo, Veronica, Daniele Jahier Pagliari, Sara Urru, Piercesare
+Grimaldi, Honoria Ocagli, Sara Ahsani-Nasab, Rosanna Irene Comoretto,
+Dario Gregori, and Paola Berchialla. 2024. {``Information Extraction
+from Medical Case Reports Using OpenAI InstructGPT.''} \emph{Computer
+Methods and Programs in Biomedicine} 255 (October): 108326.
+\url{https://doi.org/10.1016/j.cmpb.2024.108326}.
+
+\bibitem[\citeproctext]{ref-silberzahn2018}
+Silberzahn, R., E. L. Uhlmann, D. P. Martin, P. Anselmi, F. Aust, E.
+Awtrey, Š. Bahník, et al. 2018. {``Many Analysts, One Data Set: Making
+Transparent How Variations in Analytic Choices Affect Results.''}
+\emph{Advances in Methods and Practices in Psychological Science} 1 (3):
+337--56. \url{https://doi.org/10.1177/2515245917747646}.
+
+\bibitem[\citeproctext]{ref-simmons2011}
+Simmons, Joseph P., Leif D. Nelson, and Uri Simonsohn. 2011.
+{``False-Positive Psychology: Undisclosed Flexibility in Data Collection
+and Analysis Allows Presenting Anything as Significant.''}
+\emph{Psychological Science} 22 (11): 1359--66.
+\url{https://doi.org/10.1177/0956797611417632}.
+
+\bibitem[\citeproctext]{ref-simson2025}
+Simson, Jan, Fiona Draxler, Samuel Mehr, and Christoph Kern. 2025.
+{``Preventing Harmful Data Practices by Using Participatory Input to
+Navigate the Machine Learning Multiverse.''} In, 130. CHI '25. New York,
+NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3706598.3713482}.
+
+\bibitem[\citeproctext]{ref-tbahriti2006}
+Tbahriti, Imad, Christine Chichester, Frédérique Lisacek, and Patrick
+Ruch. 2006. {``Using Argumentation to Retrieve Articles with Similar
+Citations: An Inquiry into Improving Related Articles Search in the
+MEDLINE Digital Library.''} \emph{International Journal of Medical
+Informatics}, Recent advances in natural language processing for
+biomedical applications special issue, 75 (6): 488--95.
+\url{https://doi.org/10.1016/j.ijmedinf.2005.06.007}.
+
+\bibitem[\citeproctext]{ref-touloumi2006}
+Touloumi, G., E. Samoli, M. Pipikou, A. Le Tertre, R. Atkinson, and K.
+Katsouyanni. 2006. {``Seasonal Confounding in Air Pollution and Health
+Time-Series Studies: Effect on Air Pollution Effect Estimates.''}
+\emph{Statistics in Medicine} 25 (24): 4164--78.
+\url{https://doi.org/10.1002/sim.2681}.
+
+\bibitem[\citeproctext]{ref-ueda2009}
+Ueda, Kayo, Nitta ,Hiroshi, Ono ,Masaji, and Ayano and Takeuchi. 2009.
+{``Estimating Mortality Effects of Fine Particulate Matter in Japan: A
+Comparison of Time-Series and Case-Crossover Analyses.''} \emph{Journal
+of the Air \& Waste Management Association} 59 (10): 1212--18.
+\url{https://doi.org/10.3155/1047-3289.59.10.1212}.
+
+\bibitem[\citeproctext]{ref-wicherts2016}
+Wicherts, Jelte M., Coosje L. S. Veldkamp, Hilde E. M. Augusteijn,
+Marjan Bakker, Robbie C. M. van Aert, and Marcel A. L. M. van Assen.
+2016. {``Degrees of Freedom in Planning, Running, Analyzing, and
+Reporting Psychological Studies: A Checklist to Avoid p-Hacking.''}
+\emph{Frontiers in Psychology} 7 (November).
+\url{https://doi.org/10.3389/fpsyg.2016.01832}.
+
+\bibitem[\citeproctext]{ref-wickham2014}
+Wickham, Hadley. 2014. {``Tidy Data.''} \emph{Journal of Statistical
+Software} 59 (September): 1--23.
+\url{https://doi.org/10.18637/jss.v059.i10}.
+
+\bibitem[\citeproctext]{ref-tidyverse}
+Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy
+D'Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019.
+{``Welcome to the {tidyverse}.''} \emph{Journal of Open Source Software}
+4 (43): 1686. \url{https://doi.org/10.21105/joss.01686}.
+
+\bibitem[\citeproctext]{ref-ellmer}
+Wickham, Hadley, Joe Cheng, and Aaron Jacobs. 2025. \emph{Ellmer: Chat
+with Large Language Models}.
+\url{https://CRAN.R-project.org/package=ellmer}.
+
+\bibitem[\citeproctext]{ref-xu}
+Xu, Derong, Wei Chen, Wenjun Peng, Chao Zhang, Tong Xu, Xiangyu Zhao,
+Xian Wu, Yefeng Zheng, Yang Wang, and Enhong Chen. n.d. {``Large
+Language Models for Generative Information Extraction: A Survey.''}
+\url{https://doi.org/10.48550/arXiv.2312.17617}.
+
+\bibitem[\citeproctext]{ref-yang}
+Yang, Zhilin, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan
+Salakhutdinov, and Quoc V. Le. n.d. {``XLNet: Generalized Autoregressive
+Pretraining for Language Understanding.''}
+\url{https://doi.org/10.48550/arXiv.1906.08237}.
+
+\end{CSLReferences}
+
+
+
 
 \end{document}
-\endinput
-%%
-%% End of file `sample-manuscript.tex'.
