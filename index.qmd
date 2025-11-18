@@ -7,7 +7,10 @@ pdf-engine: pdflatex
 bibliography: references.bib
 title: "An LLM-based Pipeline for Understanding Decision Choices in Data Analysis from Published Literature"
 abstract: "Decision choices, such as those made when building regression models, and their rationale are essential for interpreting results and understanding uncertainty in an analysis. However, these decisions are rarely studied because tracing every alternatives considered by authors is often impractical, and reworking a completed analysis is generally of limited interest. Consequently, researchers must manually review large bodies of published analyses to identify common choices and understand how choices are made. In this work, we propose a workflow to automatically extract analytic decisions and their reasons from published literature using Large Language Models. Our method also introduces a paper similarity measure based on decision similarity and visualization methods using clustering algorithms. As an example, this workflow is applied to analyses studying the effect of particulate matter on mortality. This approach enables scalable and automated studies of decision choices in applied data analysis, providing an alternative to existing qualitative and interview-based studies. "
-keywords: decision choice, data analysis, Large Language Models
+keywords:
+ - decision choice
+ - data analysis
+ - Large Language Models
 notebook-links: false
 author:
   - name: H. Sherry Zhang
