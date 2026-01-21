@@ -99,38 +99,53 @@ In this section, we present the workflow for extracting decisions from published
 
 ## Record decisions in data analysis {#sec-decisions}
 
-In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. This question has been studied extensively by researchers across the globe, and it serves to provide scientific evidence in the US to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants. While individual modeling choices vary, these studies often share a common structure: they adjust for meteorological covariates, such as temperature and humidity, include lagged variables to account for temporal correlations, and estimate the effect size by city or region before pooling the results with random effect. This naturally forms a "many-analyst" experiment setting to analyze decisions in air pollution mortality modelling.
+To analyze decisions, we first need to translate free-text descriptions of decisions in academic papers into a tabular format. We record decision following the tidy data principle [@wickham2014], which states that each variable forms a column and each observation forms a row. For our purpose, each row represents a single decision made in a paper, and an analysis typically involves multiple decisions. 
 
-Consider the following excerpt from @ostro2006 modeling the association between daily counts of mortality and ambient particulate matter (PM10):
+A decision generally consists of three components: the context, the reason (`reason`), and the decision itself (`decision`). To characterize the context, additional information is often required, such as what variable the decision is acted on (`variable`), what statistical method the decision uses (`method`), and what parameter of the method is being decided (`parameter`). The `reference` field captures any citations referenced to justify the decision.
 
-> Based on previous findings reported in the literature (e.g., Samet et al. 2000), the basic model included a smoothing spline for time with 7 degrees of freedom (df) per year of data. This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
+Some decisions at the model level do not involve a specific variable, method, or parameter. For example, estimating the model separately for each city is a spatial decision on data partitioning. Similarly, choosing lag values for certain variables is a temporal decision may not involve a specific method or parameter. To accommodate these cases, we introduce a `type` identifier indicating whether a decision is parameter-based, spatial, or temporal. The resulting structure for recording decisions is as follows:
 
-This sentence encodes the following components of a decision:
+- `type`: one of "parameter", "spatial", or "temporal".
+- `variable`: the variable to which the statistical method is applied.
+- `method`: the statistical method used, (e.g. "LOESS", "smoothing spline", "natural spline").
+- `parameter`: the parameter of the method being decided, (e.g. "degrees of freedom", "number of knots"). 
+- `reason`: the justification for the decision. 
+- `decision`: the final choice made.
+- `reference`: any cited sources supporting the decision.
 
--   **variable**: time
--   **method**: smoothing spline
--   **parameter**: degree of freedom (df)
--   **reason**: Based on previous findings reported in the literature (e.g., Samet et al. 2000); This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation.
--   **decision**: 7 degrees of freedom (df) per year of data
+For ease of tracking, we extract the original text describing each decision verbatim, without paraphrasing or summary. In practice, decisions in academic papers are more nuanced than this structure described above. Authors may combine multiple related decisions into a single sentence for brevity, or omit certain components, either because it is considered obvious or due to poor practice.
 
-This decision can be recorded in a tabular format following the tidy data principle [@wickham2014], which states that each variable forms a column and each observation forms a row. For our purpose, each row represents a decision made in a paper, and an analysis often includes multiple decisions. We extract the original text in the paper, without paraphrasing or summary. The decision above is a parameter choice of a statistical method applied to the variable *time*. A data analysis may also include other types of decisions, such as temporal or spatial ones, for example, the choice of lagged exposure for certain variables or whether the model is estimated collectively or separated for individual locations. These decisions don't have a specific method or parameter fields, but should still include variable, type (spatial or temporal), reason, and decision fields.
 
-Given the writing style of authors, multiple decisions may be combined in one sentence, and certain fields may be omitted. Consider a different excerpt from @ostro2006:
+<!-- Consider the following excerpt from @ostro2006 modeling the association between daily counts of mortality and ambient particulate matter (PM10): -->
 
-> Other covariates, such as day of the week and smoothing splines of 1-day lags of average temperature and humidity (each with 3 df), were also included in the model because they may be associated with daily mortality and are likely to vary over time in concert with air pollution levels.
+<!-- > Based on previous findings reported in the literature (e.g., Samet et al. 2000), the basic model included a smoothing spline for time with 7 degrees of freedom (df) per year of data. This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation. -->
 
-This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity, and should be structured as separate entries:
+<!-- This sentence encodes the following components of a decision: -->
 
-| Paper | ID | variable | method | parameter | type | reason | decision |
-|---------|---------|---------|---------|---------|---------|---------|---------|
-| ostro | 1 | temperature | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA |
-| ostro | 2 | relative humidity | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA |
-| ostro | 3 | temperature | NA | NA | temporal | 1-day lags | NA |
-| ostro | 4 | relative humidity | NA | NA | temporal | 1-day lags | NA |
+<!-- -   **variable**: time -->
+<!-- -   **method**: smoothing spline -->
+<!-- -   **parameter**: degree of freedom (df) -->
+<!-- -   **reason**: Based on previous findings reported in the literature (e.g., Samet et al. 2000); This number of degrees of freedom controls well for seasonal patterns in mortality and reduces and often eliminates autocorrelation. -->
+<!-- -   **decision**: 7 degrees of freedom (df) per year of data -->
 
-Notice in the example above, the reason field is recorded as NA. This is because the stated reason ("and are likely to vary over time in concert with air pollution levels") only supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over other alternatives, e.g., 2-day average of lags 0 and 1 or single-day lag of 2 days. Similar scenarios can happen when a direct decision choice is missing, but a reason is provided, as in @katsouyanni2001:
+<!-- This decision can be recorded in a tabular format following the tidy data principle [@wickham2014], which states that each variable forms a column and each observation forms a row. For our purpose, each row represents a decision made in a paper, and an analysis often includes multiple decisions. We extract the original text in the paper, without paraphrasing or summary. The decision above is a parameter choice of a statistical method applied to the variable *time*. A data analysis may also include other types of decisions, such as temporal or spatial ones, for example, the choice of lagged exposure for certain variables or whether the model is estimated collectively or separated for individual locations. These decisions don't have a specific method or parameter fields, but should still include variable, type (spatial or temporal), reason, and decision fields. -->
 
-> The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion.
+<!-- Given the writing style of authors, multiple decisions may be combined in one sentence, and certain fields may be omitted. Consider a different excerpt from @ostro2006: -->
+
+<!-- > Other covariates, such as day of the week and smoothing splines of 1-day lags of average temperature and humidity (each with 3 df), were also included in the model because they may be associated with daily mortality and are likely to vary over time in concert with air pollution levels. -->
+
+<!-- This sentence contains four decisions: two for temperature (the temporal lag and the smoothing spline parameter) and two for humidity, and should be structured as separate entries: -->
+
+<!-- | Paper | ID | variable | method | parameter | type | reason | decision | -->
+<!-- |---------|---------|---------|---------|---------|---------|---------|---------| -->
+<!-- | ostro | 1 | temperature | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA | -->
+<!-- | ostro | 2 | relative humidity | smoothing spline | degree of freedom | parameter | 3 degree of freedom | NA | -->
+<!-- | ostro | 3 | temperature | NA | NA | temporal | 1-day lags | NA | -->
+<!-- | ostro | 4 | relative humidity | NA | NA | temporal | 1-day lags | NA | -->
+
+<!-- Notice in the example above, the reason field is recorded as NA. This is because the stated reason ("and are likely to vary over time in concert with air pollution levels") only supports the general inclusion of temporal lags but does not justify the specific choice of 1-day lag over other alternatives, e.g., 2-day average of lags 0 and 1 or single-day lag of 2 days. Similar scenarios can happen when a direct decision choice is missing, but a reason is provided, as in @katsouyanni2001: -->
+
+<!-- > The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion. -->
 
 ## Extract decisions automatically from literature with LLMs
 
@@ -166,7 +181,9 @@ Although paper similarity can be calculated based on all available matched decis
 knitr::include_graphics(here::here("figures/workflow.png"))
 ```
 
-# Results {#sec-result}
+# Application {#sec-result}
+
+In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. This question has been studied extensively by researchers across the globe, and it serves to provide scientific evidence in the US to guide public policy on setting the National Ambient Air Quality Standards (NAAQS) for air pollutants. While individual modeling choices vary, these studies often share a common structure: they adjust for meteorological covariates, such as temperature and humidity, include lagged variables to account for temporal correlations, and estimate the effect size by city or region before pooling the results with random effect. This naturally forms a "many-analyst" experiment setting to analyze decisions in air pollution mortality modelling.
 
 We apply the workflow to extract the decisions in `r length(unique(gemini_df$paper))` studies that estimate the effect of particulate matter ($\text{PM}_{10}$ and $\text{PM}_{2.5}$) on mortality and hospital admission using Gemini (`gemini-2.0-flash`). We focus on the baseline model reported in each paper, excluding secondary models (e.g., lag-distributed models), multi-pollutant models, and alternatives tested in the sensitivity analysis, which are discussed in @sec-discussions. This yields `r nrow(gemini_df)` decisions extracted, averaging `r round(nrow(gemini_df)/length(unique(gemini_df$paper)))` decisions per paper.
 
@@ -256,8 +273,6 @@ count_variable_type(gemini_df) |> head(8) |>
 ```
 
 @tbl-most-common-decisions lists the eight most frequently reported decisions: parameter and temporal choice for `time`, `PM`, `temperature`, and `humidity.` While a wider list of variables has been used in the analysis, these four variables are most commonly included in baseline models. This includes the smoothing parameter used for time, temperature, and humidity in the smoothing method (natural spline and smoothing spline) and temporal lag choices for PM, temperature, and humidity.
-
-\newpage
 
 ```{r}
 #| label: tbl-humidity-temperature-decisions

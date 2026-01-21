@@ -460,134 +460,58 @@ illustration summarizing the workflow.
 
 \subsection{Record decisions in data analysis}\label{sec-decisions}
 
-In the study of the health effects of outdoor air pollution, one area of
-interest is the association between short-term, day-to-day changes in
-particulate matter air pollution and daily mortality counts. This
-question has been studied extensively by researchers across the globe,
-and it serves to provide scientific evidence in the US to guide public
-policy on setting the National Ambient Air Quality Standards (NAAQS) for
-air pollutants. While individual modeling choices vary, these studies
-often share a common structure: they adjust for meteorological
-covariates, such as temperature and humidity, include lagged variables
-to account for temporal correlations, and estimate the effect size by
-city or region before pooling the results with random effect. This
-naturally forms a ``many-analyst'' experiment setting to analyze
-decisions in air pollution mortality modelling.
+To analyze decisions, we first need to translate free-text descriptions
+of decisions in academic papers into a tabular format. We record
+decision following the tidy data principle (Wickham 2014), which states
+that each variable forms a column and each observation forms a row. For
+our purpose, each row represents a single decision made in a paper, and
+an analysis typically involves multiple decisions.
 
-Consider the following excerpt from Ostro et al. (2006) modeling the
-association between daily counts of mortality and ambient particulate
-matter (PM10):
+A decision generally consists of three components: the context, the
+reason (\texttt{reason}), and the decision itself (\texttt{decision}).
+To characterize the context, additional information is often required,
+such as what variable the decision is acted on (\texttt{variable}), what
+statistical method the decision uses (\texttt{method}), and what
+parameter of the method is being decided (\texttt{parameter}). The
+\texttt{reference} field captures any citations referenced to justify
+the decision.
 
-\begin{quote}
-Based on previous findings reported in the literature (e.g., Samet et
-al.~2000), the basic model included a smoothing spline for time with 7
-degrees of freedom (df) per year of data. This number of degrees of
-freedom controls well for seasonal patterns in mortality and reduces and
-often eliminates autocorrelation.
-\end{quote}
-
-This sentence encodes the following components of a decision:
+Some decisions at the model level do not involve a specific variable,
+method, or parameter. For example, estimating the model separately for
+each city is a spatial decision on data partitioning. Similarly,
+choosing lag values for certain variables is a temporal decision may not
+involve a specific method or parameter. To accommodate these cases, we
+introduce a \texttt{type} identifier indicating whether a decision is
+parameter-based, spatial, or temporal. The resulting structure for
+recording decisions is as follows:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{variable}: time
+  \texttt{type}: one of ``parameter'', ``spatial'', or ``temporal''.
 \item
-  \textbf{method}: smoothing spline
+  \texttt{variable}: the variable to which the statistical method is
+  applied.
 \item
-  \textbf{parameter}: degree of freedom (df)
+  \texttt{method}: the statistical method used, (e.g.~``LOESS'',
+  ``smoothing spline'', ``natural spline'').
 \item
-  \textbf{reason}: Based on previous findings reported in the literature
-  (e.g., Samet et al.~2000); This number of degrees of freedom controls
-  well for seasonal patterns in mortality and reduces and often
-  eliminates autocorrelation.
+  \texttt{parameter}: the parameter of the method being decided,
+  (e.g.~``degrees of freedom'', ``number of knots'').
 \item
-  \textbf{decision}: 7 degrees of freedom (df) per year of data
+  \texttt{reason}: the justification for the decision.
+\item
+  \texttt{decision}: the final choice made.
+\item
+  \texttt{reference}: any cited sources supporting the decision.
 \end{itemize}
 
-This decision can be recorded in a tabular format following the tidy
-data principle (Wickham 2014), which states that each variable forms a
-column and each observation forms a row. For our purpose, each row
-represents a decision made in a paper, and an analysis often includes
-multiple decisions. We extract the original text in the paper, without
-paraphrasing or summary. The decision above is a parameter choice of a
-statistical method applied to the variable \emph{time}. A data analysis
-may also include other types of decisions, such as temporal or spatial
-ones, for example, the choice of lagged exposure for certain variables
-or whether the model is estimated collectively or separated for
-individual locations. These decisions don't have a specific method or
-parameter fields, but should still include variable, type (spatial or
-temporal), reason, and decision fields.
-
-Given the writing style of authors, multiple decisions may be combined
-in one sentence, and certain fields may be omitted. Consider a different
-excerpt from Ostro et al. (2006):
-
-\begin{quote}
-Other covariates, such as day of the week and smoothing splines of 1-day
-lags of average temperature and humidity (each with 3 df), were also
-included in the model because they may be associated with daily
-mortality and are likely to vary over time in concert with air pollution
-levels.
-\end{quote}
-
-This sentence contains four decisions: two for temperature (the temporal
-lag and the smoothing spline parameter) and two for humidity, and should
-be structured as separate entries:
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Paper
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-ID
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-variable
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-method
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-parameter
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-type
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-reason
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-decision
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-ostro & 1 & temperature & smoothing spline & degree of freedom &
-parameter & 3 degree of freedom & NA \\
-ostro & 2 & relative humidity & smoothing spline & degree of freedom &
-parameter & 3 degree of freedom & NA \\
-ostro & 3 & temperature & NA & NA & temporal & 1-day lags & NA \\
-ostro & 4 & relative humidity & NA & NA & temporal & 1-day lags & NA \\
-\end{longtable}
-
-Notice in the example above, the reason field is recorded as NA. This is
-because the stated reason (``and are likely to vary over time in concert
-with air pollution levels'') only supports the general inclusion of
-temporal lags but does not justify the specific choice of 1-day lag over
-other alternatives, e.g., 2-day average of lags 0 and 1 or single-day
-lag of 2 days. Similar scenarios can happen when a direct decision
-choice is missing, but a reason is provided, as in Klea Katsouyanni et
-al. (2001):
-
-\begin{quote}
-The inclusion of lagged weather variables and the choice of smoothing
-parameters for all of the weather variables were done by minimizing
-Akaike's information criterion.
-\end{quote}
+For ease of tracking, we extract the original text describing each
+decision verbatim, without paraphrasing or summary. In practice,
+decisions in academic papers are more nuanced than this structure
+described above. Authors may combine multiple related decisions into a
+single sentence for brevity, or omit certain components, either because
+it is considered obvious or due to poor practice.
 
 \subsection{Extract decisions automatically from literature with
 LLMs}\label{extract-decisions-automatically-from-literature-with-llms}
@@ -728,7 +652,21 @@ reduction methods.}
 
 \end{figure}%
 
-\section{Results}\label{sec-result}
+\section{Application}\label{sec-result}
+
+In the study of the health effects of outdoor air pollution, one area of
+interest is the association between short-term, day-to-day changes in
+particulate matter air pollution and daily mortality counts. This
+question has been studied extensively by researchers across the globe,
+and it serves to provide scientific evidence in the US to guide public
+policy on setting the National Ambient Air Quality Standards (NAAQS) for
+air pollutants. While individual modeling choices vary, these studies
+often share a common structure: they adjust for meteorological
+covariates, such as temperature and humidity, include lagged variables
+to account for temporal correlations, and estimate the effect size by
+city or region before pooling the results with random effect. This
+naturally forms a ``many-analyst'' experiment setting to analyze
+decisions in air pollution mortality modelling.
 
 We apply the workflow to extract the decisions in 56 studies that
 estimate the effect of particulate matter (\(\text{PM}_{10}\) and
@@ -903,8 +841,6 @@ are most commonly included in baseline models. This includes the
 smoothing parameter used for time, temperature, and humidity in the
 smoothing method (natural spline and smoothing spline) and temporal lag
 choices for PM, temperature, and humidity.
-
-\newpage
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1889}}
@@ -1774,12 +1710,6 @@ Narechania, Arpit, Alireza Karduni, Ryan Wesslen, and Emily Wall. 2022.
 with Transformers \& Visual Analytics.''} \emph{IEEE Transactions on
 Visualization and Computer Graphics} 28 (1): 486--96.
 \url{https://doi.org/10.1109/TVCG.2021.3114820}.
-
-\bibitem[\citeproctext]{ref-ostro2006}
-Ostro, Bart, Rachel Broadwin, Shelley Green, Wen-Ying Feng, and Michael
-Lipsett. 2006. {``Fine Particulate Air Pollution and Mortality in Nine
-California Counties: Results from CALFINE.''} \emph{Environmental Health
-Perspectives} 114 (1): 29--33. \url{https://doi.org/10.1289/ehp.8335}.
 
 \bibitem[\citeproctext]{ref-peng2006}
 Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. {``Model
