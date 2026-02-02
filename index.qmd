@@ -30,17 +30,17 @@ author:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, 
                       warning = FALSE, fig.align = "center", fig.height = 3)
 library(tidyverse)
 library(dossier)
 library(ggdendro)
 library(patchwork)
-library(text)
 load(here::here("data/text_sensitivity_decision_df.rda"))
 load(here::here("data/llm_temp_df.rda"))
 load(here::here("data/all_geminis.rda"))
 load(here::here("data/all_claudes.rda"))
+load(here::here("data/distance_df.rda"))
 gemini_df <- read_csv(here::here("data/gemini_df.csv")) |> as_decision_tbl()
 ```
 
@@ -207,7 +207,7 @@ res <- purrr::map_dfr(
   )
 
 reason_df <- tibble(reason2 = c("recode", "irrelevant", "fail to capture", "duplicates", "general", "definition"),
-       reason = c("Edit made to recode smoothing parametser unit to per year",
+       reason = c("Edit made to recode smoothing parameter unit to per year",
                   "Remove decisions out of scope: other pollutants and sensitivity analysis",
                   "Fix incorrect capture",
                   "Duplicates",
@@ -359,10 +359,12 @@ good_pp <- gemini_df |> count(paper) |> filter(n >= 3) |> pull(paper)
 paper_df <- df |> filter(paper %in% good_pp)
 ```
 
-```{r embed}
+```{r embed, eval = FALSE}
 embed_df <- paper_df |> compute_text_embed()
 distance_decision_df <- calc_decision_similarity(paper_df, embed = embed_df)
 distance_df <- distance_decision_df |> calc_paper_similarity()
+save(distance_decision_df, file = here::here("data/distance_decision_df.rda"))
+save(distance_df, file = here::here("data/distance_df.rda"))
 ```
 
 ```{r}
@@ -417,10 +419,10 @@ p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) +
 ```
 
 ```{r}
-#| fig.height: 13
-#| fig.width: 13
+#| fig.height: 10
+#| fig.width: 10
 #| label: fig-mds
-#| fig-cap: "The multi-dimensional scaling (MDS) based on paper similarity distance for `length(good_pp)` air pollution mortality modeling papers, colored by the smoothing method used. The MDS reveals the three distinct groups of papers, corresponds to LOESS, natural spline, and smoothing spline. These groups corresponds to the different modeling strategies debated in the European and U.S. studies, as documented in the APHENA project [@APHENA]."
+#| fig-cap: "The multi-dimensional scaling (MDS) based on paper similarity distance for 56 air pollution mortality modeling papers, colored by the smoothing method used. The MDS reveals the three distinct groups of papers, corresponds to LOESS, natural spline, and smoothing spline. These groups corresponds to the different modeling strategies debated in the European and U.S. studies, as documented in the APHENA project [@APHENA]."
 p3  
 ```
 
@@ -656,7 +658,7 @@ p3 <- mds_df |> ggplot(aes(x = V1, y = V2, gorup = method)) +
   theme_bw() + 
   theme(aspect.ratio = 1, legend.position = "bottom")  
 
-(p1 | p3) + plot_layout(widths = c(1.5, 1), guides = 'collect') &
+p1 + p3 + plot_layout(widths = c(1.5, 1), guides = 'collect') & 
   theme(legend.position = 'bottom')
 ```
 
@@ -702,6 +704,7 @@ Many work on studying decision-making in data analysis conduct qualitative inter
 
 The article has been created using Quarto [@Allaire_Quarto_2022] in R
 [@R]. The source code for reproducing the work reported in this paper
-can be found at: <https://github.com/huizezhang-sherry/paper-decisions>. 
+can be found at: <https://github.com/huizezhang-sherry/paper-decisions>. The tools developed to support this methodology are available as an R package, `dossier` on GitHub at <https://github.com/huizezhang-sherry/dossier>.
+
 
 # References {.unnumbered}

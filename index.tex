@@ -138,6 +138,20 @@
  
 
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \usepackage{orcidlink}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -186,7 +200,7 @@
 \hypersetup{
   pdftitle={An LLM-based Pipeline for Understanding Decision Choices in Data Analysis from Published Literature},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
-  pdfkeywords={decision choice, data analysis, Large Language Models},
+  pdfkeywords={decision choices, data analysis, Large Language Models},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -226,7 +240,7 @@ alternative to existing qualitative and interview-based studies.
 \end{abstract}
 \begin{keywords}
 \def\sep{;\ }
-decision choice\sep data analysis\sep 
+decision choices\sep data analysis\sep 
 Large Language Models
 \end{keywords}
 
@@ -679,7 +693,7 @@ Count
 \endlastfoot
 Remove decisions out of scope: other pollutants and sensitivity analysis
 & 50 \\
-Edit made to recode smoothing parametser unit to per year & 45 \\
+Edit made to recode smoothing parameter unit to per year & 45 \\
 Duplicates & 9 \\
 Fix incorrect capture & 9 \\
 Edit made due to decisions are too general, e.g.~minimum of 1 df per
@@ -937,12 +951,12 @@ visualization}\label{paper-similarity-calculation-clustering-analysis-and-visual
 }
 
 \caption{\label{fig-mds}The multi-dimensional scaling (MDS) based on
-paper similarity distance for \texttt{length(good\_pp)} air pollution
-mortality modeling papers, colored by the smoothing method used. The MDS
-reveals the three distinct groups of papers, corresponds to LOESS,
-natural spline, and smoothing spline. These groups corresponds to the
-different modeling strategies debated in the European and U.S. studies,
-as documented in the APHENA project (Katsouyanni et al. 2009).}
+paper similarity distance for 56 air pollution mortality modeling
+papers, colored by the smoothing method used. The MDS reveals the three
+distinct groups of papers, corresponds to LOESS, natural spline, and
+smoothing spline. These groups corresponds to the different modeling
+strategies debated in the European and U.S. studies, as documented in
+the APHENA project (Katsouyanni et al. 2009).}
 
 \end{figure}%
 
@@ -1294,7 +1308,10 @@ Touloumi et al. 2006).
 The article has been created using Quarto (Allaire et al. 2022) in R (R
 Core Team 2025). The source code for reproducing the work reported in
 this paper can be found at:
-\url{https://github.com/huizezhang-sherry/paper-decisions}.
+\url{https://github.com/huizezhang-sherry/paper-decisions}. The tools
+developed to support this methodology are available as an R package,
+\texttt{dossier} on GitHub at
+\url{https://github.com/huizezhang-sherry/dossier}.
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
