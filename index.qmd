@@ -96,7 +96,7 @@ With the growing volume of scientific publications and the difficulty of navigat
 
 # Methods {#sec-extract-decisions}
 
-In this section, we present the workflow for extracting decisions from published literature using LLMs. We first describe the data structure for recording decisions, followed by the four main steps in the workflow: 1) automatic extraction of decisions from literature with LLMs, 2) validation and standardization of LLM outputs, 3) calculation of paper similarity, and 4) visualization of paper similarity using clustering or dimension reduction methods. The section concludes with an illustration summarizing the workflow.
+In this section, we present the workflow for extracting decisions from published literature using LLMs. We first describe the data structure for recording decisions, followed by the four main steps in the workflow: 1) automatic extraction of decisions from literature with LLMs, 2) validation and standardization of LLM outputs, 3) exploratory data analysis on analytic decisions, and 4) visualization of paper similarity using clustering or dimension reduction methods. The section concludes with an illustration summarizing the workflow.
 
 ## Record decisions in data analysis {#sec-decisions}
 
@@ -165,21 +165,25 @@ The LLM outputs need to be validated and standardized before further analysis. V
 knitr::include_graphics("figures/shiny.png")
 ```
 
-## Calculate paper similarity and visualization {#sec-paper-similarity}
+## Conduct exploratory data analysis on analytic decisions {#sec-paper-similarity}
 
-Once the output has been extracted and validated, these decisions can be treated as data for further analysis. Apart from exploratory data analysis, we propose a paper similarity measure to compare how similar decisions are between paper pairs. A decision is considered comparable between two papers if they share the same variable and decision type, for example, a parameter decision on temperature. To quantify similarity between matched decisions, we consider three aspects: 1) similarity of the decision choice, 2) similarity of the stated reasons, and 3) for parameter decisions, similarity of the statistical method used. Similarity in choice and method reflects the same analytical decision, while similarity in reason reflects a shared rationale, even when the choices differ due to differences in data. 
+Once the output has been extracted and validated, these decisions can be treated as data for exploratory data analysis. Analysts may summarize the missingness of decision choices and their associated reasons to better understand the reporting practice in the field. They may also examine the most frequent reported choices to identify common analytical practices. Grouping similar decision choices can further highlight patterns of uncommon practices that may require closer examination. 
 
-To measure similarity in choices and reasons, we obtain text embeddings and compute cosine similarity using the BERT model via the `text` package [@text] in `R`. Method similarity is encoded as a binary indicator (1 if the two papers used the same method, and 0 otherwise) since semantic similarity in text cannot reliably distinguish statistical methods. For example, the textual difference between "smoothing spline" and "natural spline" does not fully capture their methodological distinction. The overall paper similarity is computed as the average similarity across all matched methods, decisions, and reasons.
+Analysts may also be interested in whether there is structure in the decision choices across papers. For example, do certain papers tend to make similar choices? To address this question, we propose a paper similarity measure based on decision similarity. A decision is considered comparable between two papers if they share the same variable and decision type, for example, a parameter decision on temperature. To quantify similarity between matched decisions, we consider three aspects: 1) similarity of the decision choice, 2) similarity of the stated reasons, and 3) for parameter decisions, similarity of the statistical method used. Similarity in choice and method reflects the same analytical decision, while similarity in reason reflects a shared rationale, even when the choices differ due to differences in data. 
 
-Although paper similarity can be calculated based on all available matched decisions, care should be taken for pairs with only a small number of matches. This can happen because two papers focus on different variables or some decisions have missing choices or reasons. In practice, users may decide to focus on a set of decisions shared among papers or on papers that report a minimal number of shared decisions when calculating paper similarity.
+To measure similarity in choices and reasons, we obtain text embeddings and compute cosine similarity using the BERT model via the `text` package [@text] in `R`. Method similarity is encoded as a binary indicator (1 if the two papers used the same method, and 0 otherwise) since semantic similarity in text cannot reliably distinguish statistical methods. For example, the textual difference between "smoothing spline" and "natural spline" does not fully capture their methodological distinction. The overall paper similarity is computed as the average similarity across all matched methods, decisions, and reasons. 
+
+Because each individual component is between 0 and 1, the overall similarity also lies between 0 and 1, with a value of 1 indicating identical decisions across all matched decisions. This metric does not account for the number of matched decisions between two papers, and a high (low) similarity score may be driven by a small number of matched decisions. Analysts may therefore choose to restrict attention to a set of common decisions shared across papers, or to pairs of papers that report a minimal number of matched decisions when computing paper similarity.
+
+This similarity score can be used as a distance metric in dimension reduction methods, such as multidimensional scaling (MDS), to visualize how papers relate to each other based on their decisions across the literature. 
 
 ## Summary
 
-@fig-workflow summarises the workflow proposed for extracting and analyzing decisions from published literature using LLMs. After identifying a set of relevant papers, a prompt has been designed to guide the LLM in extracting decisions from the documents. The extracted outputs are then validated and standardized before further analysis. The resulting dataset can then be used for exploratory data analysis and the construction of a paper similarity metric. This measure can be interpreted as a distance metric between papers and used for clustering and dimension reduction to visualize patterns in decision-making across the literature.
+@fig-workflow summarises the workflow proposed for extracting and analyzing decisions from published literature using LLMs. After identifying a set of relevant papers, a prompt has been designed to guide the LLM in extracting decisions from the documents. The extracted outputs are then validated and standardized before further analysis. The resulting dataset can then be used for exploratory data analysis and in addition, we propose a paper similarity metric tol quantify similarity in decision-making across papers. This measure can be interpreted as a distance metric between papers and used for clustering and dimension reduction to visualize patterns in decision-making across the literature.
 
 ```{r}
 #| label: fig-workflow
-#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions automatically from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Calculate paper similarity and visualization, and (4) visualization with clustering or dimension reduction methods."
+#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions automatically from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Conduct exploratory data analysis on analytic decisions, and (4) visualization with clustering or dimension reduction methods."
 #| out.width: "100%"
 knitr::include_graphics(here::here("figures/workflow.png"))
 ```
@@ -367,6 +371,11 @@ save(distance_decision_df, file = here::here("data/distance_decision_df.rda"))
 save(distance_df, file = here::here("data/distance_df.rda"))
 ```
 
+Given the number of decisions reported in @tbl-most-common-decisions, we focus on the six most common variable-type decisions for calculating paper similarity: parameter choices for time, temperature, and humidity, and temporal lag choices for PM, temperature, and humidity. This choice allows us to compare papers based on a common set of decisions that are widely reported in the literature. We also restrict our analysis to papers that report at least three of these six decisions, resulting in `r length(good_pp)` papers for the paper similarity calculation. This ensures that the paper similarity metric is based on a sufficient number of comparable decisions. We use the default text embedding model (BERT) in the `text` package and cosine similarity to compute the similarity score. Sensitivity analysis on different text embedding models is checked in @sec-text-model. Paper similarity is then calculated as the average of decision similarity for each paper pair. The resulting similarity score is then used as the distance matrix in multi-dimensional scaling (MDS). 
+
+@fig-mds displays the multidimensional scaling of the papers based on their pairwise (dis)similarities. The two MDS dimensions reveal three separated groups that align with the smoothing strategy adopted in the original analyses: LOESS, natural spline, and smoothing spline. The visual separation is supported by the silhouette diagnostic in @fig-sil, where all the studies exhibit a positive silhouette, suggesting no mis-classification and an average silhouette width is 0.723. This clustering pattern is consistent with the historical methodological divide documented in the APHENA project. Studies from the European APHEA [@katsouyanni1996] and APHEA2 [@katsouyanni2001] projects more commonly employed LOESS and smoothing splines, whereas the U.S.-based NMMAPS study [@samet2000] predominantly relies on natural splines.
+
+
 ```{r}
 #| fig.height: 8
 #| fig.width: 8
@@ -408,11 +417,11 @@ p2 <- ggplot() +
   theme_void() + 
   theme(legend.position = 'bottom')
   
-
 mds_df <- run_mds(distance_df) |> left_join(method_df, by = c("paper" = "paper"))
 
 p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) + 
-  ggrepel::geom_label_repel(aes(label = paper, color = method)) + 
+  ggrepel::geom_label_repel(aes(label = paper, color = method), 
+                            max.overlaps = Inf ) + 
   scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
   theme(aspect.ratio = 1, legend.position = 'bottom') 
@@ -426,7 +435,44 @@ p3 <- mds_df |> ggplot(aes(x = V1, y = V2)) +
 p3  
 ```
 
-Given the number of decisions reported in @tbl-most-common-decisions, we focus on the six most common variable-type decisions for calculating paper similarity: parameter choices for time, temperature, and humidity, and temporal lag choices for PM, temperature, and humidity. We also restrict our analysis to papers that report at least three of these six decisions, resulting in `r length(good_pp)` papers for the paper similarity calculation. This ensures that the paper similarity metric is based on a sufficient number of comparable decisions. We use the default text embedding model (BERT) in the `text` package and cosine similarity to compute the similarity score. Sensitivity analysis on different text embedding models is checked in @sec-text-model. Paper similarity is then calculated as the average of decision similarity for each paper pair. The resulting similarity score is then used as the distance matrix in multi-dimensional scaling (MDS) and plotted in @fig-mds. The two MDS dimension axes reveal three clusters correspond to the three smoothing methods used in these analyses: LOESS, natural spline, and smoothing spline, where natural spline is commonly used in U.S. based studies suggested in the NMMAPS study [@samet2000], while LOESS and smoothing spline are more often used in the European studies, as suggested in the APHEA [@katsouyanni1996] and APHEA2 [@katsouyanni2001] project.
+```{r}
+#| fig.height: 3
+#| fig.width: 8
+#| label: fig-sil
+#| fig-cap: "Medoid silhouette width for the three clusters identified from the multi-dimensional scaling (MDS) using paper similarity score as the distance. Each bar represents a study's medoid silhouette value, with the dashed line indiciating the overall average silhouette width (0.723). This diagnostic plot suggests strong within-cluster cohesion and clear separation between clusters corresponding to the three smoothing methods used: LOESS, natural spline, and smoothing spline."
+centroid_df <- mds_df |> 
+  filter(!is.na(method)) |> 
+  group_by(method) |> 
+  summarize(V1 = mean(V1), V2 = mean(V2)) |> 
+  mutate(id = row_number())
+
+library(Silhouette)
+mat <- proxy::dist(mds_df[,2:3], centroid_df |> select(-method, -id))
+sil <- Silhouette(mat) |> 
+  left_join(centroid_df |> select(id, method), by = c("cluster" = "id")) |> 
+  group_by(cluster) |> 
+  arrange(cluster, desc(sil_width)) |> 
+  ungroup(cluster) |> 
+  mutate(id = row_number())
+
+sil |> 
+  ggplot() + 
+  geom_col(ggplot2::aes(x = id, y = sil_width, fill = method, color = method))  + 
+  geom_hline(yintercept =  mean(sil$sil_width), linetype = "dashed")  + 
+  geom_text(aes(
+    x = 43, y = mean(sil$sil_width) + 0.05, 
+    label = round(mean(sil$sil_width), 3)
+    )) + 
+  scale_fill_brewer(palette = "Dark2", name = "method", 
+                    aesthetics = c("color", "fill") ) + 
+  theme_minimal() + 
+  theme(legend.position = 'bottom', 
+        axis.line.x = element_blank(), 
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())  + 
+  ylab("Medoid Silhouette Width") +
+  xlab("") 
+```
 
 ## Sensitivity analysis
 
