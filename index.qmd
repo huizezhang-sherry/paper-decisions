@@ -146,7 +146,7 @@ For the ease of tracking, we extract the original text describing each decision 
 
 <!-- > The inclusion of lagged weather variables and the choice of smoothing parameters for all of the weather variables were done by minimizing Akaike’s information criterion. -->
 
-## Extract decisions automatically from literature with LLMs
+## Extract decisions from literature with LLMs
 
 Manually extracting decisions from published papers is labor-intensive and time-consuming. Large language models (LLMs) make it possible to automate this process by providing a collection of PDF documents along with a structured prompt. In the prompt, the LLM is assigned the role of an applied statistician and instructed to extract decisions from each PDF document according to the format described in @sec-decisions. The prompt also notes that the reason and decision fields may be missing, with examples provided. We use the `ellmer` package [@ellmer] in R to interface with Anthropic Claude and Google Gemini for this task and the full prompt is provided in the Appendix.
 
@@ -179,11 +179,11 @@ This similarity score can be used as a distance metric in dimension reduction me
 
 ## Summary
 
-@fig-workflow summarises the workflow proposed for extracting and analyzing decisions from published literature using LLMs. After identifying a set of relevant papers, a prompt has been designed to guide the LLM in extracting decisions from the documents. The extracted outputs are then validated and standardized before further analysis. The resulting dataset can then be used for exploratory data analysis and in addition, we propose a paper similarity metric tol quantify similarity in decision-making across papers. This measure can be interpreted as a distance metric between papers and used for clustering and dimension reduction to visualize patterns in decision-making across the literature.
+@fig-workflow summarises the workflow proposed for extracting and analyzing decisions from published literature using LLMs. After identifying a set of relevant papers, a prompt has been designed to guide the LLM in extracting decisions from the documents. The extracted outputs are then validated and standardized before further analysis. The resulting dataset can then be used for exploratory data analysis and in addition, we propose a paper similarity metric to quantify similarity in decision-making across papers. This measure can be interpreted as a distance metric between papers and used for clustering and dimension reduction to visualize patterns in decision-making across the literature.
 
 ```{r}
 #| label: fig-workflow
-#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions automatically from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Conduct exploratory data analysis on analytic decisions, and (4) visualization with clustering or dimension reduction methods."
+#| fig-cap: "The workflow for extracting decisions from published literature using Large Language Models (LLMs) and analyzing the extracted decisions. The workflow consists of four main steps: (1) Extract decisions from literature with LLMs, (2) Validate and standardize LLM outputs, (3) Conduct exploratory data analysis on analytic decisions, including calculating paper similarity score."
 #| out.width: "100%"
 knitr::include_graphics(here::here("figures/workflow.png"))
 ```
